@@ -11,8 +11,8 @@ const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
   try {
     await con.BeginTransaction();
 
-    const data: NewsModel = await con.QuerySingle(
-      `SELECT body,CASE WHEN DATE_FORMAT(encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment WHERE news_pk=@news_pk`,
+    const data: Array<NewsModel> = await con.Query(
+      `SELECT nw.news_comment_pk,u.full_name,nw.body,CASE WHEN DATE_FORMAT(nw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(nw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(nw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment nw JOIN USER u ON nw.user_pk=u.user_pk where news_pk=@news_pk`,
       {
         news_pk: news_pk,
       }

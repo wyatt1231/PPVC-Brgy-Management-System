@@ -101,7 +101,7 @@ const NewsController = async (app: Express): Promise<void> => {
 
   router.post(
     "/addNewsComment",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: NewsCommentModel = req.body;
       res.json(await NewsRepository.addNewsComment(payload, req.user_pk));
