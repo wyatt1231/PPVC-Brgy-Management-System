@@ -5,7 +5,7 @@ import { PaginationModel } from "../Models/PaginationModel";
 export const DatabaseConfig = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "root sa",
+  password: "rootsa",
   database: "bms",
   port: 3309,
 });

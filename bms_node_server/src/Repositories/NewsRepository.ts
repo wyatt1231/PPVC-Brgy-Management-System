@@ -6,7 +6,118 @@ import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
 import { ResponseModel } from "../Models/ResponseModels";
+const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
 
+    const data: NewsModel = await con.QuerySingle(
+      `SELECT body,CASE WHEN DATE_FORMAT(encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment WHERE news_pk=@news_pk`,
+      {
+        news_pk: news_pk,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+const getSingleNewsWithPhoto = async (news_pk: string): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<NewsModel> = await con.Query(
+      `
+      SELECT * FROM 
+      (
+        SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic FROM news n 
+        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.news_pk=@news_pk order by n.encoded_at desc) tmp;
+      `,
+      {
+        news_pk: news_pk,
+      }
+    );
+
+    for (const file of data) {
+      file.upload_files = await con.Query(
+        `
+      select * from news_file where news_pk=@news_pk
+      `,
+        {
+          news_pk: file.news_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+const getNewsDataPublished = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<NewsModel> = await con.Query(
+      `
+      SELECT * FROM 
+      (
+        SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic FROM news n 
+        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" order by n.encoded_at desc) tmp;
+      `,
+      null
+    );
+
+    for (const file of data) {
+      file.upload_files = await con.Query(
+        `
+      select * from news_file where news_pk=@news_pk
+      `,
+        {
+          news_pk: file.news_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 const getNewsDataTable = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -471,4 +582,7 @@ export default {
   addNewsComment,
   republishNews,
   unpublishNews,
+  getNewsDataPublished,
+  getSingleNewsWithPhoto,
+  getNewsComments
 };

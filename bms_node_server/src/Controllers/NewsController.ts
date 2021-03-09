@@ -11,11 +11,34 @@ const NewsController = async (app: Express): Promise<void> => {
   const router = Router();
 
   router.post(
+    "/getNewsComments",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const news_pk: string = req.body.news_pk;
+        res.json(await NewsRepository.getNewsComments(news_pk));
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
     "/getNewsDataTable",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
         res.json(await NewsRepository.getNewsDataTable());
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
+    "/getNewsDataPublished",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await NewsRepository.getNewsDataPublished());
       } catch (error) {
         res.json(error);
       }
@@ -65,6 +88,14 @@ const NewsController = async (app: Express): Promise<void> => {
     async (req: Request & UserClaims, res: Response) => {
       const news_pk: string = req.body.news_pk;
       res.json(await NewsRepository.getSingleNews(news_pk));
+    }
+  );
+  router.post(
+    "/getSingleNewsWithPhoto",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const news_pk: string = req.body.news_pk;
+      res.json(await NewsRepository.getSingleNewsWithPhoto(news_pk));
     }
   );
 
