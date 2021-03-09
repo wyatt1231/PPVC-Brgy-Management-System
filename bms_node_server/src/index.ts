@@ -18,9 +18,7 @@ const main = async () => {
 
   const port = 4050;
 
-  app.listen(port, () =>
-    console.log(`listening to port wqqweqweqw e wqe qw${port}`)
-  );
+  app.listen(port, () => console.log(`listening to ports ${port}`));
 };
 
 function haltOnTimedout(req, res, next) {
