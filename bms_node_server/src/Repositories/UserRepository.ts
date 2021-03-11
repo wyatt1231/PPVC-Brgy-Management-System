@@ -80,12 +80,12 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
         null
       );
       user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
-    } else if (user_data.user_type === "tutor") {
+    } else if (user_data.user_type === "resident") {
       const sql_get_pic = await con.QuerySingle(
         `SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`,
         null
       );
-      user_data.pic = await GetUploadedImage(sql_get_pic?.picture);
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
     }
 
     await con.Commit();

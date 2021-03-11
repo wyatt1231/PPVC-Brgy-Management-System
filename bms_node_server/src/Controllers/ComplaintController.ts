@@ -11,7 +11,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
 
   router.post(
     "/addComplaint",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintModel = req.body;
       res.json(await ComplaintRepository.addComplaint(payload, req.user_pk));
@@ -29,10 +29,17 @@ const ComplaintController = async (app: Express): Promise<void> => {
 
   router.post(
     "/getSingleComplaint",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const complaint_pk: string = req.body.complaint_pk;
       res.json(await ComplaintRepository.getSingleComplaint(complaint_pk));
+    }
+  );
+  router.post(
+    "/getComplaintList",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ComplaintRepository.getComplaintList());
     }
   );
 

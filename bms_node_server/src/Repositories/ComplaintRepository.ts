@@ -19,7 +19,9 @@ const addComplaint = async (
       `
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        body=@body;
+        subject=@subject,
+        body=@body,
+        sts_pk="A";
          `,
       payload
     );
@@ -184,12 +186,55 @@ const getSingleComplaint = async (
   try {
     await con.BeginTransaction();
 
-    const data: ComplaintModel = await con.QuerySingle(
-      `select * from complaint where complaint_pk = @complaint_pk`,
+    const data: Array<ComplaintModel> = await con.Query(
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk from complaint where complaint_pk = @complaint_pk`,
       {
         complaint_pk: complaint_pk,
       }
     );
+    for (const file of data) {
+      file.complaint_file = await con.Query(
+        `
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `,
+        {
+          complaint_pk: file.complaint_pk,
+        }
+      );
+    }
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+const getComplaintList = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<ComplaintModel> = await con.Query(
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint`,
+      null
+    );
+    for (const file of data) {
+      file.complaint_file = await con.Query(
+        `
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `,
+        {
+          complaint_pk: file.complaint_pk,
+        }
+      );
+    }
 
     con.Commit();
     return {
@@ -212,4 +257,5 @@ export default {
   addComplaintLog,
   addComplaintMessage,
   getSingleComplaint,
+  getComplaintList
 };
