@@ -4,6 +4,7 @@ import { UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsModel } from "../Models/NewsModels";
+import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
 import { ResponseModel } from "../Models/ResponseModels";
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
@@ -12,12 +13,20 @@ const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
     await con.BeginTransaction();
 
     const data: Array<NewsModel> = await con.Query(
-      `SELECT nw.news_comment_pk,u.full_name,nw.body,CASE WHEN DATE_FORMAT(nw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(nw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(nw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment nw JOIN USER u ON nw.user_pk=u.user_pk where news_pk=@news_pk`,
+      `SELECT u.user_pk,nw.news_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,nw.body,CASE WHEN DATE_FORMAT(nw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(nw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(nw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment nw JOIN resident u ON nw.user_pk=u.user_pk  where news_pk=@news_pk`,
       {
         news_pk: news_pk,
       }
     );
-
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+        null
+      );
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
+    }
+  
     con.Commit();
     return {
       success: true,
@@ -160,6 +169,7 @@ const getNewsDataTable = async (): Promise<ResponseModel> => {
     };
   }
 };
+
 const addNews = async (
   payload: NewsModel,
   files: Array<File>,

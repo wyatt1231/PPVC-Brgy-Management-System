@@ -36,16 +36,25 @@ const ComplaintController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
+    "/getComplaintMessage",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: string = req.body.complaint_pk;
+      res.json(await ComplaintRepository.getComplaintMessage(complaint_pk));
+    }
+  );
+  router.post(
     "/getComplaintList",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await ComplaintRepository.getComplaintList());
+      const reported_by: string = req.body.reported_by;
+      res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
 
   router.post(
     "/addComplaintLog",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintLogModel = req.body;
       res.json(await ComplaintRepository.addComplaintLog(payload, req.user_pk));
@@ -54,7 +63,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
 
   router.post(
     "/addComplaintMessage",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintMessageModel = req.body;
       res.json(

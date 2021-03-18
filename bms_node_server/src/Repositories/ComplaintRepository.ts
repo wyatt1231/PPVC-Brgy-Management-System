@@ -1,5 +1,6 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
+import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintModel } from "../Models/ComplaintModels";
@@ -216,14 +217,16 @@ const getSingleComplaint = async (
     };
   }
 };
-const getComplaintList = async (): Promise<ResponseModel> => {
+const getComplaintList = async (reported_by: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     const data: Array<ComplaintModel> = await con.Query(
-      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint`,
-      null
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint where reported_by=@reported_by`,
+      {
+        reported_by: reported_by,
+      }
     );
     for (const file of data) {
       file.complaint_file = await con.Query(
@@ -250,6 +253,40 @@ const getComplaintList = async (): Promise<ResponseModel> => {
     };
   }
 };
+const getComplaintMessage = async (  complaint_pk: string): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<ComplaintMessageModel> = await con.Query(
+      `SELECT cm.complaint_msg_pk,cm.sent_by,r.first_name,r.middle_name,r.last_name,cm.body,cm.complaint_pk,r.pic FROM complaint_message cm LEFT JOIN complaint c ON cm.complaint_pk=c.complaint_pk JOIN resident r ON cm.sent_by=r.user_pk WHERE cm.complaint_pk=@complaint_pk`,
+      {
+        complaint_pk: complaint_pk,
+      }
+    );
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.sent_by} LIMIT 1`,
+        null
+      );
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+     
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 
 export default {
   addComplaint,
@@ -257,5 +294,6 @@ export default {
   addComplaintLog,
   addComplaintMessage,
   getSingleComplaint,
-  getComplaintList
+  getComplaintList,
+  getComplaintMessage
 };

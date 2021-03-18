@@ -10,11 +10,20 @@ const BrgyOfficialController = async (app: Express): Promise<void> => {
 
   router.post(
     "/getBrgyOfficialDataTable",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request, res: Response) => {
       const payload: PaginationModel = req.body;
       res.json(
         await BarangayOfficialRepository.getBrgyOfficialDataTable(payload)
+      );
+    }
+  );
+  router.post(
+    "/getBrgyOfficialList",
+    Authorize("admin,resident"),
+    async (req: Request, res: Response) => {
+      res.json(
+        await BarangayOfficialRepository.getBrgyOfficialList()
       );
     }
   );

@@ -1,8 +1,7 @@
-import { NewsFileModel } from "./NewsFileModel";
+import { PostsFileModel } from "./PostsFileModel";
 
-export interface NewsModel {
-  news_pk?: number;
-  audience?: string;
+export interface PostsModel {
+  posts_pk?: number;
   title?: string;
   body?: string;
   sts_pk?: string;
@@ -11,7 +10,7 @@ export interface NewsModel {
   sts_backgroundColor?: string;
   encoded_at?: Date;
   encoder_pk?: number;
-  news_files?: Array<NewsFileModel>;
+  news_files?: Array<PostsFileModel>;
   upload_files: Array<any>;
   user_full_name?: string;
   user_pic?: string;

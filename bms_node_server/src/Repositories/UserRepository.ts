@@ -66,7 +66,7 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
     await con.BeginTransaction();
 
     const user_data = await con.QuerySingle(
-      `SELECT u.user_type,u.full_name FROM user u 
+      `  SELECT r.*,u.user_type,u.full_name FROM USER u JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `,
       {
