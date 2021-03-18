@@ -17,6 +17,7 @@ const Authorize = (roles?: string): any => {
         if (bearerToken) {
           jwt.verify(bearerToken, JWT_SECRET_KEY, (error, claims: any) => {
             if (error) {
+              console.error(`err on verify 1`, error);
               res.status(403).send({
                 success: false,
                 message: "Unauthorized",
@@ -31,6 +32,7 @@ const Authorize = (roles?: string): any => {
                     req.user_type = user.user_type;
                     next();
                   } else {
+                    console.error(`error token 2`);
                     res.status(403).send({
                       success: false,
                       message: "Unauthorized",
@@ -39,18 +41,21 @@ const Authorize = (roles?: string): any => {
                 } else {
                   req.user_pk = user.user_pk;
                   req.user_type = user.user_type;
+
                   next();
                 }
               }
             }
           });
         } else {
+          console.error(`error token 3`);
           res.status(403).send({
             success: false,
             message: "Unauthorized",
           });
         }
       } else {
+        console.error(`error token 4`);
         res.status(403).send({
           success: false,
           message: "Unauthorized",

@@ -16,6 +16,7 @@ const Authorize = (roles) => {
                 if (bearerToken) {
                     jsonwebtoken_1.default.verify(bearerToken, Constants_1.JWT_SECRET_KEY, (error, claims) => {
                         if (error) {
+                            console.error(`err on verify 1`, error);
                             res.status(403).send({
                                 success: false,
                                 message: "Unauthorized",
@@ -31,6 +32,7 @@ const Authorize = (roles) => {
                                         next();
                                     }
                                     else {
+                                        console.error(`error token 2`);
                                         res.status(403).send({
                                             success: false,
                                             message: "Unauthorized",
@@ -47,6 +49,7 @@ const Authorize = (roles) => {
                     });
                 }
                 else {
+                    console.error(`error token 3`);
                     res.status(403).send({
                         success: false,
                         message: "Unauthorized",
@@ -54,6 +57,7 @@ const Authorize = (roles) => {
                 }
             }
             else {
+                console.error(`error token 4`);
                 res.status(403).send({
                     success: false,
                     message: "Unauthorized",
