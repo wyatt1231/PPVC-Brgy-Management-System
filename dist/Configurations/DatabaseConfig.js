@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.query = exports.DatabaseConnection = exports.DatabaseConfig = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
 exports.DatabaseConfig = mysql2_1.default.createPool({
-    host: "localhost",
-    user: "root",
-    password: "root sa",
-    database: "bms",
-    port: 3309,
+    host: "us-cdbr-east-03.cleardb.com",
+    user: "bed41c71c3944a",
+    password: "f1ec4cc8",
+    database: "heroku_fcd8378bc75cb9b",
+    port: 3306,
 });
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
