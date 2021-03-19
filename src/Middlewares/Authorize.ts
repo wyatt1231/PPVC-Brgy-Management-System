@@ -1,6 +1,5 @@
 import { Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET_KEY } from "../Configurations/Constants";
 import { UserClaims } from "../Models/UserModels";
 
 const Authorize = (roles?: string): any => {
@@ -15,47 +14,46 @@ const Authorize = (roles?: string): any => {
         const bearer: Array<string> = bearerHeader.split(" ");
         const bearerToken: string = bearer[1];
         if (bearerToken) {
-          jwt.verify(bearerToken, JWT_SECRET_KEY, (error, claims: any) => {
-            if (error) {
-              console.error(`err on verify 1`, error);
-              res.status(403).send({
-                success: false,
-                message: "Unauthorized",
-              });
-            } else {
-              if (typeof claims?.user !== "undefined") {
-                const user: UserClaims = claims.user;
+          jwt.verify(
+            bearerToken,
+            process.env.JWT_SECRET_KEY,
+            (error, claims: any) => {
+              if (error) {
+                res.status(403).send({
+                  success: false,
+                  message: "Unauthorized",
+                });
+              } else {
+                if (typeof claims?.user !== "undefined") {
+                  const user: UserClaims = claims.user;
 
-                if (listRoles) {
-                  if (listRoles.includes(user.user_type)) {
+                  if (listRoles) {
+                    if (listRoles.includes(user.user_type)) {
+                      req.user_pk = user.user_pk;
+                      req.user_type = user.user_type;
+                      next();
+                    } else {
+                      res.status(403).send({
+                        success: false,
+                        message: "Unauthorized",
+                      });
+                    }
+                  } else {
                     req.user_pk = user.user_pk;
                     req.user_type = user.user_type;
                     next();
-                  } else {
-                    console.error(`error token 2`);
-                    res.status(403).send({
-                      success: false,
-                      message: "Unauthorized",
-                    });
                   }
-                } else {
-                  req.user_pk = user.user_pk;
-                  req.user_type = user.user_type;
-
-                  next();
                 }
               }
             }
-          });
+          );
         } else {
-          console.error(`error token 3`);
           res.status(403).send({
             success: false,
             message: "Unauthorized",
           });
         }
       } else {
-        console.error(`error token 4`);
         res.status(403).send({
           success: false,
           message: "Unauthorized",

@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const Constants_1 = require("../Configurations/Constants");
 const Authorize = (roles) => {
     const listRoles = typeof roles === "string" ? roles.split(",") : null;
     return [
@@ -14,9 +13,8 @@ const Authorize = (roles) => {
                 const bearer = bearerHeader.split(" ");
                 const bearerToken = bearer[1];
                 if (bearerToken) {
-                    jsonwebtoken_1.default.verify(bearerToken, Constants_1.JWT_SECRET_KEY, (error, claims) => {
+                    jsonwebtoken_1.default.verify(bearerToken, process.env.JWT_SECRET_KEY, (error, claims) => {
                         if (error) {
-                            console.error(`err on verify 1`, error);
                             res.status(403).send({
                                 success: false,
                                 message: "Unauthorized",
@@ -32,7 +30,6 @@ const Authorize = (roles) => {
                                         next();
                                     }
                                     else {
-                                        console.error(`error token 2`);
                                         res.status(403).send({
                                             success: false,
                                             message: "Unauthorized",
@@ -49,7 +46,6 @@ const Authorize = (roles) => {
                     });
                 }
                 else {
-                    console.error(`error token 3`);
                     res.status(403).send({
                         success: false,
                         message: "Unauthorized",
@@ -57,7 +53,6 @@ const Authorize = (roles) => {
                 }
             }
             else {
-                console.error(`error token 4`);
                 res.status(403).send({
                     success: false,
                     message: "Unauthorized",

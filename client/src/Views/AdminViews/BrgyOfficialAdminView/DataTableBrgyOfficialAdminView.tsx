@@ -161,9 +161,9 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
         <Grid container spacing={3}>
           <Grid item xs={12} container justify="flex-end" alignItems="center">
             <Grid item>
-              <NavLink to="/admin/resident/add">
+              <NavLink to="/admin/brgy-official/add">
                 <Button disableElevation color="primary" variant="contained">
-                  Add Resident
+                  Set Brgy. Official
                 </Button>
               </NavLink>
             </Grid>
