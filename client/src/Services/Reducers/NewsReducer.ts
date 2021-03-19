@@ -1,40 +1,35 @@
 import { NewsReducerModel, NewsReducerTypes } from "../Types/NewsTypes";
 
-const defaultState: NewsReducerModel = {
-  fetching_news_data_table: false,
-  fetching_selected_news: false,
-};
+const defaultState: NewsReducerModel = {};
 
 const NewsReducer = (
   state: NewsReducerModel = defaultState,
   action: NewsReducerTypes
 ): NewsReducerModel => {
   switch (action.type) {
-    case "set_news_data_table": {
+    case "news_table": {
       return {
         ...state,
-        news_data_table: action.news_data_table,
+        news_table: action.news_table,
       };
     }
-    case "fetching_news_data_table": {
+    case "fetch_news_table": {
       return {
         ...state,
-        fetching_news_data_table: action.fetching_news_data_table,
+        fetch_news_table: action.fetch_news_table,
       };
     }
 
-    //--
-
-    case "set_selected_news": {
+    case "single_news": {
       return {
         ...state,
-        selected_news: action.selected_news,
+        single_news: action.single_news,
       };
     }
-    case "fetching_selected_news": {
+    case "fetch_single_news": {
       return {
         ...state,
-        fetching_selected_news: action.fetching_selected_news,
+        fetch_single_news: action.fetch_single_news,
       };
     }
 

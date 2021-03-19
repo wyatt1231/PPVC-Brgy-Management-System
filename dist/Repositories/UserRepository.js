@@ -68,7 +68,7 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const user_data = yield con.QuerySingle(`SELECT u.user_type,u.full_name FROM user u 
+        const user_data = yield con.QuerySingle(`  SELECT r.*,u.user_type,u.full_name FROM USER u JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `, {
             user_pk,
@@ -77,9 +77,9 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM administrator WHERE user_pk=${user_pk} LIMIT 1`, null);
             user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
         }
-        else if (user_data.user_type === "tutor") {
+        else if (user_data.user_type === "resident") {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`, null);
-            user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.picture);
+            user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
         }
         yield con.Commit();
         return {

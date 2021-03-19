@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
+const useFileUploader_1 = require("../Hooks/useFileUploader");
 const addComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -19,7 +20,9 @@ const addComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, fun
         const sql_add_complaint = yield con.Insert(`
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        body=@body;
+        subject=@subject,
+        body=@body,
+        sts_pk="A";
          `, payload);
         if (sql_add_complaint.insertedId > 0) {
             con.Commit();
@@ -155,9 +158,71 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.QuerySingle(`select * from complaint where complaint_pk = @complaint_pk`, {
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
+        for (const file of data) {
+            file.complaint_file = yield con.Query(`
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `, {
+                complaint_pk: file.complaint_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint where reported_by=@reported_by`, {
+            reported_by: reported_by,
+        });
+        for (const file of data) {
+            file.complaint_file = yield con.Query(`
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `, {
+                complaint_pk: file.complaint_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT cm.complaint_msg_pk,cm.sent_by,r.first_name,r.middle_name,r.last_name,cm.body,cm.complaint_pk,r.pic FROM complaint_message cm LEFT JOIN complaint c ON cm.complaint_pk=c.complaint_pk JOIN resident r ON cm.sent_by=r.user_pk WHERE cm.complaint_pk=@complaint_pk`, {
+            complaint_pk: complaint_pk,
+        });
+        for (const file of data) {
+            const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.sent_by} LIMIT 1`, null);
+            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+        }
         con.Commit();
         return {
             success: true,
@@ -179,5 +244,7 @@ exports.default = {
     addComplaintLog,
     addComplaintMessage,
     getSingleComplaint,
+    getComplaintList,
+    getComplaintMessage
 };
 //# sourceMappingURL=ComplaintRepository.js.map

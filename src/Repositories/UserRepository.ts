@@ -66,7 +66,7 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
     await con.BeginTransaction();
 
     const user_data = await con.QuerySingle(
-      `SELECT u.user_type,u.full_name FROM user u 
+      `  SELECT r.*,u.user_type,u.full_name FROM USER u JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `,
       {
@@ -80,12 +80,12 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
         null
       );
       user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
-    } else if (user_data.user_type === "tutor") {
+    } else if (user_data.user_type === "resident") {
       const sql_get_pic = await con.QuerySingle(
         `SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`,
         null
       );
-      user_data.pic = await GetUploadedImage(sql_get_pic?.picture);
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
     }
 
     await con.Commit();

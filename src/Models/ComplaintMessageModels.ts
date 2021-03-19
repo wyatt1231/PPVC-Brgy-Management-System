@@ -4,4 +4,5 @@ export interface ComplaintMessageModel {
   body?: string;
   sent_by?: number;
   sent_at?: Date;
+  user_pic?: string;
 }

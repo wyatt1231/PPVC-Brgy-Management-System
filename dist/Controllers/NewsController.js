@@ -17,9 +17,26 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const NewsRepository_1 = __importDefault(require("../Repositories/NewsRepository"));
 const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
+    router.post("/getNewsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const news_pk = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.getNewsComments(news_pk));
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
     router.post("/getNewsDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield NewsRepository_1.default.getNewsDataTable());
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
+    router.post("/getNewsDataPublished", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield NewsRepository_1.default.getNewsDataPublished());
         }
         catch (error) {
             res.json(error);
@@ -47,11 +64,15 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
         const news_pk = req.body.news_pk;
         res.json(yield NewsRepository_1.default.getSingleNews(news_pk));
     }));
-    router.post("/addNewsComment", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getSingleNewsWithPhoto", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const news_pk = req.body.news_pk;
+        res.json(yield NewsRepository_1.default.getSingleNewsWithPhoto(news_pk));
+    }));
+    router.post("/addNewsComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.addNewsComment(payload, req.user_pk));
     }));
-    router.post("/addNewsReaction", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addNewsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.addNewsReaction(payload, req.user_pk));
     }));

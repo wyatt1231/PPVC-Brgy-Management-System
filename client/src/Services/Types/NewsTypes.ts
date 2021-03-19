@@ -2,25 +2,25 @@ import { NewsModel } from "../Models/NewsModels";
 
 export type NewsReducerTypes =
   | {
-      type: "set_news_data_table";
-      news_data_table: Array<NewsModel>;
+      type: "news_table";
+      news_table: Array<NewsModel>;
     }
   | {
-      type: "fetching_news_data_table";
-      fetching_news_data_table: boolean;
+      type: "fetch_news_table";
+      fetch_news_table: boolean;
     }
   | {
-      type: "set_selected_news";
-      selected_news: NewsModel;
+      type: "single_news";
+      single_news: NewsModel;
     }
   | {
-      type: "fetching_selected_news";
-      fetching_selected_news: boolean;
+      type: "fetch_single_news";
+      fetch_single_news: boolean;
     };
 
 export interface NewsReducerModel {
-  news_data_table?: null | Array<NewsModel>;
-  fetching_news_data_table: boolean;
-  selected_news?: NewsModel;
-  fetching_selected_news: boolean;
+  news_table?: Array<NewsModel>;
+  fetch_news_table?: boolean;
+  single_news?: NewsModel;
+  fetch_single_news?: boolean;
 }

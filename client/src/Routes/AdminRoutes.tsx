@@ -4,6 +4,7 @@ import AddBrgyOfficialAdminView from "../Views/AdminViews/BrgyOfficialAdminView/
 import DataTableBrgyOfficialAdminView from "../Views/AdminViews/BrgyOfficialAdminView/DataTableBrgyOfficialAdminView";
 import AddCoAdminView from "../Views/AdminViews/CoAdminView/AddCoAdminView";
 import DataTableCoAdminView from "../Views/AdminViews/CoAdminView/DataTableCoAdminView";
+import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
 
@@ -35,6 +36,10 @@ const SysAdminRoutes = () => {
 
       <Route path="/admin/brgy-official/add" exact>
         <AddBrgyOfficialAdminView />
+      </Route>
+
+      <Route path="/admin/news" exact>
+        <DtNewsAdminView />
       </Route>
     </Switch>
   );

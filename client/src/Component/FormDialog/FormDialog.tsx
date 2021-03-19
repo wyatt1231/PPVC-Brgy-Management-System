@@ -26,6 +26,7 @@ interface IFormDialog {
 export const FormDialog: React.FC<IFormDialog> = memo(
   ({ children, open, title, handleClose, body, actions, minWidth }) => {
     const theme = useTheme();
+
     const descriptionElementRef = useRef<any>(null);
     const mobile = useMediaQuery((theme: any) => theme.breakpoints.down("sm"));
     const dispatch = useDispatch();
@@ -68,7 +69,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
           style: {
             margin: 0,
             padding: 0,
-            minWidth: mobile
+            width: mobile
               ? "95%"
               : typeof minWidth === "undefined"
               ? 750
@@ -99,7 +100,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
 export default FormDialog;
 
 const DialogTitleStyle = styled(DialogTitle)`
-  background-color: ${(p) => p.theme.header.backgroundColor};
+  background-color: ${(p) => p.theme.palette.primary.dark};
   color: ${(p) => p.theme.palette.primary.contrastText};
   display: grid;
   grid-auto-flow: column;
@@ -131,7 +132,9 @@ const DialogContentStyle = styled(DialogContent)`
   /* margin: 0;
   padding: 0; */
   background-color: ${(p) => p.theme.palette.common.white};
+  padding-top: 1em !important;
+  padding-bottom: 1em !important;
 `;
 const DialogActionsStyle = styled(DialogActions)`
-  background-color: #f0f0f0;
+  background-color: #fff;
 `;
