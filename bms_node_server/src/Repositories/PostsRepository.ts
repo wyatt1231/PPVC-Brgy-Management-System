@@ -340,7 +340,7 @@ const addPostReaction = async (
           con.Commit();
           return {
             success: true,
-            message: "Your reaction has beed added!",
+            message: "Your reaction has beed updated!",
           };
         } else {
           con.Rollback();

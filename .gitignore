@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 bms_react_client/node_modules
 bms_react_client/.pnp
@@ -8,3 +9,8 @@ bms_node_server/dist
 
 
 
+=======
+node_modules
+/client/node_modules
+package-lock.json
+>>>>>>> 57be99baa989f1e8ddc204c54c8b873b6e8aa438

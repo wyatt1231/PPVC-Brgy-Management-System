@@ -4,130 +4,9 @@ import { UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsModel } from "../Models/NewsModels";
-import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
 import { ResponseModel } from "../Models/ResponseModels";
-const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
 
-    const data: Array<NewsModel> = await con.Query(
-      `SELECT u.user_pk,nw.news_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,nw.body,CASE WHEN DATE_FORMAT(nw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(nw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(nw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment nw JOIN resident u ON nw.user_pk=u.user_pk  where news_pk=@news_pk`,
-      {
-        news_pk: news_pk,
-      }
-    );
-    for (const file of data) {
-      const sql_get_pic = await con.QuerySingle(
-        `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
-        null
-      );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-      console.error(`error`, file.user_pk);
-    }
-  
-    con.Commit();
-    return {
-      success: true,
-      data: data,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-const getSingleNewsWithPhoto = async (news_pk: string): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const data: Array<NewsModel> = await con.Query(
-      `
-      SELECT * FROM 
-      (
-        SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.news_pk=@news_pk order by n.encoded_at desc) tmp;
-      `,
-      {
-        news_pk: news_pk,
-      }
-    );
-
-    for (const file of data) {
-      file.upload_files = await con.Query(
-        `
-      select * from news_file where news_pk=@news_pk
-      `,
-        {
-          news_pk: file.news_pk,
-        }
-      );
-    }
-
-    con.Commit();
-    return {
-      success: true,
-      data: data,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-const getNewsDataPublished = async (): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const data: Array<NewsModel> = await con.Query(
-      `
-      SELECT * FROM 
-      (
-        SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic,COUNT( nr.reaction)likes FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
-          LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" GROUP BY n.news_pk ORDER BY n.encoded_at DESC) tmp;
-      `,
-      null
-    );
-
-    for (const file of data) {
-      file.upload_files = await con.Query(
-        `
-      select * from news_file where news_pk=@news_pk
-      `,
-        {
-          news_pk: file.news_pk,
-        }
-      );
-    }
-
-    con.Commit();
-    return {
-      success: true,
-      data: data,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
 const getNewsDataTable = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -170,7 +49,6 @@ const getNewsDataTable = async (): Promise<ResponseModel> => {
     };
   }
 };
-
 const addNews = async (
   payload: NewsModel,
   files: Array<File>,
@@ -385,16 +263,12 @@ const addNewsReaction = async (
     await con.BeginTransaction();
 
     payload.user_pk = user_pk;
-    const sql_check_exist  = await con.Query(
-      `SELECT * FROM news_reaction WHERE news_pk=@news_pk AND resident_pk=@user_pk`,
-      payload
-    );
-    if(sql_check_exist.toString()==""){
+
     const sql_add_news_reaction = await con.Modify(
       `INSERT INTO news_reaction SET
       news_pk=@news_pk,
-      reaction=@reaction,
-      resident_pk=@user_pk;`,
+      reaction=@news_pk,
+      user_pk=@user_pk;`,
       payload
     );
 
@@ -412,30 +286,6 @@ const addNewsReaction = async (
           "Looks like something went wrong, unable to save your reaction!",
       };
     }
-  }else{
-    const sql_update_news_reaction = await con.Modify(
-      `update  news_reaction SET
-      reaction=@reaction
-      where news_pk=@news_pk 
-      and
-      resident_pk=@user_pk;`,
-      payload
-    );
-     if (sql_update_news_reaction > 0) {
-          con.Commit();
-          return {
-            success: true,
-            message: "Your reaction has beed updated!",
-          };
-        } else {
-          con.Rollback();
-          return {
-            success: false,
-            message:
-              "2 Looks like something went wrong, unable to save your reaction!",
-          };
-        }
-      }
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
@@ -621,7 +471,4 @@ export default {
   addNewsComment,
   republishNews,
   unpublishNews,
-  getNewsDataPublished,
-  getSingleNewsWithPhoto,
-  getNewsComments
 };
