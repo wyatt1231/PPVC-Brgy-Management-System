@@ -90,7 +90,36 @@ const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
+const getBrgyOfficialList = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`
+      SELECT * FROM 
+      (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
+      JOIN resident r ON bo.resident_pk = r.resident_pk
+      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp
+      `, null);
+        for (const admin of data) {
+            admin.pic = yield useFileUploader_1.GetUploadedImage(admin.pic);
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
+    getBrgyOfficialList,
     addBarangayOfficial,
     getBrgyOfficialDataTable,
 };

@@ -15,4 +15,5 @@ export interface NewsModel {
   upload_files: Array<any>;
   user_full_name?: string;
   user_pic?: string;
+  user_pk?: string;
 }

@@ -17,9 +17,12 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const BarangayOfficialRepository_1 = __importDefault(require("../Repositories/BarangayOfficialRepository"));
 const BrgyOfficialController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
-    router.post("/getBrgyOfficialDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getBrgyOfficialDataTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialDataTable(payload));
+    }));
+    router.post("/getBrgyOfficialList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialList());
     }));
     router.post("/addBarangayOfficial", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;

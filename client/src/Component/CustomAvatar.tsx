@@ -18,8 +18,8 @@ const CustomAvatar: React.FC<ICustomAvatar> = memo(
         className={className}
         variant={variant ? variant : "circle"}
         style={{
-          height: theme.spacing(4),
-          width: theme.spacing(4),
+          height: theme.spacing(5),
+          width: theme.spacing(5),
           backgroundColor: theme.palette.primary.main,
           color: theme.palette.secondary.contrastText,
         }}
