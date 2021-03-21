@@ -20,7 +20,7 @@ const addComplaint = async (
       `
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        subject=@subject,
+        title=@subject,
         body=@body,
         sts_pk="A";
          `,
@@ -188,7 +188,7 @@ const getSingleComplaint = async (
     await con.BeginTransaction();
 
     const data: Array<ComplaintModel> = await con.Query(
-      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk from complaint where complaint_pk = @complaint_pk`,
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`,
       {
         complaint_pk: complaint_pk,
       }
@@ -223,7 +223,7 @@ const getComplaintList = async (reported_by: string): Promise<ResponseModel> => 
     await con.BeginTransaction();
 
     const data: Array<ComplaintModel> = await con.Query(
-      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint where reported_by=@reported_by`,
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
       {
         reported_by: reported_by,
       }
