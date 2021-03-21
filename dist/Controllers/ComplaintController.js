@@ -28,6 +28,10 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
         const payload = req.body;
         res.json(yield ComplaintRepository_1.default.updateComplaint(payload));
     }));
+    router.post("/getComplaintList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const reported_by = req.body.reported_by;
+        res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
+    }));
     router.post("/getSingleComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintRepository_1.default.getSingleComplaint(complaint_pk));

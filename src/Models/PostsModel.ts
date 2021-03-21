@@ -22,7 +22,15 @@ export interface PostsModel {
   status?: StatusMasterModel;
   files?: Array<PostsFileModel>;
 }
-
+export interface PostFilesModel {
+  posts_file_pk?: number;
+  posts_pk?: number;
+  file_name?: string;
+  encoder_pk?: number;
+  file_path?: string;
+  mimetype?: string;
+  
+}
 export interface PostCommentModel {
   posts_comment_pk?: number;
   posts_pk?: number;

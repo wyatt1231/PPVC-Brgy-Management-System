@@ -24,7 +24,7 @@ export let DatabaseConfig = (): mysql.Pool => {
     return mysql.createPool({
       host: "127.0.0.1",
       user: "root",
-      password: "root sa",
+      password: "rootsa",
       database: "bms",
       port: 3309,
     });

@@ -45,8 +45,8 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
     router.post("/addPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const payload = req.body;
-        const files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        res.json(yield PostsRepository_1.default.addPosts(payload, files, req.user_pk));
+        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+        res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
     router.post("/getPostsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
