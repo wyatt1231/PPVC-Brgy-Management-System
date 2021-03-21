@@ -46,6 +46,11 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const payload = req.body;
         let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+        if (files instanceof Array) {
+        }
+        else {
+            files = [files];
+        }
         res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
     router.post("/updateNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {

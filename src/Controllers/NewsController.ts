@@ -50,6 +50,11 @@ const NewsController = async (app: Express): Promise<void> => {
       const payload: NewsModel = req.body;
       let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
+      if (files instanceof Array) {
+      } else {
+        files = [files];
+      }
+
       res.json(
         await NewsRepository.addNews(
           payload,
