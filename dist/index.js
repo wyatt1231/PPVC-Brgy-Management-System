@@ -26,7 +26,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     dotenv_1.default.config();
     exports.app.use(body_parser_1.default.json({ limit: "100mb" }));
     exports.app.use(express_fileupload_1.default());
-    // app.use(express.static("./"));
+    exports.app.use(express_1.default.static("./"));
     const server = http_1.default.createServer(exports.app);
     const socketServer = new socket_io_1.Server(server, {
         cors: {

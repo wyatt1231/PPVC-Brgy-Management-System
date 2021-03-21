@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
-const useFileUploader_2 = require("../Hooks/useFileUploader");
 const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -22,7 +21,7 @@ const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function*
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_2.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
             console.error(`error`, file.user_pk);
         }
         con.Commit();
@@ -80,7 +79,7 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`
+        const news_table = yield con.Query(`
       SELECT * FROM 
       (
         SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
@@ -89,17 +88,23 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
         LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" GROUP BY n.news_pk ORDER BY n.encoded_at DESC) tmp;
       `, null);
-        for (const file of data) {
-            file.upload_files = yield con.Query(`
+        for (const news of news_table) {
+            news.upload_files = yield con.Query(`
       select * from news_file where news_pk=@news_pk
       `, {
-                news_pk: file.news_pk,
+                news_pk: news.news_pk,
+            });
+            news.comments = yield con.Query(`
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `, {
+                news_pk: news.news_pk,
             });
         }
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: news_table,
         };
     }
     catch (error) {
@@ -127,6 +132,22 @@ const getNewsDataTable = () => __awaiter(void 0, void 0, void 0, function* () {
             file.upload_files = yield con.Query(`
       select * from news_file where news_pk=@news_pk
       `, {
+                news_pk: file.news_pk,
+            });
+            file.comments = yield con.Query(`
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `, {
+                news_pk: file.news_pk,
+            });
+            for (const com of file.comments) {
+                com.pic = yield useFileUploader_1.GetUploadedImage(com.pic);
+            }
+            file.likes = yield con.Query(`
+        SELECT  u.full_name,nl.liked_by FROM news_likes nl JOIN vw_users u
+        ON nl.liked_by = u.user_pk
+        WHERE nl.news_pk = @news_pk;
+        `, {
                 news_pk: file.news_pk,
             });
         }
@@ -429,61 +450,69 @@ const addNewsComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         };
     }
 });
-// const getAdminDataTable = async (
-//   payload: PaginationModel
-// ): Promise<ResponseModel> => {
-//   const con = await DatabaseConnection();
-//   try {
-//     await con.BeginTransaction();
-//     const data: Array<NewsModel> = await con.QueryPagination(
-//       `
-//       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a
-//       LEFT JOIN STATUS s ON s.sts_pk = a.sts_pk) tmp
-//       WHERE
-//       (firstname like concat('%',@search,'%')
-//       OR lastname like concat('%',@search,'%')
-//       OR email like concat('%',@search,'%')
-//       OR phone like concat('%',@search,'%')
-//       OR sts_desc like concat('%',@search,'%'))
-//       AND admin_pk != 1
-//       `,
-//       payload
-//     );
-//     const hasMore: boolean = data.length > payload.page.limit;
-//     if (hasMore) {
-//       data.splice(data.length - 1, 1);
-//     }
-//     const count: number = hasMore
-//       ? -1
-//       : payload.page.begin * payload.page.limit + data.length;
-//     for (const admin of data) {
-//       admin.pic = await GetUploadedImage(admin.pic);
-//     }
-//     con.Commit();
-//     return {
-//       success: true,
-//       data: {
-//         table: data,
-//         begin: payload.page.begin,
-//         count: count,
-//         limit: payload.page.limit,
-//       },
-//     };
-//   } catch (error) {
-//     await con.Rollback();
-//     console.error(`error`, error);
-//     return {
-//       success: false,
-//       message: ErrorMessage(error),
-//     };
-//   }
-// };
+const toggleLike = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const has_liked = yield con.QuerySingle(`
+      SELECT count(*) as total from news_likes where news_pk=@news_pk and liked_by = liked_by;
+    `, payload);
+        if (has_liked.total) {
+            const sql_delete_like = yield con.Modify(`
+        DELETE FROM news_likes WHERE
+        news_pk=@news_pk and 
+        liked_by=@liked_by;
+        `, payload);
+            if (sql_delete_like > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "Looks like something went wrong, unable to save your like action!",
+                };
+            }
+        }
+        else {
+            const sql_add_like = yield con.Insert(`
+        INSERT INTO news_likes SET
+        news_pk=@news_pk,
+        liked_by=@liked_by;
+        `, payload);
+            if (sql_add_like.affectedRows > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "Looks like something went wrong, unable to save your like action!",
+                };
+            }
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const getSingleNews = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
         const data = yield con.QuerySingle(`select * from news where news_pk = @news_pk`, {
-            admin_pk: news_pk,
+            news_pk: news_pk,
         });
         con.Commit();
         return {
@@ -512,6 +541,7 @@ exports.default = {
     unpublishNews,
     getNewsDataPublished,
     getSingleNewsWithPhoto,
-    getNewsComments
+    getNewsComments,
+    toggleLike,
 };
 //# sourceMappingURL=NewsRepository.js.map

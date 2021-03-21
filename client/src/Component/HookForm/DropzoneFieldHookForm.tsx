@@ -46,7 +46,7 @@ const DropzoneFieldHookForm = ({ name }) => {
       defaultValue={[]}
       render={({ onChange, onBlur, value }) => (
         <>
-          <Dropzone onDrop={onChange}>
+          <Dropzone accept="image/*, video/*" onDrop={onChange}>
             {({ getRootProps, getInputProps }) => (
               <Paper
                 variant="outlined"

@@ -26,14 +26,13 @@ export default Body;
 const StyledBody = styled.main`
   margin-top: ${(p) => p.theme.header.height}px !important;
   transition: 0.2s margin-top ease-in-out;
-
+  background-color: #fafafa !important;
   &.expand-body {
     margin-top: ${(p) => p.theme.header.height * 2}px !important;
     transition: 0.2s margin-top ease-in-out;
   }
 
   .page-container {
-    background-color: #fff !important;
     min-height: calc(100vh - ${(p) => p.theme.header.height + 40}px) !important;
     padding: 0.5em;
   }

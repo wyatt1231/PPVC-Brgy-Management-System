@@ -22,19 +22,13 @@ export const TextFieldHookForm: FC<TextFieldProps> = memo((props) => {
       name={props.name}
       control={control}
       // defaultValue={""}
-      render={(
-        { onChange, onBlur, value, name, ref },
-        { invalid, isTouched, isDirty }
-      ) => (
+      render={(ctrlProps, { invalid, isTouched, isDirty }) => (
         <TextField
           {...props}
-          name={name}
+          {...ctrlProps}
+          value={ctrlProps.value ? ctrlProps.value : ""}
           error={error}
-          defaultValue={value}
-          onBlur={onBlur}
-          onChange={onChange}
           helperText={error_message}
-          inputRef={ref}
         />
       )}
     />

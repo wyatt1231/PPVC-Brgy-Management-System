@@ -65,6 +65,8 @@ export const UploadFile = (
       fs.mkdirSync(base_url, { recursive: true });
     }
 
+    console.log(`file_to_upload.data`, file_to_upload);
+
     const file_name = moment(new Date()).format("x") + file_to_upload.name;
     fs.writeFile(
       "./" + base_url + file_name,

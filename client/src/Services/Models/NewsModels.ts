@@ -1,3 +1,5 @@
+import { NewsCommentModel } from "./NewsCommentModels";
+
 export interface NewsModel {
   news_pk?: number;
   audience?: string;
@@ -13,6 +15,8 @@ export interface NewsModel {
   upload_files?: Array<any>;
   user_full_name?: string;
   user_pic?: string;
+  comments?: Array<NewsCommentModel>;
+  likes?: Array<NewsLikesModel>;
 }
 
 export interface NewsFileModel {
@@ -24,4 +28,11 @@ export interface NewsFileModel {
   encoded_at?: string | Date;
   encoder_pk?: number;
   uploaded_file?: any;
+}
+
+export interface NewsLikesModel {
+  news_like_pk?: number;
+  news_pk?: number;
+  liked_by?: number;
+  encoded_at?: string | Date;
 }

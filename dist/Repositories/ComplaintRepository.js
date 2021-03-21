@@ -12,30 +12,55 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
-const addComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        payload.reported_by = user_pk;
         const sql_add_complaint = yield con.Insert(`
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        subject=@subject,
+        title=@title,
         body=@body,
         sts_pk="A";
          `, payload);
         if (sql_add_complaint.insertedId > 0) {
+            for (const file of files) {
+                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Complaints/", file);
+                console.log(`files_res`, file_res);
+                if (!file_res.success) {
+                    con.Rollback();
+                    return file_res;
+                }
+                const news_file_payload = {
+                    file_path: file_res.data.path,
+                    file_name: file_res.data.name,
+                    mimetype: file_res.data.mimetype,
+                    complaint_pk: sql_add_complaint.insertedId,
+                };
+                const sql_add_news_file = yield con.Insert(`INSERT INTO complaint_file SET
+             complaint_pk=@complaint_pk,
+             file_name=@file_name,
+             file_path=@file_path,
+             mimetype=@mimetype;`, news_file_payload);
+                if (sql_add_news_file.affectedRows < 1) {
+                    con.Rollback();
+                    return {
+                        success: false,
+                        message: "The process has been terminated when trying to save the file!",
+                    };
+                }
+            }
             con.Commit();
             return {
                 success: true,
-                message: "The complaint has been reported successfully!",
+                message: "The complaint has been saved successfully!",
             };
         }
         else {
             con.Rollback();
             return {
                 success: false,
-                message: "No affected rows while reporting the complaint",
+                message: "No affected rows while saving the complaint",
             };
         }
     }
@@ -48,14 +73,14 @@ const addComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, fun
         };
     }
 });
-const updateComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const updateComplaint = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        payload.reported_by = user_pk;
         const sql_update_complaint = yield con.Modify(`
           UPDATE complaint SET
-          body=@body
+          body=@body,
+          title=@title
           where complaint_pk=@complaint_pk;
           ;
            `, payload);
@@ -158,20 +183,22 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
+        const single_complaint = yield con.QuerySingle(`Select * from complaint where complaint_pk = @complaint_pk;`, {
             complaint_pk: complaint_pk,
         });
-        for (const file of data) {
-            file.complaint_file = yield con.Query(`
-      select * from complaint_file where complaint_file_pk=@complaint_pk
+        single_complaint.complaint_file = yield con.Query(`
+        select * from complaint_file where complaint_pk=@complaint_pk
       `, {
-                complaint_pk: file.complaint_pk,
-            });
-        }
+            complaint_pk: complaint_pk,
+        });
+        single_complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+            user_pk: single_complaint.reported_by,
+        });
+        single_complaint.user.pic = yield useFileUploader_1.GetUploadedImage(single_complaint.user.pic);
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: single_complaint,
         };
     }
     catch (error) {
@@ -183,24 +210,28 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         };
     }
 });
-const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint where reported_by=@reported_by`, {
+        const complaint_table = yield con.Query(`Select * from complaint`, {
             reported_by: reported_by,
         });
-        for (const file of data) {
-            file.complaint_file = yield con.Query(`
-      select * from complaint_file where complaint_file_pk=@complaint_pk
+        for (const complaint of complaint_table) {
+            complaint.complaint_file = yield con.Query(`
+        select * from complaint_file where complaint_pk=@complaint_pk
       `, {
-                complaint_pk: file.complaint_pk,
+                complaint_pk: complaint.complaint_pk,
             });
+            complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+                user_pk: complaint.reported_by,
+            });
+            complaint.user.pic = yield useFileUploader_1.GetUploadedImage(complaint.user.pic);
         }
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: complaint_table,
         };
     }
     catch (error) {
@@ -216,7 +247,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT cm.complaint_msg_pk,cm.sent_by,r.first_name,r.middle_name,r.last_name,cm.body,cm.complaint_pk,r.pic FROM complaint_message cm LEFT JOIN complaint c ON cm.complaint_pk=c.complaint_pk JOIN resident r ON cm.sent_by=r.user_pk WHERE cm.complaint_pk=@complaint_pk`, {
+        const data = yield con.Query(`SELECT * from complaint where complaint_pk=@complaint_pk`, {
             complaint_pk: complaint_pk,
         });
         for (const file of data) {
@@ -244,7 +275,7 @@ exports.default = {
     addComplaintLog,
     addComplaintMessage,
     getSingleComplaint,
-    getComplaintList,
-    getComplaintMessage
+    getComplaintTable,
+    getComplaintMessage,
 };
 //# sourceMappingURL=ComplaintRepository.js.map

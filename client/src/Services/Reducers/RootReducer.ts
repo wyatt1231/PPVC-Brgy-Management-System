@@ -6,6 +6,7 @@ import AdminReducer from "./AdminReducer";
 import ResidentReducer from "./ResidentReducer";
 import BrgyOfficialReducer from "./BrgyOfficialReducer";
 import NewsReducer from "./NewsReducer";
+import ComplaintReducer from "./ComplaintReducer";
 
 const RootReducer = combineReducers({
   UserReducer,
@@ -14,6 +15,7 @@ const RootReducer = combineReducers({
   ResidentReducer,
   BrgyOfficialReducer,
   NewsReducer,
+  ComplaintReducer,
 });
 
 export default RootReducer;

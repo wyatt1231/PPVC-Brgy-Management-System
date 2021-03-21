@@ -54,6 +54,30 @@ export const PostFetch = async (
   }
 };
 
+export const FormDataPostFetch = async (
+  endpoint: string,
+  payload: any
+): Promise<IServerResponse> => {
+  try {
+    const serverResponse: IServerResponse = await Axios.post(
+      `/` + endpoint,
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+      }
+    );
+    return serverResponse.data;
+  } catch (error) {
+    return {
+      success: false,
+      message: `Client error has occured. ${error}`,
+    };
+  }
+};
+
 let isRefreshing = false;
 let refreshSubscribers: Array<any> = [];
 

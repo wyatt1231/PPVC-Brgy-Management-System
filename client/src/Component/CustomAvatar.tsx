@@ -3,7 +3,7 @@ import React, { memo } from "react";
 interface ICustomAvatar {
   src: string | null;
   errorMessage: string;
-  className: string;
+  className?: string;
   variant?: "circle" | "rounded" | "square";
 }
 

@@ -21,4 +21,5 @@ export interface UserModel {
   encoded_at?: Date;
   encoder_pk?: string | number;
   allow_login?: "y" | "n";
+  pic?: any;
 }

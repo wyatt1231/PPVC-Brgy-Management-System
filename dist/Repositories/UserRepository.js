@@ -68,7 +68,7 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const user_data = yield con.QuerySingle(`  SELECT u.user_type,u.full_name FROM USER u LEFT JOIN resident r ON r.user_pk=u.user_pk
+        const user_data = yield con.QuerySingle(`  SELECT u.user_pk,u.user_type,u.full_name FROM USER u LEFT JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `, {
             user_pk,

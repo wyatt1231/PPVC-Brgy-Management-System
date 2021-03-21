@@ -1,3 +1,4 @@
+import { NewsCommentModel } from "./NewsCommentModels";
 import { NewsFileModel } from "./NewsFileModel";
 
 export interface NewsModel {
@@ -16,4 +17,13 @@ export interface NewsModel {
   user_full_name?: string;
   user_pic?: string;
   user_pk?: string;
+  comments?: Array<NewsCommentModel>;
+  likes?: Array<NewsLikesModel>;
+}
+
+export interface NewsLikesModel {
+  news_like_pk?: number;
+  news_pk?: number;
+  liked_by?: number;
+  encoded_at?: string | Date;
 }

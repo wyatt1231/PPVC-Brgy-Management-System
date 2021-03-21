@@ -3,7 +3,7 @@ import helperErrorMessage from "../../Helpers/helperErrorMessage";
 import NewsApi from "../Api/NewsApi";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
-import { NewsModel } from "../Models/NewsModels";
+import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReducerTypes } from "../Types/NewsTypes";
 import { PageReducerTypes } from "../Types/PageTypes";
 
@@ -58,7 +58,7 @@ const setSingleNews = (news_pk: number) => async (
 };
 
 const addNews = (
-  payload: NewsModel,
+  payload: FormData,
   successCallback: (msg: string) => any
 ) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
   try {
@@ -249,28 +249,16 @@ const addNewsComment = (
   }
 };
 
-const addNewsReaction = (
-  payload: NewsCommentModel,
-  successCallback: (msg: string) => any
+const toggleLike = (
+  payload: NewsLikesModel,
+  successCallback: () => any
 ) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
   try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.addNewsReaction(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
+    const response: IServerResponse = await NewsApi.toggleLike(payload);
+
     if (response.success) {
       if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
+        successCallback();
       }
     } else {
       helperErrorMessage(dispatch, response);
@@ -320,4 +308,5 @@ export default {
   unpublishNews,
   addNewsComment,
   updateNewsReaction,
+  toggleLike,
 };
