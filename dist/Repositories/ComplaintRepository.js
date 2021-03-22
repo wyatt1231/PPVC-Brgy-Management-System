@@ -20,7 +20,7 @@ const addComplaint = (payload, user_pk) => __awaiter(void 0, void 0, void 0, fun
         const sql_add_complaint = yield con.Insert(`
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        subject=@subject,
+        title=@subject,
         body=@body,
         sts_pk="A";
          `, payload);
@@ -158,7 +158,7 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
         for (const file of data) {
@@ -187,7 +187,7 @@ const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, func
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,SUBJECT,body,sts_pk FROM complaint where reported_by=@reported_by`, {
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`, {
             reported_by: reported_by,
         });
         for (const file of data) {
