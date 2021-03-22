@@ -278,7 +278,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * from complaint where complaint_pk=@complaint_pk`, {
+        const data = yield con.Query(`SELECT * from complaint_message where complaint_pk=@complaint_pk`, {
             complaint_pk: complaint_pk,
         });
         for (const file of data) {

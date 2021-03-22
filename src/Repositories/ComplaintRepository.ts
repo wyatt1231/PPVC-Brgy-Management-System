@@ -358,7 +358,7 @@ const getComplaintMessage = async (
     await con.BeginTransaction();
 
     const data: Array<ComplaintMessageModel> = await con.Query(
-      `SELECT * from complaint where complaint_pk=@complaint_pk`,
+      `SELECT * from complaint_message where complaint_pk=@complaint_pk`,
       {
         complaint_pk: complaint_pk,
       }
