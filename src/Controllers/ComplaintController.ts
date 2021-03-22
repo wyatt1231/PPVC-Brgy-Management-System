@@ -12,9 +12,18 @@ const ComplaintController = async (app: Express): Promise<void> => {
   router.post(
     "/addComplaint",
     Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
+    async (req: Request & { files: any } & UserClaims, res: Response) => {
       const payload: ComplaintModel = req.body;
-      res.json(await ComplaintRepository.addComplaint(payload, req.user_pk));
+      payload.reported_by = req.user_pk;
+
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+
+      res.json(
+        await ComplaintRepository.addComplaint(
+          payload,
+          files instanceof Array ? files : [files]
+        )
+      );
     }
   );
 
@@ -23,7 +32,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintModel = req.body;
-      res.json(await ComplaintRepository.updateComplaint(payload, req.user_pk));
+      res.json(await ComplaintRepository.updateComplaint(payload));
     }
   );
 
@@ -35,6 +44,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.getSingleComplaint(complaint_pk));
     }
   );
+
   router.post(
     "/getComplaintMessage",
     Authorize("admin,resident"),
@@ -44,11 +54,11 @@ const ComplaintController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
-    "/getComplaintList",
+    "/getComplaintTable",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const reported_by: string = req.body.reported_by;
-      res.json(await ComplaintRepository.getComplaintList(reported_by));
+      res.json(await ComplaintRepository.getComplaintTable(reported_by));
     }
   );
 

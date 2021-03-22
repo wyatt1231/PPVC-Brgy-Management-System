@@ -1,7 +1,7 @@
 import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
-import { NewsModel } from "../Models/NewsModels";
+import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 
 const API_DEFAULT_ROUTE = `api/news/`;
 
@@ -13,7 +13,7 @@ const getNewsDataTable = async (): Promise<IServerResponse> => {
   return response;
 };
 
-const addNews = async (payload: NewsModel): Promise<IServerResponse> => {
+const addNews = async (payload: FormData): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "addNews", payload);
   return response;
 };
@@ -64,6 +64,13 @@ const addNewsReaction = async (
   return response;
 };
 
+const toggleLike = async (
+  payload: NewsLikesModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "toggleLike", payload);
+  return response;
+};
+
 const updateNewsReaction = async (
   payload: NewsCommentModel
 ): Promise<IServerResponse> => {
@@ -84,4 +91,5 @@ export default {
   addNewsComment,
   addNewsReaction,
   updateNewsReaction,
+  toggleLike,
 };

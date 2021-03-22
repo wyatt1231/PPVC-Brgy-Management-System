@@ -18,19 +18,10 @@ const UserProfile: React.FC<IUserProfile> = memo(({ variant, user }) => {
     setAnchorEl(event.currentTarget);
   }, []);
 
-  const handleClose = useCallback(() => {
-    setAnchorEl(null);
-  }, []);
-
-  const handleLogout = useCallback(() => {
-    removeToken();
-    window.location.href = "/login";
-  }, []);
-
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  let ProfileLink;
+  let ProfileLink: any = null;
 
   if (user?.user_type === "admin") {
     ProfileLink = (

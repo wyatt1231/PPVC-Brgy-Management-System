@@ -40,34 +40,31 @@ export const MultiRadioFieldHookForm: FC<MultiRadioFieldHookFormProps> = memo(
       <Controller
         name={props.name}
         control={control}
-        // defaultValue={""}
-        render={(
-          { onChange, onBlur, value, name, ref },
-          { invalid, isTouched, isDirty }
-        ) => (
+        render={(ctrlProps, { invalid, isTouched, isDirty }) => (
           <FormControl
             error={error}
-            name={name}
             variant={props.variant}
             component="fieldset"
           >
             <FormLabel component="legend">{props.label}</FormLabel>
             <RadioGroup
-              aria-label="gender"
-              name={props.name}
               row={props.row}
-              onChange={onChange}
-              onBlur={onBlur}
+              {...ctrlProps}
+              value={ctrlProps.value ? ctrlProps.value : ""}
             >
-              {props.radio_items.map((radio, index) => (
-                <FormControlLabel
-                  key={index}
-                  value={radio.value}
-                  control={<Radio />}
-                  label={radio.label}
-                  disabled={radio.disabled}
-                />
-              ))}
+              {props.radio_items.map((radio, index) => {
+                return (
+                  <FormControlLabel
+                    key={index}
+                    value={radio.value}
+                    control={<Radio />}
+                    label={radio.label}
+                    disabled={radio.disabled}
+                    // checked={radio.value === ctrlProps.value}
+                    // defaultChecked={radio.value === ctrlProps.value}
+                  />
+                );
+              })}
             </RadioGroup>
             <FormHelperText>{error_message}</FormHelperText>
           </FormControl>

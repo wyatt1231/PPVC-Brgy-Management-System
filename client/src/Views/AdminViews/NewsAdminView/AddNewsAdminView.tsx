@@ -9,6 +9,7 @@ import FormDialog from "../../../Component/FormDialog/FormDialog";
 import DropzoneFieldHookForm from "../../../Component/HookForm/DropzoneFieldHookForm";
 import MultiRadioFieldHookForm from "../../../Component/HookForm/MultiRadioFieldHookForm";
 import TextFieldHookForm from "../../../Component/HookForm/TextFieldHookForm";
+import ObjectToFormDataHelper from "../../../Helpers/ObjectToFormDataHelper";
 import NewsActions from "../../../Services/Actions/NewsActions";
 import { setGeneralPrompt } from "../../../Services/Actions/PageActions";
 import { NewsModel } from "../../../Services/Models/NewsModels";
@@ -25,7 +26,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
     title: "",
     audience: "",
     body: "",
-    upload_files: [],
+    uploaded_files: [],
   });
 
   const validate_main_details: any = yup.object({
@@ -101,7 +102,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
       View: (
         <Grid item container>
           <Grid item xs={12}>
-            <DropzoneFieldHookForm name="upload_files" />
+            <DropzoneFieldHookForm name="uploaded_files" />
           </Grid>
         </Grid>
       ),
@@ -135,7 +136,15 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
   const handleSubmitForm = useCallback(
     (data) => {
       if (active_step === Steps.length - 1) {
-        const payload: NewsModel = data;
+        const payload = ObjectToFormDataHelper(data);
+
+        console.log(`data`, data);
+
+        data?.uploaded_files?.forEach((f) => {
+          payload.append("uploaded_files", f);
+        });
+
+        console.log(`payload`, payload);
 
         dispatch(
           setGeneralPrompt({

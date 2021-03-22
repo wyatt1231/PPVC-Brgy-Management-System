@@ -13,7 +13,8 @@ const main = async () => {
 
   app.use(BodyParser.json({ limit: "100mb" }));
   app.use(FileUpload());
-  // app.use(express.static("./"));
+
+  app.use(express.static("./"));
 
   const server = http.createServer(app);
   const socketServer = new Server(server, {

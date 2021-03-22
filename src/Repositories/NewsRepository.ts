@@ -1,10 +1,9 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import { UploadFile } from "../Hooks/useFileUploader";
+import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
-import { NewsModel } from "../Models/NewsModels";
-import { GetUploadedImage } from "../Hooks/useFileUploader";
+import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
 import { ResponseModel } from "../Models/ResponseModels";
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
@@ -26,7 +25,7 @@ const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
       file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
       console.error(`error`, file.user_pk);
     }
-  
+
     con.Commit();
     return {
       success: true,
@@ -41,7 +40,9 @@ const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
     };
   }
 };
-const getSingleNewsWithPhoto = async (news_pk: string): Promise<ResponseModel> => {
+const getSingleNewsWithPhoto = async (
+  news_pk: string
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -90,7 +91,7 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
   try {
     await con.BeginTransaction();
 
-    const data: Array<NewsModel> = await con.Query(
+    const news_table: Array<NewsModel> = await con.Query(
       `
       SELECT * FROM 
       (
@@ -103,13 +104,23 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
       null
     );
 
-    for (const file of data) {
-      file.upload_files = await con.Query(
+    for (const news of news_table) {
+      news.upload_files = await con.Query(
         `
       select * from news_file where news_pk=@news_pk
       `,
         {
-          news_pk: file.news_pk,
+          news_pk: news.news_pk,
+        }
+      );
+
+      news.comments = await con.Query(
+        `
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `,
+        {
+          news_pk: news.news_pk,
         }
       );
     }
@@ -117,7 +128,7 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
     con.Commit();
     return {
       success: true,
-      data: data,
+      data: news_table,
     };
   } catch (error) {
     await con.Rollback();
@@ -150,6 +161,31 @@ const getNewsDataTable = async (): Promise<ResponseModel> => {
         `
       select * from news_file where news_pk=@news_pk
       `,
+        {
+          news_pk: file.news_pk,
+        }
+      );
+
+      file.comments = await con.Query(
+        `
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `,
+        {
+          news_pk: file.news_pk,
+        }
+      );
+
+      for (const com of file.comments) {
+        com.pic = await GetUploadedImage(com.pic);
+      }
+
+      file.likes = await con.Query(
+        `
+        SELECT  u.full_name,nl.liked_by FROM news_likes nl JOIN vw_users u
+        ON nl.liked_by = u.user_pk
+        WHERE nl.news_pk = @news_pk;
+        `,
         {
           news_pk: file.news_pk,
         }
@@ -385,57 +421,57 @@ const addNewsReaction = async (
     await con.BeginTransaction();
 
     payload.user_pk = user_pk;
-    const sql_check_exist  = await con.Query(
+    const sql_check_exist = await con.Query(
       `SELECT * FROM news_reaction WHERE news_pk=@news_pk AND resident_pk=@user_pk`,
       payload
     );
-    if(sql_check_exist.toString()==""){
-    const sql_add_news_reaction = await con.Modify(
-      `INSERT INTO news_reaction SET
+    if (sql_check_exist.toString() == "") {
+      const sql_add_news_reaction = await con.Modify(
+        `INSERT INTO news_reaction SET
       news_pk=@news_pk,
       reaction=@reaction,
       resident_pk=@user_pk;`,
-      payload
-    );
+        payload
+      );
 
-    if (sql_add_news_reaction > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "Your reaction has beed added!",
-      };
+      if (sql_add_news_reaction > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "Your reaction has beed added!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "Looks like something went wrong, unable to save your reaction!",
+        };
+      }
     } else {
-      con.Rollback();
-      return {
-        success: false,
-        message:
-          "Looks like something went wrong, unable to save your reaction!",
-      };
-    }
-  }else{
-    const sql_update_news_reaction = await con.Modify(
-      `update  news_reaction SET
+      const sql_update_news_reaction = await con.Modify(
+        `update  news_reaction SET
       reaction=@reaction
       where news_pk=@news_pk 
       and
       resident_pk=@user_pk;`,
-      payload
-    );
-     if (sql_update_news_reaction > 0) {
-          con.Commit();
-          return {
-            success: true,
-            message: "Your reaction has beed updated!",
-          };
-        } else {
-          con.Rollback();
-          return {
-            success: false,
-            message:
-              "2 Looks like something went wrong, unable to save your reaction!",
-          };
-        }
+        payload
+      );
+      if (sql_update_news_reaction > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "Your reaction has beed updated!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "2 Looks like something went wrong, unable to save your reaction!",
+        };
       }
+    }
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
@@ -528,61 +564,74 @@ const addNewsComment = async (
   }
 };
 
-// const getAdminDataTable = async (
-//   payload: PaginationModel
-// ): Promise<ResponseModel> => {
-//   const con = await DatabaseConnection();
-//   try {
-//     await con.BeginTransaction();
+const toggleLike = async (payload: NewsLikesModel): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
 
-//     const data: Array<NewsModel> = await con.QueryPagination(
-//       `
-//       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a
-//       LEFT JOIN STATUS s ON s.sts_pk = a.sts_pk) tmp
-//       WHERE
-//       (firstname like concat('%',@search,'%')
-//       OR lastname like concat('%',@search,'%')
-//       OR email like concat('%',@search,'%')
-//       OR phone like concat('%',@search,'%')
-//       OR sts_desc like concat('%',@search,'%'))
-//       AND admin_pk != 1
-//       `,
-//       payload
-//     );
+    const has_liked = await con.QuerySingle(
+      `
+      SELECT count(*) as total from news_likes where news_pk=@news_pk and liked_by = liked_by;
+    `,
+      payload
+    );
 
-//     const hasMore: boolean = data.length > payload.page.limit;
+    if (has_liked.total) {
+      const sql_delete_like = await con.Modify(
+        `
+        DELETE FROM news_likes WHERE
+        news_pk=@news_pk and 
+        liked_by=@liked_by;
+        `,
+        payload
+      );
 
-//     if (hasMore) {
-//       data.splice(data.length - 1, 1);
-//     }
+      if (sql_delete_like > 0) {
+        con.Commit();
+        return {
+          success: true,
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "Looks like something went wrong, unable to save your like action!",
+        };
+      }
+    } else {
+      const sql_add_like = await con.Insert(
+        `
+        INSERT INTO news_likes SET
+        news_pk=@news_pk,
+        liked_by=@liked_by;
+        `,
+        payload
+      );
 
-//     const count: number = hasMore
-//       ? -1
-//       : payload.page.begin * payload.page.limit + data.length;
-
-//     for (const admin of data) {
-//       admin.pic = await GetUploadedImage(admin.pic);
-//     }
-
-//     con.Commit();
-//     return {
-//       success: true,
-//       data: {
-//         table: data,
-//         begin: payload.page.begin,
-//         count: count,
-//         limit: payload.page.limit,
-//       },
-//     };
-//   } catch (error) {
-//     await con.Rollback();
-//     console.error(`error`, error);
-//     return {
-//       success: false,
-//       message: ErrorMessage(error),
-//     };
-//   }
-// };
+      if (sql_add_like.affectedRows > 0) {
+        con.Commit();
+        return {
+          success: true,
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "Looks like something went wrong, unable to save your like action!",
+        };
+      }
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 
 const getSingleNews = async (news_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -592,7 +641,7 @@ const getSingleNews = async (news_pk: string): Promise<ResponseModel> => {
     const data: NewsModel = await con.QuerySingle(
       `select * from news where news_pk = @news_pk`,
       {
-        admin_pk: news_pk,
+        news_pk: news_pk,
       }
     );
 
@@ -623,5 +672,6 @@ export default {
   unpublishNews,
   getNewsDataPublished,
   getSingleNewsWithPhoto,
-  getNewsComments
+  getNewsComments,
+  toggleLike,
 };

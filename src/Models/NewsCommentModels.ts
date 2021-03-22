@@ -3,4 +3,6 @@ export interface NewsCommentModel {
   user_pk?: number;
   body?: string;
   encoded_at?: string;
+  full_name?: string;
+  pic: string;
 }

@@ -45,8 +45,13 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     router.post("/addNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const payload = req.body;
-        const files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        res.json(yield NewsRepository_1.default.addNews(payload, files, req.user_pk));
+        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+        if (files instanceof Array) {
+        }
+        else {
+            files = [files];
+        }
+        res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
     router.post("/updateNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
@@ -75,6 +80,10 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     router.post("/addNewsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.addNewsReaction(payload, req.user_pk));
+    }));
+    router.post("/toggleLike", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = Object.assign(Object.assign({}, req.body), { liked_by: req.user_pk });
+        res.json(yield NewsRepository_1.default.toggleLike(payload));
     }));
     router.post("/updateNewsReaction", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;

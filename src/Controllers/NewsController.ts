@@ -1,8 +1,7 @@
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
-import { AdministratorModel } from "../Models/AdministratorModels";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
-import { NewsModel } from "../Models/NewsModels";
+import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
 import { UserClaims } from "../Models/UserModels";
 import NewsRepository from "../Repositories/NewsRepository";
@@ -49,9 +48,20 @@ const NewsController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
       const payload: NewsModel = req.body;
-      const files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      res.json(await NewsRepository.addNews(payload, files, req.user_pk));
+      if (files instanceof Array) {
+      } else {
+        files = [files];
+      }
+
+      res.json(
+        await NewsRepository.addNews(
+          payload,
+          files instanceof Array ? files : [files],
+          req.user_pk
+        )
+      );
     }
   );
 
@@ -114,6 +124,18 @@ const NewsController = async (app: Express): Promise<void> => {
     async (req: Request & UserClaims, res: Response) => {
       const payload: NewsReactionModel = req.body;
       res.json(await NewsRepository.addNewsReaction(payload, req.user_pk));
+    }
+  );
+
+  router.post(
+    "/toggleLike",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const payload: NewsLikesModel = {
+        ...req.body,
+        liked_by: req.user_pk,
+      };
+      res.json(await NewsRepository.toggleLike(payload));
     }
   );
 

@@ -7,13 +7,14 @@ interface IProps {
   type: "button" | "submit" | "reset" | undefined;
   color?: "inherit" | "primary" | "secondary" | "default" | undefined;
   size?: "small" | "medium" | "large" | undefined;
-  variant: "text" | "outlined" | "contained" | undefined;
+  variant?: "text" | "outlined" | "contained" | undefined;
   loading?: boolean;
   disabled?: boolean;
   handleClick?: () => void;
-  fullWidth: boolean;
+  fullWidth?: boolean;
   className?: string | undefined;
   borderRadius?: number | string;
+  form?: string;
 }
 
 const LoadingButton: React.FC<IProps> = ({
@@ -28,6 +29,7 @@ const LoadingButton: React.FC<IProps> = ({
   className,
   children,
   borderRadius,
+  form,
 }) => {
   return (
     <StyledLoadingButton>
@@ -44,6 +46,7 @@ const LoadingButton: React.FC<IProps> = ({
         style={{
           borderRadius: borderRadius,
         }}
+        form={form}
       >
         {children}
       </Button>
