@@ -245,6 +245,35 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         };
     }
 });
+const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`, {
+            reported_by: reported_by,
+        });
+        for (const file of data) {
+            file.complaint_file = yield con.Query(`
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `, {
+                complaint_pk: file.complaint_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -275,6 +304,7 @@ exports.default = {
     addComplaint,
     updateComplaint,
     addComplaintLog,
+    getComplaintList,
     addComplaintMessage,
     getSingleComplaint,
     getComplaintTable,

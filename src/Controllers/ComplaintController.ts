@@ -61,7 +61,14 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.getComplaintTable(reported_by));
     }
   );
-
+  router.post(
+    "/getComplaintList",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const reported_by: string = req.body.reported_by;
+      res.json(await ComplaintRepository.getComplaintList(reported_by));
+    }
+  );
   router.post(
     "/addComplaintLog",
     Authorize("admin,resident"),

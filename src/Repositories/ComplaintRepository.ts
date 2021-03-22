@@ -314,7 +314,42 @@ const getComplaintTable = async (
     };
   }
 };
+const getComplaintList = async (reported_by: string): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
 
+    const data: Array<ComplaintModel> = await con.Query(
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
+      {
+        reported_by: reported_by,
+      }
+    );
+    for (const file of data) {
+      file.complaint_file = await con.Query(
+        `
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `,
+        {
+          complaint_pk: file.complaint_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 const getComplaintMessage = async (
   complaint_pk: string
 ): Promise<ResponseModel> => {
@@ -355,6 +390,7 @@ export default {
   addComplaint,
   updateComplaint,
   addComplaintLog,
+  getComplaintList,
   addComplaintMessage,
   getSingleComplaint,
   getComplaintTable,
