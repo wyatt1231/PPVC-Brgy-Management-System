@@ -87,6 +87,47 @@ const addComplaint = async (
   }
 };
 
+const addComplaintMessage = async (
+  payload: ComplaintMessageModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+
+
+    const sql_add_complaint_msg = await con.Insert(
+      `
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `,
+      payload
+    );
+
+    if (sql_add_complaint_msg.affectedRows > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The complaint has been updated successfully!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the complaint",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 const updateComplaint = async (
   payload: ComplaintModel
 ): Promise<ResponseModel> => {
@@ -330,48 +371,7 @@ const getComplaintTable = async (
     };
   }
 };
-
-//messages
-
-const addComplaintMessage = async (
-  payload: ComplaintMessageModel
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const sql_add_complaint_msg = await con.Insert(
-      `
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `,
-      payload
-    );
-
-    if (sql_add_complaint_msg.affectedRows > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "The complaint has been updated successfully!",
-      };
-    } else {
-      con.Rollback();
-      return {
-        success: false,
-        message: "No affected rows while updating the complaint",
-      };
-    }
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};const getComplaintList = async (reported_by: string): Promise<ResponseModel> => {
+const getComplaintList = async (reported_by: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -444,13 +444,13 @@ const getComplaintMessage = async (
 };
 
 export default {
+  addComplaintMessage,
   getComplaintList,
   addComplaint,
   updateComplaint,
   addComplaintLog,
-  addComplaintMessage,
+  getComplaintMessage,
   getSingleComplaint,
   getComplaintTable,
-  getComplaintMessage,
   getComplaintLogTable,
 };

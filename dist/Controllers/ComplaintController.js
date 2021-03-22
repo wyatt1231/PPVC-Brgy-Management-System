@@ -40,7 +40,10 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
         const reported_by = req.body.reported_by;
         res.json(yield ComplaintRepository_1.default.getComplaintTable(reported_by));
     }));
-    // LOGS
+    router.post("/getComplaintList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const reported_by = req.body.reported_by;
+        res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
+    }));
     router.post("/addComplaintLog", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ComplaintRepository_1.default.addComplaintLog(payload, req.user_pk));

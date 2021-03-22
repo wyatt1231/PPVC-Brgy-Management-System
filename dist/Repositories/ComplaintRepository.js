@@ -72,6 +72,40 @@ const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, funct
         };
     }
 });
+const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_add_complaint_msg = yield con.Insert(`
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `, payload);
+        if (sql_add_complaint_msg.affectedRows > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The complaint has been updated successfully!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the complaint",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const updateComplaint = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -252,41 +286,6 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         };
     }
 });
-//messages
-const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
-    try {
-        yield con.BeginTransaction();
-        const sql_add_complaint_msg = yield con.Insert(`
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `, payload);
-        if (sql_add_complaint_msg.affectedRows > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The complaint has been updated successfully!",
-            };
-        }
-        else {
-            con.Rollback();
-            return {
-                success: false,
-                message: "No affected rows while updating the complaint",
-            };
-        }
-    }
-    catch (error) {
-        yield con.Rollback();
-        console.error(`error`, error);
-        return {
-            success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
-        };
-    }
-});
 const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -342,14 +341,14 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.default = {
+    addComplaintMessage,
     getComplaintList,
     addComplaint,
     updateComplaint,
     addComplaintLog,
-    addComplaintMessage,
+    getComplaintMessage,
     getSingleComplaint,
     getComplaintTable,
-    getComplaintMessage,
     getComplaintLogTable,
 };
 //# sourceMappingURL=ComplaintRepository.js.map
