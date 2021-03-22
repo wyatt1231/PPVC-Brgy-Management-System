@@ -40,7 +40,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
     "/getSingleComplaint",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const complaint_pk: string = req.body.complaint_pk;
+      const complaint_pk: number = req.body.complaint_pk;
       res.json(await ComplaintRepository.getSingleComplaint(complaint_pk));
     }
   );

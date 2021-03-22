@@ -224,41 +224,38 @@ const getSingleComplaint = async (
   try {
     await con.BeginTransaction();
 
-<<<<<<< HEAD
     const data: Array<ComplaintModel> = await con.Query(
       `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`,
-=======
-    const single_complaint: ComplaintModel = await con.QuerySingle(
-      `Select * from complaint where complaint_pk = @complaint_pk;`,
->>>>>>> 5f5f3902712bcb2fec5f65b3b96d3f74d1f0ba43
       {
         complaint_pk: complaint_pk,
       }
     );
-
-    single_complaint.complaint_file = await con.Query(
-      `
-        select * from complaint_file where complaint_pk=@complaint_pk
-      `,
-      {
-        complaint_pk: complaint_pk,
+      for(var file of data){
+        file.complaint_file = await con.Query(
+          `
+            select * from complaint_file where complaint_pk=@complaint_pk
+          `,
+          {
+            complaint_pk: complaint_pk,
+          }
+        );
+    
+        file.user = await con.QuerySingle(
+          `Select * from vw_users where user_pk = @user_pk`,
+          {
+            user_pk: file.reported_by,
+          }
+        );
+        file.user.pic = await GetUploadedImage(
+          file.user.pic
+        );
       }
-    );
-
-    single_complaint.user = await con.QuerySingle(
-      `Select * from vw_users where user_pk = @user_pk`,
-      {
-        user_pk: single_complaint.reported_by,
-      }
-    );
-    single_complaint.user.pic = await GetUploadedImage(
-      single_complaint.user.pic
-    );
+  
 
     con.Commit();
     return {
       success: true,
-      data: single_complaint,
+      data:data,
     };
   } catch (error) {
     await con.Rollback();
@@ -277,19 +274,14 @@ const getComplaintTable = async (
   try {
     await con.BeginTransaction();
 
-<<<<<<< HEAD
     const data: Array<ComplaintModel> = await con.Query(
       `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
-=======
-    const complaint_table: Array<ComplaintModel> = await con.Query(
-      `Select * from complaint`,
->>>>>>> 5f5f3902712bcb2fec5f65b3b96d3f74d1f0ba43
       {
         reported_by: reported_by,
       }
     );
 
-    for (const complaint of complaint_table) {
+    for (const complaint of data) {
       complaint.complaint_file = await con.Query(
         `
         select * from complaint_file where complaint_pk=@complaint_pk
@@ -311,7 +303,7 @@ const getComplaintTable = async (
     con.Commit();
     return {
       success: true,
-      data: complaint_table,
+      data: data,
     };
   } catch (error) {
     await con.Rollback();

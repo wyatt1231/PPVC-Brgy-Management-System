@@ -186,19 +186,21 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
-        single_complaint.complaint_file = yield con.Query(`
-        select * from complaint_file where complaint_pk=@complaint_pk
-      `, {
-            complaint_pk: complaint_pk,
-        });
-        single_complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
-            user_pk: single_complaint.reported_by,
-        });
-        single_complaint.user.pic = yield useFileUploader_1.GetUploadedImage(single_complaint.user.pic);
+        for (var file of data) {
+            file.complaint_file = yield con.Query(`
+            select * from complaint_file where complaint_pk=@complaint_pk
+          `, {
+                complaint_pk: complaint_pk,
+            });
+            file.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+                user_pk: file.reported_by,
+            });
+            file.user.pic = yield useFileUploader_1.GetUploadedImage(file.user.pic);
+        }
         con.Commit();
         return {
             success: true,
-            data: single_complaint,
+            data: data,
         };
     }
     catch (error) {
@@ -217,7 +219,7 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`, {
             reported_by: reported_by,
         });
-        for (const complaint of complaint_table) {
+        for (const complaint of data) {
             complaint.complaint_file = yield con.Query(`
         select * from complaint_file where complaint_pk=@complaint_pk
       `, {
@@ -231,7 +233,7 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         con.Commit();
         return {
             success: true,
-            data: complaint_table,
+            data: data,
         };
     }
     catch (error) {
