@@ -47,6 +47,7 @@ const addComplaint = (payload, files) =>
         reported_by=@reported_by,
         title=@subject,
         body=@body,
+<<<<<<< HEAD
         sts_pk="P";
          `,
         payload
@@ -69,6 +70,24 @@ const addComplaint = (payload, files) =>
           };
           const sql_add_news_file = yield con.Insert(
             `INSERT INTO complaint_file SET
+=======
+        sts_pk="A";
+         `, payload);
+        if (sql_add_complaint.insertedId > 0) {
+            for (const file of files) {
+                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Complaints/", file);
+                if (!file_res.success) {
+                    con.Rollback();
+                    return file_res;
+                }
+                const news_file_payload = {
+                    file_path: file_res.data.path,
+                    file_name: file_res.data.name,
+                    mimetype: file_res.data.mimetype,
+                    complaint_pk: sql_add_complaint.insertedId,
+                };
+                const sql_add_news_file = yield con.Insert(`INSERT INTO complaint_file SET
+>>>>>>> 039d6da (posts and complaints changes)
              complaint_pk=@complaint_pk,
              file_name=@file_name,
              file_path=@file_path,

@@ -3,10 +3,16 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
+<<<<<<< HEAD
 import { PostCommentModel, PostFilesModel, PostsModel } from "../Models/PostsModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
+=======
+import {PostFilesModel, PostsModel} from '../Models/PostsModel'
+import { PostReactionModel } from "../Models/PostReactionModel";
+import {PostsCommentModel} from '../Models/PostsCommentModel'
+>>>>>>> 039d6da (posts and complaints changes)
 
 
 const getPosts = async (): Promise<ResponseModel> => {
@@ -310,7 +316,7 @@ const addPostComment = async (
 
     payload.user_pk = user_pk;
 
-    const sql_add_post_comment = await con.Modify(
+    const sql_add_post_comment = await con.Insert(
       `INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
@@ -318,7 +324,8 @@ const addPostComment = async (
       payload
     );
 
-    if (sql_add_post_comment > 0) {
+    if (sql_add_post_comment.insertedId > 0) {
+    
       con.Commit();
       return {
         success: true,

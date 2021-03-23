@@ -12,7 +12,7 @@ export interface PostsModel {
   sts_backgroundColor?: string;
   encoded_at?: Date;
   encoder_pk?: number;
-  news_files?: Array<PostsFileModel>;
+  posts_files?: Array<PostFilesModel>;
   upload_files: Array<any>;
   user_full_name?: string;
   user_pic?: string;
@@ -38,4 +38,13 @@ export interface PostCommentModel {
   body?: string;
   encoded_at?: string | Date;
   user?: UserModel;
+}
+export interface PostFilesModel {
+  posts_file_pk?: number;
+  posts_pk?: number;
+  file_name?: string;
+  encoder_pk?: number;
+  file_path?: string;
+  mimetype?: string;
+  
 }
