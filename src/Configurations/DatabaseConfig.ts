@@ -2,12 +2,20 @@ import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
 import { PaginationModel } from "../Models/PaginationModel";
 
+// export const DatabaseConfig = mysql.createPool({
+//   host: "us-cdbr-east-03.cleardb.com",
+//   user: "bed41c71c3944a",
+//   password: "f1ec4cc8",
+//   database: "heroku_fcd8378bc75cb9b",
+//   port: 3306,
+// });
+
 export const DatabaseConfig = mysql.createPool({
-  host: "us-cdbr-east-03.cleardb.com",
-  user: "bed41c71c3944a",
-  password: "f1ec4cc8",
-  database: "heroku_fcd8378bc75cb9b",
-  port: 3306,
+  host: "localhost",
+  user: "root",
+  password: "rootsa",
+  database: "bms",
+  port: 3309,
 });
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {

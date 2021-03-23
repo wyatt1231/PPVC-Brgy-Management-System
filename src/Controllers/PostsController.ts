@@ -48,9 +48,15 @@ const PostsController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
       const payload: PostsModel = req.body;
-      const files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      res.json(await PostsRepository.addPosts(payload, files, req.user_pk));
+      res.json(
+        await PostsRepository.addPosts(
+          payload,
+          files instanceof Array ? files : [files],req.user_pk
+        )
+      );
+    
     }
   );
 

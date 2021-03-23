@@ -26,7 +26,6 @@ const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, funct
         if (sql_add_complaint.insertedId > 0) {
             for (const file of files) {
                 const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Complaints/", file);
-                console.log(`files_res`, file_res);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;

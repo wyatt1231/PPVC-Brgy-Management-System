@@ -32,8 +32,6 @@ const addComplaint = async (
           file
         );
 
-        console.log(`files_res`, file_res);
-
         if (!file_res.success) {
           con.Rollback();
 

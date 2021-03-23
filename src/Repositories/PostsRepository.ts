@@ -3,10 +3,9 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
-import {PostsModel} from '../Models/PostsModel'
+import {PostFilesModel, PostsModel} from '../Models/PostsModel'
 import { PostReactionModel } from "../Models/PostReactionModel";
 import {PostsCommentModel} from '../Models/PostsCommentModel'
-import { PostsFileModel } from "../Models/PostsFileModel";
 
 const getPosts = async (): Promise<ResponseModel> => {
     const con = await DatabaseConnection();
@@ -193,7 +192,7 @@ const addPosts = async (
 
     if (sql_add_posts.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/Post/", file);
+        const file_res = await UploadFile("src/Storage/Files/Posts/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -201,7 +200,7 @@ const addPosts = async (
           return file_res;
         }
 
-        const posts_file_payload: PostsFileModel = {
+        const posts_file_payload: PostFilesModel = {
           file_path: file_res.data.path,
           file_name: file_res.data.name,
           mimetype: file_res.data.mimetype,
@@ -261,7 +260,7 @@ const addPostComment = async (
 
     payload.user_pk = user_pk;
 
-    const sql_add_post_comment = await con.Modify(
+    const sql_add_post_comment = await con.Insert(
       `INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
@@ -269,7 +268,8 @@ const addPostComment = async (
       payload
     );
 
-    if (sql_add_post_comment > 0) {
+    if (sql_add_post_comment.insertedId > 0) {
+    
       con.Commit();
       return {
         success: true,

@@ -154,7 +154,7 @@ const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, 
          encoder_pk=@encoder_pk;`, payload);
         if (sql_add_posts.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Post/", file);
+                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Posts/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -208,11 +208,11 @@ const addPostComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
-        const sql_add_post_comment = yield con.Modify(`INSERT INTO posts_comment SET
+        const sql_add_post_comment = yield con.Insert(`INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
       body=@body;`, payload);
-        if (sql_add_post_comment > 0) {
+        if (sql_add_post_comment.insertedId > 0) {
             con.Commit();
             return {
                 success: true,
