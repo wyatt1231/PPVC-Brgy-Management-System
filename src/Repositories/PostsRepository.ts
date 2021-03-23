@@ -3,174 +3,174 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
-import {PostsModel} from '../Models/PostsModel'
+import { PostsModel } from "../Models/PostsModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
-import {PostsCommentModel} from '../Models/PostsCommentModel'
+import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
 
 const getPosts = async (): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-    try {
-      await con.BeginTransaction();
-  
-      const data: Array<PostsModel> = await con.Query(
-        `
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `
         SELECT * FROM 
       (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
-        LEFT JOIN STATUS s ON p.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
         `,
+      null
+    );
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
         null
       );
-      for (const file of data) {
-        const sql_get_pic = await con.QuerySingle(
-          `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
-          null
-        );
-        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-        console.error(`error`, file.user_pk);
-      }
-      for (const file of data) {
-        file.upload_files = await con.Query(
-          `
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
+    }
+    for (const file of data) {
+      file.upload_files = await con.Query(
+        `
         select * from posts_file where posts_pk=@posts_pk
         `,
-          {
-            posts_pk: file.posts_pk,
-          }
-        );
-      }
-  
-      con.Commit();
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
+        {
+          posts_pk: file.posts_pk,
+        }
+      );
     }
-  };
 
-const getUserPosts = async ( user_pk: number): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-    try {
-      await con.BeginTransaction();
-  
-      const data: Array<PostsModel> = await con.Query(
-        `
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `
         SELECT * FROM 
       (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
-        LEFT JOIN STATUS s ON p.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
         `,
-        {
-          user_pk,
-        }
-      );
-      for (const file of data) {
-        const sql_get_pic = await con.QuerySingle(
-          `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
-          null
-        );
-        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-        console.error(`error`, file.user_pk);
+      {
+        user_pk,
       }
-      for (const file of data) {
-        file.upload_files = await con.Query(
-          `
-        select * from posts_file where posts_pk=@posts_pk
-        `,
-          {
-            posts_pk: file.posts_pk,
-          }
-        );
-      }
-  
-      con.Commit();
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
-    }
-  };
-
-const getPostsReaction = async (): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-    try {
-      await con.BeginTransaction();
-  
-      const data: Array<PostsModel> = await con.Query(
-        `
-        SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
-        `,
+    );
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
         null
       );
-  
-      con.Commit();
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
     }
-  };
-  const getPostsComments = async (posts_pk: string): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-    try {
-      await con.BeginTransaction();
-  
-      const data: Array<PostsModel> = await con.Query(
-        `SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk`,
+    for (const file of data) {
+      file.upload_files = await con.Query(
+        `
+        select * from posts_file where posts_pk=@posts_pk
+        `,
         {
-          posts_pk: posts_pk,
+          posts_pk: file.posts_pk,
         }
       );
-      for (const file of data) {
-        const sql_get_pic = await con.QuerySingle(
-          `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
-          null
-        );
-        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-        console.error(`error`, file.user_pk);
-      }
-    
-      con.Commit();
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
     }
-  };
-  
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getPostsReaction = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `
+        SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
+        `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+const getPostsComments = async (posts_pk: string): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk`,
+      {
+        posts_pk: posts_pk,
+      }
+    );
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+        null
+      );
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const addPosts = async (
   payload: PostsModel,
   files: Array<File>,
@@ -216,7 +216,7 @@ const addPosts = async (
              file_name=@file_name,
              mimetype=@mimetype,
              encoder_pk=@encoder_pk;`,
-             posts_file_payload
+          posts_file_payload
         );
 
         if (sql_add_posts_file.affectedRows < 1) {
@@ -301,60 +301,56 @@ const addPostReaction = async (
     await con.BeginTransaction();
 
     payload.user_pk = user_pk;
-    const sql_check_exist  = await con.Query(
+    const sql_check_exist = await con.Query(
       `SELECT * FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk`,
       payload
     );
-      if(sql_check_exist.toString()==""){
-        const sql_add_news_reaction = await con.Modify(
-          `INSERT INTO posts_reaction SET
+    if (sql_check_exist.toString() == "") {
+      const sql_add_news_reaction = await con.Modify(
+        `INSERT INTO posts_reaction SET
           posts_pk=@posts_pk,
           reaction=@reaction,
           resident_pk=@user_pk;`,
-          payload
-        );
-        if (sql_add_news_reaction > 0) {
-          con.Commit();
-          return {
-            success: true,
-            message: "Your reaction has beed added!",
-          };
-        } else {
-          con.Rollback();
-          return {
-            success: false,
-            message:
-              "1 Looks like something went wrong, unable to save your reaction!",
-          };
-        }
-      }else{
-        const sql_update_news_reaction = await con.Modify(
-          `update  posts_reaction SET
+        payload
+      );
+      if (sql_add_news_reaction > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "Your reaction has beed added!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "1 Looks like something went wrong, unable to save your reaction!",
+        };
+      }
+    } else {
+      const sql_update_news_reaction = await con.Modify(
+        `update  posts_reaction SET
           reaction=@reaction
           where posts_pk=@posts_pk 
           and
           resident_pk=@user_pk;`,
-          payload
-        );
-        if (sql_update_news_reaction > 0) {
-          con.Commit();
-          return {
-            success: true,
-            message: "Your reaction has beed updated!",
-          };
-        } else {
-          con.Rollback();
-          return {
-            success: false,
-            message:
-              "2 Looks like something went wrong, unable to save your reaction!",
-          };
-        }
-
+        payload
+      );
+      if (sql_update_news_reaction > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "Your reaction has beed updated!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message:
+            "2 Looks like something went wrong, unable to save your reaction!",
+        };
       }
-   
-
-    
+    }
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
@@ -364,12 +360,12 @@ const addPostReaction = async (
     };
   }
 };
-  export default {
-    addPosts,
-    getPosts,
-    getUserPosts,
-    addPostReaction,
-    addPostComment,
-    getPostsReaction,
-    getPostsComments
-  }
+export default {
+  addPosts,
+  getPosts,
+  getUserPosts,
+  addPostReaction,
+  addPostComment,
+  getPostsReaction,
+  getPostsComments,
+};

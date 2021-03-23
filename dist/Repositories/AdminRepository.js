@@ -145,7 +145,7 @@ const getAdminDataTable = (payload) => __awaiter(void 0, void 0, void 0, functio
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a 
-      LEFT JOIN STATUS s ON s.sts_pk = a.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = a.sts_pk) tmp
       WHERE 
       (firstname like concat('%',@search,'%')
       OR lastname like concat('%',@search,'%')
