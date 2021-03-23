@@ -181,7 +181,7 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
       SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
-      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
       first_name like concat('%',@search,'%')
       OR last_name like concat('%',@search,'%')
@@ -228,7 +228,7 @@ const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, fun
     try {
         yield con.BeginTransaction();
         const data = yield con.QuerySingle(`SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc  FROM resident a 
-      LEFT JOIN STATUS s ON s.sts_pk = a.sts_pk where r.resident_pk =@resident_pk`, {
+      LEFT JOIN status s ON s.sts_pk = a.sts_pk where r.resident_pk =@resident_pk`, {
             resident_pk: resident_pk,
         });
         con.Commit();
