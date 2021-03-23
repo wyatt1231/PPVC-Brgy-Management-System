@@ -1,11 +1,4 @@
-import {
-  Button,
-  Chip,
-  Container,
-  Grid,
-  IconButton,
-  TextField,
-} from "@material-ui/core";
+import { Chip, Container, Grid } from "@material-ui/core";
 import moment from "moment";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,17 +11,12 @@ import {
   setGeneralPrompt,
   setPageLinks,
 } from "../../../Services/Actions/PageActions";
-import SendRoundedIcon from "@material-ui/icons/SendRounded";
 import { NewsModel } from "../../../Services/Models/NewsModels";
 import { RootStore } from "../../../Services/Store";
 import AddNewsAdminView from "./AddNewsAdminView";
 import EditNewsAdminView from "./EditNewsAdminView";
-import { StyledNewsContainer } from "./styles";
-import ThumbUpOutlinedIcon from "@material-ui/icons/ThumbUpOutlined";
-import ThumbUpAltRoundedIcon from "@material-ui/icons/ThumbUpAltRounded";
-import ChatRoundedIcon from "@material-ui/icons/ChatRounded";
-import { NewsCommentModel } from "../../../Services/Models/NewsCommentModels";
 import NewsCommentAdminView from "./NewsCommentAdminView";
+import { StyledNewsContainer } from "./styles";
 
 interface DtNewsAdminViewProps {}
 

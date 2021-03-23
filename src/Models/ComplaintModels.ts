@@ -1,3 +1,5 @@
+import { SocketModel } from "./SocketModel";
+import { StatusMasterModel } from "./StatusMasterModel";
 import { UserModel } from "./UserModels";
 
 export interface ComplaintModel {
@@ -9,6 +11,7 @@ export interface ComplaintModel {
   sts_pk?: string;
   upload_files: Array<any>;
   complaint_file?: Array<ComplaintFilesModel>;
+  status?: StatusMasterModel;
   user: UserModel;
 }
 
@@ -18,4 +21,9 @@ export interface ComplaintFilesModel {
   file_name?: string;
   file_path?: string;
   mimetype?: string;
+}
+
+export interface ComplaintChatModel {
+  room: string;
+  con: Array<SocketModel>;
 }

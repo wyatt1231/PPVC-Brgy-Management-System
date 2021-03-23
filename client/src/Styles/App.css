@@ -4,8 +4,6 @@
   box-sizing: border-box;
   font-family: "Nunito", "Segoe UI", Helvetica, Tahoma, Geneva, Verdana,
     sans-serif;
-  letter-spacing: 0.2pt;
-  word-spacing: 0.2pt;
 }
 
 /* html {
@@ -128,13 +126,13 @@ tr th {
   background-color: #fff !important;
 }
 
-tr:nth-child(even) {
+/* tr:nth-child(even) {
   background-color: #f2f2f2 !important;
 }
 
 tr td {
   color: black !important;
-}
+} */
 
 .empty-rows {
   color: orangered;

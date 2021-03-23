@@ -21,12 +21,11 @@ const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, funct
         reported_by=@reported_by,
         title=@title,
         body=@body,
-        sts_pk="A";
+        sts_pk="P";
          `, payload);
         if (sql_add_complaint.insertedId > 0) {
             for (const file of files) {
                 const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Complaints/", file);
-                console.log(`files_res`, file_res);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -113,25 +112,35 @@ const addComplaintLog = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
-        const sql_add_complaint_log = yield con.Insert(`
-              INSERT into complaint_log SET
-              complaint_pk=@complaint_pk,
-              notes=@notes,
-              sts_pk=@sts_pk,
-              encoder_pk=@encoder_pk;
-               `, payload);
-        if (sql_add_complaint_log.affectedRows > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The complaint update has been saved successfully!",
-            };
+        const sql_update_complaint_status = yield con.Modify(`UPDATE complaint set sts_pk = @sts_pk where complaint_pk = @complaint_pk`, payload);
+        if (sql_update_complaint_status) {
+            const sql_add_complaint_log = yield con.Insert(`
+                INSERT into complaint_log SET
+                complaint_pk=@complaint_pk,
+                notes=@notes,
+                sts_pk=@sts_pk,
+                encoder_pk=@encoder_pk;
+                 `, payload);
+            if (sql_add_complaint_log.affectedRows > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                    message: "The complaint update has been saved successfully!",
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "No affected rows while saving the complaint update",
+                };
+            }
         }
         else {
             con.Rollback();
             return {
                 success: false,
-                message: "No affected rows while saving the complaint update",
+                message: "No affected rows while updating the complaint status",
             };
         }
     }
@@ -144,34 +153,26 @@ const addComplaintLog = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
-const addComplaintMessage = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintLogTable = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
-        yield con.BeginTransaction();
-        payload.sent_by = user_pk;
-        const sql_add_complaint_msg = yield con.Insert(`
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `, payload);
-        if (sql_add_complaint_msg.affectedRows > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The complaint has been updated successfully!",
-            };
+        const log_table = yield con.Query(` SELECT * FROM complaint_log WHERE complaint_pk = @complaint_pk order by encoded_at desc`, {
+            complaint_pk: complaint_pk,
+        });
+        for (const log of log_table) {
+            log.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+                user_pk: log.encoder_pk,
+            });
+            log.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk`, {
+                sts_pk: log.sts_pk,
+            });
         }
-        else {
-            con.Rollback();
-            return {
-                success: false,
-                message: "No affected rows while updating the complaint",
-            };
-        }
+        return {
+            success: true,
+            data: log_table,
+        };
     }
     catch (error) {
-        yield con.Rollback();
         console.error(`error`, error);
         return {
             success: false,
@@ -195,6 +196,9 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
             user_pk: single_complaint.reported_by,
         });
         single_complaint.user.pic = yield useFileUploader_1.GetUploadedImage(single_complaint.user.pic);
+        single_complaint.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk;`, {
+            sts_pk: single_complaint.sts_pk,
+        });
         con.Commit();
         return {
             success: true,
@@ -243,25 +247,59 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         };
     }
 });
-const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
+//messages
+const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * from complaint where complaint_pk=@complaint_pk`, {
-            complaint_pk: complaint_pk,
-        });
-        for (const file of data) {
-            const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.sent_by} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+        const sql_add_complaint_msg = yield con.Insert(`
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `, payload);
+        if (sql_add_complaint_msg.affectedRows > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The complaint has been updated successfully!",
+            };
         }
-        con.Commit();
-        return {
-            success: true,
-            data: data,
-        };
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the complaint",
+            };
+        }
     }
     catch (error) {
         yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        const table_messages = yield con.Query(` SELECT * FROM complaint_message WHERE  complaint_pk =@complaint_pk;`, {
+            complaint_pk: complaint_pk,
+        });
+        for (const message of table_messages) {
+            message.user = yield con.QuerySingle(`SELECT * from vw_users where user_pk = @user_pk`, {
+                user_pk: message.sent_by,
+            });
+            message.user.pic = yield useFileUploader_1.GetUploadedImage(message.user.pic);
+        }
+        return {
+            success: true,
+            data: table_messages,
+        };
+    }
+    catch (error) {
         console.error(`error`, error);
         return {
             success: false,
@@ -277,5 +315,6 @@ exports.default = {
     getSingleComplaint,
     getComplaintTable,
     getComplaintMessage,
+    getComplaintLogTable,
 };
 //# sourceMappingURL=ComplaintRepository.js.map

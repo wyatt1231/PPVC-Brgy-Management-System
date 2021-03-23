@@ -40,19 +40,11 @@ const ComplaintController = async (app: Express): Promise<void> => {
     "/getSingleComplaint",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const complaint_pk: string = req.body.complaint_pk;
+      const complaint_pk: number = req.body.complaint_pk;
       res.json(await ComplaintRepository.getSingleComplaint(complaint_pk));
     }
   );
 
-  router.post(
-    "/getComplaintMessage",
-    Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const complaint_pk: string = req.body.complaint_pk;
-      res.json(await ComplaintRepository.getComplaintMessage(complaint_pk));
-    }
-  );
   router.post(
     "/getComplaintTable",
     Authorize("admin,resident"),
@@ -62,6 +54,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
     }
   );
 
+  // LOGS
   router.post(
     "/addComplaintLog",
     Authorize("admin,resident"),
@@ -72,13 +65,31 @@ const ComplaintController = async (app: Express): Promise<void> => {
   );
 
   router.post(
+    "/getComplaintLogTable",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: number = req.body.complaint_pk;
+      res.json(await ComplaintRepository.getComplaintLogTable(complaint_pk));
+    }
+  );
+
+  //MESSAGES
+  router.post(
     "/addComplaintMessage",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintMessageModel = req.body;
-      res.json(
-        await ComplaintRepository.addComplaintMessage(payload, req.user_pk)
-      );
+      payload.sent_by = req.user_pk;
+      res.json(await ComplaintRepository.addComplaintMessage(payload));
+    }
+  );
+
+  router.post(
+    "/getComplaintMessage",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: number = req.body.complaint_pk;
+      res.json(await ComplaintRepository.getComplaintMessage(complaint_pk));
     }
   );
 

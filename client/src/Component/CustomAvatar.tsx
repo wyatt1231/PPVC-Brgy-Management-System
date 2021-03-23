@@ -5,10 +5,12 @@ interface ICustomAvatar {
   errorMessage: string;
   className?: string;
   variant?: "circle" | "rounded" | "square";
+  height?: number;
+  width?: number;
 }
 
 const CustomAvatar: React.FC<ICustomAvatar> = memo(
-  ({ src, errorMessage, className, variant }) => {
+  ({ src, errorMessage, className, variant, height, width }) => {
     const theme: any = useTheme();
     return src === "" ||
       src === "null" ||
@@ -18,8 +20,8 @@ const CustomAvatar: React.FC<ICustomAvatar> = memo(
         className={className}
         variant={variant ? variant : "circle"}
         style={{
-          height: theme.spacing(5),
-          width: theme.spacing(5),
+          height: theme.spacing(height ? height : 5),
+          width: theme.spacing(width ? width : 5),
           backgroundColor: theme.palette.primary.main,
           color: theme.palette.secondary.contrastText,
         }}
@@ -41,8 +43,8 @@ const CustomAvatar: React.FC<ICustomAvatar> = memo(
         variant={variant ? variant : "circle"}
         className={className}
         style={{
-          height: theme.spacing(5),
-          width: theme.spacing(5),
+          height: theme.spacing(height ? height : 5),
+          width: theme.spacing(width ? width : 5),
         }}
         src={`data:image/jpg;base64,${src}`}
       />
