@@ -3,6 +3,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grow,
   IconButton,
   Tooltip,
   useMediaQuery,
@@ -65,6 +66,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
         scroll="body"
         disableBackdropClick={true}
         disableEscapeKeyDown={true}
+        TransitionComponent={Grow}
         PaperProps={{
           style: {
             margin: 0,

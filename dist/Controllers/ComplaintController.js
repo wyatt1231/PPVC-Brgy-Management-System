@@ -32,21 +32,28 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintRepository_1.default.getSingleComplaint(complaint_pk));
     }));
-    router.post("/getComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const complaint_pk = req.body.complaint_pk;
-        res.json(yield ComplaintRepository_1.default.getComplaintMessage(complaint_pk));
-    }));
     router.post("/getComplaintTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reported_by = req.body.reported_by;
         res.json(yield ComplaintRepository_1.default.getComplaintTable(reported_by));
     }));
+    // LOGS
     router.post("/addComplaintLog", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ComplaintRepository_1.default.addComplaintLog(payload, req.user_pk));
     }));
+    router.post("/getComplaintLogTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const complaint_pk = req.body.complaint_pk;
+        res.json(yield ComplaintRepository_1.default.getComplaintLogTable(complaint_pk));
+    }));
+    //MESSAGES
     router.post("/addComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
-        res.json(yield ComplaintRepository_1.default.addComplaintMessage(payload, req.user_pk));
+        payload.sent_by = req.user_pk;
+        res.json(yield ComplaintRepository_1.default.addComplaintMessage(payload));
+    }));
+    router.post("/getComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const complaint_pk = req.body.complaint_pk;
+        res.json(yield ComplaintRepository_1.default.getComplaintMessage(complaint_pk));
     }));
     app.use("/api/complaint/", router);
 });

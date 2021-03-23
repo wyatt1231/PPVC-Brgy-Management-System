@@ -5,16 +5,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.query = exports.DatabaseConnection = exports.DatabaseConfig = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
-exports.DatabaseConfig = mysql2_1.default.createPool({
-    host: "us-cdbr-east-03.cleardb.com",
-    user: "bed41c71c3944a",
-    password: "f1ec4cc8",
-    database: "heroku_fcd8378bc75cb9b",
-    port: 3306,
-});
+let DatabaseConfig = () => {
+    if (process.env.NODE_ENV === "production") {
+        // return mysql.createPool({
+        //   host: "us-cdbr-east-03.cleardb.com",
+        //   user: "bed41c71c3944a",
+        //   password: "f1ec4cc8",
+        //   database: "heroku_fcd8378bc75cb9b",
+        //   port: 3306,
+        //   connectionLimit: 10,
+        // });
+        return mysql2_1.default.createPool({
+            host: "sql6.freemysqlhosting.net",
+            user: "sql6400894",
+            password: "R9R8CS57Mw",
+            database: "sql6400894",
+            port: 3306,
+            connectionLimit: 10,
+        });
+    }
+    else {
+        return mysql2_1.default.createPool({
+            host: "127.0.0.1",
+            user: "root",
+            password: "root sa",
+            database: "bms",
+            port: 3309,
+        });
+    }
+};
+exports.DatabaseConfig = DatabaseConfig;
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
-        exports.DatabaseConfig.getConnection((error, connection) => {
+        exports.DatabaseConfig().getConnection((error, connection) => {
             if (error) {
                 reject(error);
             }
@@ -252,7 +275,7 @@ const queryFormat = (query, values) => {
 };
 const query = (sql, binding) => {
     return new Promise((resolve, reject) => {
-        exports.DatabaseConfig.query(sql, binding, (err, result) => {
+        exports.DatabaseConfig().query(sql, binding, (err, result) => {
             if (err)
                 reject(err);
             resolve(result);
@@ -260,58 +283,4 @@ const query = (sql, binding) => {
     });
 };
 exports.query = query;
-// const generateSearch = (search_data, defaultSearch) => {
-//     let finalSearchQuery = "";
-//     if (!defaultSearch || defaultSearch == null) {
-//       defaultSearch = "";
-//     }
-//     if (search_data.length > 0) {
-//       let searchArray = [];
-//       search_data.forEach((field) => {
-//         if (field.field && field.value !== "") {
-//           searchArray.push(
-//             ` ${mysql.escapeId(field.key)} LIKE CONCAT('%',${pool.escape(
-//               field.value
-//             )},'%') `
-//           );
-//         }
-//       });
-//       var searchQuery = searchArray.join(" and ");
-//       if (searchQuery.trim() !== "" && defaultSearch !== "") {
-//         searchQuery = searchQuery + " and " + defaultSearch;
-//       }
-//       if (searchQuery.trim() !== "") {
-//         searchQuery = " where " + searchQuery;
-//       }
-//     }
-//     if (searchQuery.trim() === "" && defaultSearch.trim() !== "") {
-//       return " where " + defaultSearch;
-//     } else {
-//       return searchQuery;
-//     }
-//   };
-//   const generateLimit = (begin, limit) => {
-//     if (limit == null || begin == null) {
-//       return "";
-//     }
-//     const limitQuery = ` limit ${mysql.escape(begin)}, ${mysql.escape(limit)} `;
-//     return limitQuery;
-//   };
-//   const nullableColumns = (replacementObject, listFieldToRemove) => {
-//     var NULL = {
-//       toSqlString: function () {
-//         return "NULL";
-//       },
-//     };
-//     for (var key of Object.keys(replacementObject)) {
-//       if (
-//         listFieldToRemove.includes(key) &&
-//         replacementObject[key].toString().trim() === ""
-//       ) {
-//         // delete replacementObject[key];
-//         replacementObject[key] = NULL;
-//       }
-//     }
-//     return replacementObject;
-//   };
 //# sourceMappingURL=DatabaseConfig.js.map

@@ -1,3 +1,5 @@
+import { ComplaintLogModel } from "../Models/ComplaintLogModels";
+import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintModel } from "../Models/ComplaintModels";
 
 export type ComplaintReducerTypes =
@@ -16,6 +18,22 @@ export type ComplaintReducerTypes =
   | {
       type: "fetch_single_complaint";
       fetch_single_complaint: boolean;
+    }
+  | {
+      type: "selected_complaint_log";
+      selected_complaint_log: Array<ComplaintLogModel>;
+    }
+  | {
+      type: "fetch_selected_complaint_log";
+      fetch_selected_complaint_log: boolean;
+    }
+  | {
+      type: "complaint_messages";
+      complaint_messages: Array<ComplaintMessageModel>;
+    }
+  | {
+      type: "fetch_complaint_messages";
+      fetch_complaint_messages: boolean;
     };
 
 export interface ComplaintReducerModel {
@@ -23,4 +41,10 @@ export interface ComplaintReducerModel {
   fetch_complaints_table?: boolean;
   single_complaint?: ComplaintModel;
   fetch_single_complaint?: boolean;
+
+  selected_complaint_log?: Array<ComplaintLogModel>;
+  fetch_selected_complaint_log?: boolean;
+
+  complaint_messages?: Array<ComplaintMessageModel>;
+  fetch_complaint_messages?: boolean;
 }

@@ -2,6 +2,7 @@ import { Container, Grid } from "@material-ui/core";
 import moment from "moment";
 import React, { FC, memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
@@ -14,16 +15,7 @@ interface DtComplaintAdminViewProps {}
 
 export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
   const dispatch = useDispatch();
-
-  // const [open_edit_dialog, set_open_edit_dialog] = useState(false);
-
-  // const [selected_news_pk, set_selected_news_pk] = useState<
-  //   number | undefined
-  // >();
-
-  // const handleSetOpenEditDialog = useCallback((open: boolean) => {
-  //   set_open_edit_dialog(open);
-  // }, []);
+  const history = useHistory();
 
   const complaint_table = useSelector(
     (store: RootStore) => store.ComplaintReducer.complaints_table
@@ -34,59 +26,6 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
   const fetch_complaint_table = useSelector(
     (store: RootStore) => store.ComplaintReducer.fetch_complaints_table
   );
-
-  // const RenderNewsAction = useCallback(
-  //   (news: NewsModel) => {
-  //     const actions: Array<any> = [
-  //       {
-  //         text: "Edit News",
-  //         handleClick: () => {
-  //           set_selected_news_pk(news.news_pk);
-  //           handleSetOpenEditDialog(true);
-  //         },
-  //       },
-  //     ];
-
-  //     if (news.sts_pk === "PU") {
-  //       actions.push({
-  //         text: "Unpublish News",
-  //         handleClick: () => {
-  //           dispatch(
-  //             setGeneralPrompt({
-  //               open: true,
-  //               continue_callback: () =>
-  //                 dispatch(
-  //                   NewsActions.unpublishNews(news.news_pk, () => {
-  //                     dispatch(NewsActions.setNewsDataTable());
-  //                   })
-  //                 ),
-  //             })
-  //           );
-  //         },
-  //       });
-  //     } else if (news.sts_pk === "UP") {
-  //       actions.push({
-  //         text: "Publish News",
-  //         handleClick: () => {
-  //           dispatch(
-  //             setGeneralPrompt({
-  //               open: true,
-  //               continue_callback: () =>
-  //                 dispatch(
-  //                   NewsActions.republishNews(news.news_pk, () => {
-  //                     dispatch(NewsActions.setNewsDataTable());
-  //                   })
-  //                 ),
-  //             })
-  //           );
-  //         },
-  //       });
-  //     }
-
-  //     return actions;
-  //   },
-  //   [dispatch]
-  // );
 
   useEffect(() => {
     let mounted = true;
@@ -138,6 +77,8 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
                   <CustomAvatar
                     className="img"
                     src={comp?.user?.pic}
+                    height={3}
+                    width={3}
                     errorMessage={comp?.user?.full_name?.charAt(0)}
                   />
 
@@ -150,8 +91,11 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
                     <IconButtonPopper
                       buttons={[
                         {
-                          text: "Update Status",
-                          handleClick: () => console.log(``),
+                          text: "Go to Complaint",
+                          handleClick: () =>
+                            history.push(
+                              window.location.pathname + "/" + comp.complaint_pk
+                            ),
                         },
                       ]}
                     />

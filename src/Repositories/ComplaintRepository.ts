@@ -20,7 +20,7 @@ const addComplaint = async (
         reported_by=@reported_by,
         title=@title,
         body=@body,
-        sts_pk="A";
+        sts_pk="P";
          `,
       payload
     );
@@ -31,8 +31,6 @@ const addComplaint = async (
           "src/Storage/Files/Complaints/",
           file
         );
-
-        console.log(`files_res`, file_res);
 
         if (!file_res.success) {
           con.Rollback();
@@ -140,28 +138,41 @@ const addComplaintLog = async (
 
     payload.encoder_pk = user_pk;
 
-    const sql_add_complaint_log = await con.Insert(
-      `
-              INSERT into complaint_log SET
-              complaint_pk=@complaint_pk,
-              notes=@notes,
-              sts_pk=@sts_pk,
-              encoder_pk=@encoder_pk;
-               `,
+    const sql_update_complaint_status = await con.Modify(
+      `UPDATE complaint set sts_pk = @sts_pk where complaint_pk = @complaint_pk`,
       payload
     );
 
-    if (sql_add_complaint_log.affectedRows > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "The complaint update has been saved successfully!",
-      };
+    if (sql_update_complaint_status) {
+      const sql_add_complaint_log = await con.Insert(
+        `
+                INSERT into complaint_log SET
+                complaint_pk=@complaint_pk,
+                notes=@notes,
+                sts_pk=@sts_pk,
+                encoder_pk=@encoder_pk;
+                 `,
+        payload
+      );
+
+      if (sql_add_complaint_log.affectedRows > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "The complaint update has been saved successfully!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message: "No affected rows while saving the complaint update",
+        };
+      }
     } else {
       con.Rollback();
       return {
         success: false,
-        message: "No affected rows while saving the complaint update",
+        message: "No affected rows while updating the complaint status",
       };
     }
   } catch (error) {
@@ -174,41 +185,39 @@ const addComplaintLog = async (
   }
 };
 
-const addComplaintMessage = async (
-  payload: ComplaintMessageModel,
-  user_pk: number
+const getComplaintLogTable = async (
+  complaint_pk: number
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
-    await con.BeginTransaction();
-
-    payload.sent_by = user_pk;
-
-    const sql_add_complaint_msg = await con.Insert(
-      `
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `,
-      payload
+    const log_table: Array<ComplaintLogModel> = await con.Query(
+      ` SELECT * FROM complaint_log WHERE complaint_pk = @complaint_pk order by encoded_at desc`,
+      {
+        complaint_pk: complaint_pk,
+      }
     );
 
-    if (sql_add_complaint_msg.affectedRows > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "The complaint has been updated successfully!",
-      };
-    } else {
-      con.Rollback();
-      return {
-        success: false,
-        message: "No affected rows while updating the complaint",
-      };
+    for (const log of log_table) {
+      log.user = await con.QuerySingle(
+        `Select * from vw_users where user_pk = @user_pk`,
+        {
+          user_pk: log.encoder_pk,
+        }
+      );
+
+      log.status = await con.QuerySingle(
+        `Select * from status where sts_pk = @sts_pk`,
+        {
+          sts_pk: log.sts_pk,
+        }
+      );
     }
+
+    return {
+      success: true,
+      data: log_table,
+    };
   } catch (error) {
-    await con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -248,6 +257,13 @@ const getSingleComplaint = async (
     );
     single_complaint.user.pic = await GetUploadedImage(
       single_complaint.user.pic
+    );
+
+    single_complaint.status = await con.QuerySingle(
+      `Select * from status where sts_pk = @sts_pk;`,
+      {
+        sts_pk: single_complaint.sts_pk,
+      }
     );
 
     con.Commit();
@@ -313,34 +329,75 @@ const getComplaintTable = async (
   }
 };
 
-const getComplaintMessage = async (
-  complaint_pk: string
+//messages
+
+const addComplaintMessage = async (
+  payload: ComplaintMessageModel
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const data: Array<ComplaintMessageModel> = await con.Query(
-      `SELECT * from complaint where complaint_pk=@complaint_pk`,
+    const sql_add_complaint_msg = await con.Insert(
+      `
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `,
+      payload
+    );
+
+    if (sql_add_complaint_msg.affectedRows > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The complaint has been updated successfully!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the complaint",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getComplaintMessage = async (
+  complaint_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const table_messages: Array<ComplaintMessageModel> = await con.Query(
+      ` SELECT * FROM complaint_message WHERE  complaint_pk =@complaint_pk;`,
       {
         complaint_pk: complaint_pk,
       }
     );
-    for (const file of data) {
-      const sql_get_pic = await con.QuerySingle(
-        `SELECT pic FROM resident WHERE user_pk=${file?.sent_by} LIMIT 1`,
-        null
+
+    for (const message of table_messages) {
+      message.user = await con.QuerySingle(
+        `SELECT * from vw_users where user_pk = @user_pk`,
+        {
+          user_pk: message.sent_by,
+        }
       );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      message.user.pic = await GetUploadedImage(message.user.pic);
     }
 
-    con.Commit();
     return {
       success: true,
-      data: data,
+      data: table_messages,
     };
   } catch (error) {
-    await con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -357,4 +414,5 @@ export default {
   getSingleComplaint,
   getComplaintTable,
   getComplaintMessage,
+  getComplaintLogTable,
 };
