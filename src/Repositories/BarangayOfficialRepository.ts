@@ -59,7 +59,7 @@ const getBrgyOfficialDataTable = async (
       SELECT * FROM 
       (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
-      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       WHERE 
       (first_name like concat('%',@search,'%')
       OR last_name like concat('%',@search,'%')
@@ -103,8 +103,7 @@ const getBrgyOfficialDataTable = async (
   }
 };
 
-const getBrgyOfficialList= async (
-): Promise<ResponseModel> => {
+const getBrgyOfficialList = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -114,12 +113,11 @@ const getBrgyOfficialList= async (
       SELECT * FROM 
       (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
-      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       `,
       null
     );
 
-    
     for (const admin of data) {
       admin.pic = await GetUploadedImage(admin.pic);
     }
@@ -127,8 +125,7 @@ const getBrgyOfficialList= async (
     con.Commit();
     return {
       success: true,
-      data:  data,
-   
+      data: data,
     };
   } catch (error) {
     await con.Rollback();

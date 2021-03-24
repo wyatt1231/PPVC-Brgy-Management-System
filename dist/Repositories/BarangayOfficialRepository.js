@@ -53,7 +53,7 @@ const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, 
       SELECT * FROM 
       (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
-      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       WHERE 
       (first_name like concat('%',@search,'%')
       OR last_name like concat('%',@search,'%')
@@ -98,7 +98,7 @@ const getBrgyOfficialList = () => __awaiter(void 0, void 0, void 0, function* ()
       SELECT * FROM 
       (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
-      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       `, null);
         for (const admin of data) {
             admin.pic = yield useFileUploader_1.GetUploadedImage(admin.pic);

@@ -46,14 +46,6 @@ const ComplaintController = async (app: Express): Promise<void> => {
   );
 
   router.post(
-    "/getComplaintMessage",
-    Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const complaint_pk: string = req.body.complaint_pk;
-      res.json(await ComplaintRepository.getComplaintMessage(complaint_pk));
-    }
-  );
-  router.post(
     "/getComplaintTable",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -61,6 +53,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.getComplaintTable(reported_by));
     }
   );
+<<<<<<< HEAD
   router.post(
     "/getComplaintList",
     Authorize("admin,resident"),
@@ -69,6 +62,10 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
+=======
+
+  // LOGS
+>>>>>>> 65a179c6640283dcea4c4aa81affaa0bc21c66b7
   router.post(
     "/addComplaintLog",
     Authorize("admin,resident"),
@@ -79,13 +76,31 @@ const ComplaintController = async (app: Express): Promise<void> => {
   );
 
   router.post(
+    "/getComplaintLogTable",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: number = req.body.complaint_pk;
+      res.json(await ComplaintRepository.getComplaintLogTable(complaint_pk));
+    }
+  );
+
+  //MESSAGES
+  router.post(
     "/addComplaintMessage",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: ComplaintMessageModel = req.body;
-      res.json(
-        await ComplaintRepository.addComplaintMessage(payload, req.user_pk)
-      );
+      payload.sent_by = req.user_pk;
+      res.json(await ComplaintRepository.addComplaintMessage(payload));
+    }
+  );
+
+  router.post(
+    "/getComplaintMessage",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: number = req.body.complaint_pk;
+      res.json(await ComplaintRepository.getComplaintMessage(complaint_pk));
     }
   );
 

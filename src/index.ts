@@ -6,6 +6,7 @@ import { ControllerRegistry } from "./Registry/ControllerRegistry";
 import path from "path";
 import http from "http";
 import { Server } from "socket.io";
+import SocketRegistry from "./Registry/SocketRegistry";
 export const app = express();
 
 const main = async () => {
@@ -24,6 +25,7 @@ const main = async () => {
   });
 
   ControllerRegistry(app);
+  SocketRegistry(socketServer);
 
   if (process.env.NODE_ENV === "production") {
     app.use(

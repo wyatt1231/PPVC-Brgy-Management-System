@@ -18,7 +18,11 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
+        const zxc = yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
+      WHERE table_schema = 'sql6400894';`, null);
+        console.log(`zxc`, zxc);
         const user = yield con.QuerySingle(`SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`, payload);
+        console.log(`user`, user);
         if (user) {
             if (user.allow_login === "n") {
                 return {
@@ -68,7 +72,7 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const user_data = yield con.QuerySingle(`  SELECT u.user_pk,u.user_type,u.full_name FROM USER u LEFT JOIN resident r ON r.user_pk=u.user_pk
+        const user_data = yield con.QuerySingle(`  SELECT u.user_pk,u.user_type,u.full_name FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `, {
             user_pk,

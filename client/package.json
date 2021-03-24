@@ -67,6 +67,7 @@
     "redux": "^4.0.5",
     "save": "^2.4.0",
     "simple-react-calendar": "^2.2.8",
+    "socket.io-client": "^4.0.0",
     "styled-components": "^5.2.1",
     "typeface-mitr": "^1.1.13",
     "typeface-noto-sans": "^1.1.13",

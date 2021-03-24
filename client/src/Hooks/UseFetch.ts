@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import qs from "qs";
 import {
-  APP_NAME,
   getAccessToken,
   getRefreshToken,
   removeToken,

@@ -36,6 +36,32 @@ const ComplaintReducer = (
       };
     }
 
+    case "selected_complaint_log": {
+      return {
+        ...state,
+        selected_complaint_log: action.selected_complaint_log,
+      };
+    }
+    case "fetch_selected_complaint_log": {
+      return {
+        ...state,
+        fetch_selected_complaint_log: action.fetch_selected_complaint_log,
+      };
+    }
+
+    case "complaint_messages": {
+      return {
+        ...state,
+        complaint_messages: action.complaint_messages,
+      };
+    }
+    case "fetch_complaint_messages": {
+      return {
+        ...state,
+        fetch_complaint_messages: action.fetch_complaint_messages,
+      };
+    }
+
     default:
       return state;
   }

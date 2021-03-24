@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useState } from "react";
 import { useSelector } from "react-redux";
+import CircularLoadingProgress from "../../Component/CircularLoadingProgress";
 import { RootStore } from "../../Services/Store";
 import Body from "./Body";
 import Header from "./Header";
@@ -84,8 +85,9 @@ const generateNavLinks = (user: any): Array<IPageNavLinks> => {
 
 const Layout = memo(({ children }) => {
   const user = useSelector((reducers: RootStore) => reducers.UserReducer.user);
-
-  console.log(`user`, user);
+  const userLoading = useSelector(
+    (reducers: RootStore) => reducers.UserReducer.userLoading
+  );
 
   const [isOpenMobileHeader, setIsOpenMobileHeader] = useState(false);
 
@@ -103,7 +105,9 @@ const Layout = memo(({ children }) => {
     setIsOpenMobileSidebar((prevSidebar) => !prevSidebar);
   }, []);
 
-  return (
+  return userLoading ? (
+    <CircularLoadingProgress style={{ height: `100vh`, width: `100vw` }} />
+  ) : (
     <>
       <Header
         PageNavLinks={generateNavLinks(user)}

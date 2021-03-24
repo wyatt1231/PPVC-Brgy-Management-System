@@ -1,3 +1,4 @@
+import { StatusMasterModel } from "./StatusMasterModel";
 import { UserModel } from "./UserModels";
 
 export interface ComplaintModel {
@@ -10,6 +11,7 @@ export interface ComplaintModel {
   upload_files: Array<any>;
   complaint_file?: Array<ComplaintFilesModel>;
   user: UserModel;
+  status?: StatusMasterModel;
 }
 
 export interface ComplaintFilesModel {

@@ -5,9 +5,11 @@ import DataTableBrgyOfficialAdminView from "../Views/AdminViews/BrgyOfficialAdmi
 import AddCoAdminView from "../Views/AdminViews/CoAdminView/AddCoAdminView";
 import DataTableCoAdminView from "../Views/AdminViews/CoAdminView/DataTableCoAdminView";
 import DtComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/DtComplaintAdminView";
+import ManageComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/ManageComplaintAdminView";
 import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
+// import DataTableResidentAdminView from "../Views/AdminView";
 
 const SysAdminRoutes = () => {
   return (
@@ -45,6 +47,10 @@ const SysAdminRoutes = () => {
 
       <Route path="/admin/complaint" exact>
         <DtComplaintAdminView />
+      </Route>
+
+      <Route path="/admin/complaint/:complaint_pk" exact>
+        <ManageComplaintAdminView />
       </Route>
     </Switch>
   );

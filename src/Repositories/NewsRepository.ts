@@ -53,7 +53,7 @@ const getSingleNewsWithPhoto = async (
       (
         SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
         LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.news_pk=@news_pk order by n.encoded_at desc) tmp;
       `,
       {
@@ -97,7 +97,7 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
       (
         SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic,COUNT( nr.reaction)likes FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
         LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" GROUP BY n.news_pk ORDER BY n.encoded_at DESC) tmp;
       `,
@@ -150,7 +150,7 @@ const getNewsDataTable = async (): Promise<ResponseModel> => {
       (
         SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
         LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk order by n.encoded_at desc) tmp;
       `,
       null
