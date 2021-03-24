@@ -67,6 +67,11 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
+<<<<<<< HEAD
+=======
+
+  // LOGS
+>>>>>>> 59191f6 (try)
   router.post(
     "/addComplaintLog",
     Authorize("admin,resident"),

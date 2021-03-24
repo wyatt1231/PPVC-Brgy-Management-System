@@ -251,6 +251,7 @@ const getComplaintLogTable = (complaint_pk) =>
   __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
+<<<<<<< HEAD
       const log_table = yield con.Query(
         ` SELECT * FROM complaint_log WHERE complaint_pk = @complaint_pk order by encoded_at desc`,
         {
@@ -281,6 +282,34 @@ const getComplaintLogTable = (complaint_pk) =>
         success: false,
         message: useErrorMessage_1.ErrorMessage(error),
       };
+=======
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
+            complaint_pk: complaint_pk,
+        });
+        for (var file of data) {
+            file.complaint_file = yield con.Query(`
+            select * from complaint_file where complaint_pk=@complaint_pk
+          `, {
+                complaint_pk: complaint_pk,
+            });
+            file.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+                user_pk: file.reported_by,
+            });
+            file.user.pic = yield useFileUploader_1.GetUploadedImage(file.user.pic);
+        }
+        // single_complaint.status = await con.QuerySingle(
+        //   `Select * from status where sts_pk = @sts_pk;`,
+        //   {
+        //     sts_pk: single_complaint.sts_pk,
+        //   }
+        // );
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+>>>>>>> 59191f6 (try)
     }
   });
 const getSingleComplaint = (complaint_pk) =>
@@ -374,6 +403,7 @@ const getComplaintTable = (reported_by) =>
         message: useErrorMessage_1.ErrorMessage(error),
       };
     }
+<<<<<<< HEAD
   });
 const getComplaintList = (reported_by) =>
   __awaiter(void 0, void 0, void 0, function* () {
@@ -418,6 +448,21 @@ const getComplaintMessage = (complaint_pk) =>
         ` SELECT * FROM complaint_message WHERE  complaint_pk =@complaint_pk;`,
         {
           complaint_pk: complaint_pk,
+=======
+});
+const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const table_messages = yield con.Query(`SELECT * from complaint_message where complaint_pk=@complaint_pk`, {
+            complaint_pk: complaint_pk,
+        });
+        for (const message of table_messages) {
+            message.user = yield con.QuerySingle(`SELECT * from vw_users where user_pk = @user_pk`, {
+                user_pk: message.sent_by,
+            });
+            message.user.pic = yield useFileUploader_1.GetUploadedImage(message.user.pic);
+>>>>>>> 59191f6 (try)
         }
       );
       for (const message of table_messages) {

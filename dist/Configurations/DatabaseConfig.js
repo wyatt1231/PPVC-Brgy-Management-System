@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.query = exports.DatabaseConnection = exports.DatabaseConfig = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
 <<<<<<< HEAD
+<<<<<<< HEAD
 let DatabaseConfig = () => {
     if (process.env.NODE_ENV === "production") {
         // return mysql.createPool({
@@ -44,6 +45,8 @@ exports.DatabaseConfig = DatabaseConfig;
 //   database: "heroku_fcd8378bc75cb9b",
 //   port: 3306,
 // });
+=======
+>>>>>>> 59191f6 (try)
 exports.DatabaseConfig = mysql2_1.default.createPool({
     host: "localhost",
     user: "root",
@@ -51,7 +54,10 @@ exports.DatabaseConfig = mysql2_1.default.createPool({
     database: "bms",
     port: 3309,
 });
+<<<<<<< HEAD
 >>>>>>> 039d6da (posts and complaints changes)
+=======
+>>>>>>> 59191f6 (try)
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
         exports.DatabaseConfig().getConnection((error, connection) => {
