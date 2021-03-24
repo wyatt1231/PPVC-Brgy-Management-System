@@ -7,6 +7,7 @@ import DataTableCoAdminView from "../Views/AdminViews/CoAdminView/DataTableCoAdm
 import DtComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/DtComplaintAdminView";
 import ManageComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/ManageComplaintAdminView";
 import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
+import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
 // import DataTableResidentAdminView from "../Views/AdminView";
@@ -43,6 +44,10 @@ const SysAdminRoutes = () => {
 
       <Route path="/admin/news" exact>
         <DtNewsAdminView />
+      </Route>
+
+      <Route path="/admin/post" exact>
+        <DtPostAdminView />
       </Route>
 
       <Route path="/admin/complaint" exact>

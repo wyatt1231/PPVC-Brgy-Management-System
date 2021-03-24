@@ -1,4 +1,3 @@
-import { PostsFileModel } from "./PostsFileModel";
 import { StatusMasterModel } from "./StatusMasterModel";
 import { UserModel } from "./UserModels";
 
@@ -30,4 +29,23 @@ export interface PostCommentModel {
   body?: string;
   encoded_at?: string | Date;
   user?: UserModel;
+}
+
+export interface PostReactionModel {
+  react_pk?: number;
+  user_pk?: number;
+  posts_pk?: number;
+  reaction?: string;
+  encoded_at?: Date;
+}
+
+export interface PostsFileModel {
+  posts_file_pk?: number;
+  posts_pk?: number;
+  file_path?: string;
+  file_name?: string;
+  mimetype?: string;
+  encoded_at?: string | Date;
+  encoder_pk?: number;
+  uploaded_file?: any;
 }

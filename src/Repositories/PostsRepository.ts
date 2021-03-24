@@ -3,7 +3,7 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
-import { PostsModel } from "../Models/PostsModel";
+import { PostCommentModel, PostsModel } from "../Models/PostsModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
@@ -11,45 +11,42 @@ import { PostsFileModel } from "../Models/PostsFileModel";
 const getPosts = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
-    await con.BeginTransaction();
-
-    const data: Array<PostsModel> = await con.Query(
+    const posts: Array<PostsModel> = await con.Query(
       `
-        SELECT * FROM 
-      (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
-        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
-        LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
-        `,
+      SELECT * FROM posts`,
       null
     );
-    for (const file of data) {
-      const sql_get_pic = await con.QuerySingle(
-        `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
-        null
-      );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-      console.error(`error`, file.user_pk);
-    }
-    for (const file of data) {
-      file.upload_files = await con.Query(
-        `
-        select * from posts_file where posts_pk=@posts_pk
-        `,
+
+    for (const post of posts) {
+      post.user = await con.QuerySingle(
+        `select * from vw_users where user_pk = @user_pk;`,
         {
-          posts_pk: file.posts_pk,
+          user_pk: post.encoder_pk,
+        }
+      );
+
+      post.user.pic = await GetUploadedImage(post.user.pic);
+
+      post.status = await con.QuerySingle(
+        `select * from status where sts_pk = @sts_pk;`,
+        {
+          sts_pk: post.sts_pk,
+        }
+      );
+
+      post.files = await con.Query(
+        `select * from posts_file where posts_pk=@posts_pk`,
+        {
+          posts_pk: post.posts_pk,
         }
       );
     }
 
-    con.Commit();
     return {
       success: true,
-      data: data,
+      data: posts,
     };
   } catch (error) {
-    await con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -136,6 +133,7 @@ const getPostsReaction = async (): Promise<ResponseModel> => {
     };
   }
 };
+
 const getPostsComments = async (posts_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -251,6 +249,7 @@ const addPosts = async (
     };
   }
 };
+
 const addPostComment = async (
   payload: PostsCommentModel,
   user_pk: number
@@ -292,6 +291,7 @@ const addPostComment = async (
     };
   }
 };
+
 const addPostReaction = async (
   payload: PostReactionModel,
   user_pk: number
@@ -360,6 +360,79 @@ const addPostReaction = async (
     };
   }
 };
+
+//ADMIN POSTS
+
+const getPostReactionsAdmin = async (
+  posts_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `
+       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+        `,
+      {
+        posts_pk: posts_pk,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+//ADMIN REACTIONS
+
+const getPostCommentsAdmin = async (
+  posts_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const comments: Array<PostCommentModel> = await con.Query(
+      `
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+        `,
+      {
+        posts_pk: posts_pk,
+      }
+    );
+
+    for (const comment of comments) {
+      comment.user = await con.QuerySingle(
+        `select * from vw_users where user_pk = @user_pk;`,
+        {
+          user_pk: comment.user_pk,
+        }
+      );
+      comment.user.pic = await GetUploadedImage(comment.user.pic);
+    }
+
+    return {
+      success: true,
+      data: comments,
+    };
+  } catch (error) {
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   addPosts,
   getPosts,
@@ -368,4 +441,6 @@ export default {
   addPostComment,
   getPostsReaction,
   getPostsComments,
+  getPostReactionsAdmin,
+  getPostCommentsAdmin,
 };
