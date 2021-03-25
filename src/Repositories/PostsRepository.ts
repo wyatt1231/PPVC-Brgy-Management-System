@@ -3,10 +3,11 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
-import { PostsModel } from "../Models/PostsModel";
+import { PostCommentModel, PostFilesModel, PostsModel } from "../Models/PostsModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
+
 
 const getPosts = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -57,6 +58,53 @@ const getPosts = async (): Promise<ResponseModel> => {
     };
   }
 };
+
+// const getPosts = async (): Promise<ResponseModel> => {
+//   const con = await DatabaseConnection();
+//   try {
+//     const posts: Array<PostsModel> = await con.Query(
+//       `
+//       SELECT * FROM posts`,
+//       null
+//     );
+
+//     for (const post of posts) {
+//       post.user = await con.QuerySingle(
+//         `select * from vw_users where user_pk = @user_pk;`,
+//         {
+//           user_pk: post.encoder_pk,
+//         }
+//       );
+
+//       post.user.pic = await GetUploadedImage(post.user.pic);
+
+//       post.status = await con.QuerySingle(
+//         `select * from status where sts_pk = @sts_pk;`,
+//         {
+//           sts_pk: post.sts_pk,
+//         }
+//       );
+
+//       post.files = await con.Query(
+//         `select * from posts_file where posts_pk=@posts_pk`,
+//         {
+//           posts_pk: post.posts_pk,
+//         }
+//       );
+//     }
+
+//     return {
+//       success: true,
+//       data: posts,
+//     };
+//   } catch (error) {
+//     console.error(`error`, error);
+//     return {
+//       success: false,
+//       message: ErrorMessage(error),
+//     };
+//   }
+// };
 
 const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -136,6 +184,7 @@ const getPostsReaction = async (): Promise<ResponseModel> => {
     };
   }
 };
+
 const getPostsComments = async (posts_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -193,7 +242,7 @@ const addPosts = async (
 
     if (sql_add_posts.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/Post/", file);
+        const file_res = await UploadFile("src/Storage/Files/Posts/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -201,7 +250,7 @@ const addPosts = async (
           return file_res;
         }
 
-        const posts_file_payload: PostsFileModel = {
+        const posts_file_payload: PostFilesModel = {
           file_path: file_res.data.path,
           file_name: file_res.data.name,
           mimetype: file_res.data.mimetype,
@@ -261,7 +310,7 @@ const addPostComment = async (
 
     payload.user_pk = user_pk;
 
-    const sql_add_post_comment = await con.Modify(
+    const sql_add_post_comment = await con.Insert(
       `INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
@@ -269,7 +318,8 @@ const addPostComment = async (
       payload
     );
 
-    if (sql_add_post_comment > 0) {
+    if (sql_add_post_comment.insertedId > 0) {
+    
       con.Commit();
       return {
         success: true,
@@ -292,6 +342,7 @@ const addPostComment = async (
     };
   }
 };
+
 const addPostReaction = async (
   payload: PostReactionModel,
   user_pk: number
@@ -360,6 +411,79 @@ const addPostReaction = async (
     };
   }
 };
+
+//ADMIN POSTS
+
+const getPostReactionsAdmin = async (
+  posts_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<PostsModel> = await con.Query(
+      `
+       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+        `,
+      {
+        posts_pk: posts_pk,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+//ADMIN REACTIONS
+
+const getPostCommentsAdmin = async (
+  posts_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const comments: Array<PostCommentModel> = await con.Query(
+      `
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+        `,
+      {
+        posts_pk: posts_pk,
+      }
+    );
+
+    for (const comment of comments) {
+      comment.user = await con.QuerySingle(
+        `select * from vw_users where user_pk = @user_pk;`,
+        {
+          user_pk: comment.user_pk,
+        }
+      );
+      comment.user.pic = await GetUploadedImage(comment.user.pic);
+    }
+
+    return {
+      success: true,
+      data: comments,
+    };
+  } catch (error) {
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   addPosts,
   getPosts,
@@ -368,4 +492,6 @@ export default {
   addPostComment,
   getPostsReaction,
   getPostsComments,
+  getPostReactionsAdmin,
+  getPostCommentsAdmin,
 };

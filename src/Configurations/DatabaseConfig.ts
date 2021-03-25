@@ -2,6 +2,7 @@ import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
 import { PaginationModel } from "../Models/PaginationModel";
 
+<<<<<<< HEAD
 export let DatabaseConfig = (): mysql.Pool => {
   if (process.env.NODE_ENV === "production") {
     // return mysql.createPool({
@@ -24,12 +25,29 @@ export let DatabaseConfig = (): mysql.Pool => {
     return mysql.createPool({
       host: "127.0.0.1",
       user: "root",
-      password: "root sa",
+      password: "rootsa",
       database: "bms",
       port: 3309,
     });
   }
 };
+=======
+// export const DatabaseConfig = mysql.createPool({
+//   host: "us-cdbr-east-03.cleardb.com",
+//   user: "bed41c71c3944a",
+//   password: "f1ec4cc8",
+//   database: "heroku_fcd8378bc75cb9b",
+//   port: 3306,
+// });
+
+export const DatabaseConfig = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "rootsa",
+  database: "bms",
+  port: 3309,
+});
+>>>>>>> 039d6da (posts and complaints changes)
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
   return new Promise((resolve, reject) => {

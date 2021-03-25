@@ -48,9 +48,15 @@ const PostsController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
       const payload: PostsModel = req.body;
-      const files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      res.json(await PostsRepository.addPosts(payload, files, req.user_pk));
+      res.json(
+        await PostsRepository.addPosts(
+          payload,
+          files instanceof Array ? files : [files],req.user_pk
+        )
+      );
+    
     }
   );
 
@@ -71,7 +77,7 @@ const PostsController = async (app: Express): Promise<void> => {
     async (req: Request & UserClaims, res: Response) => {
       const payload: PostsCommentModel = req.body;
       try {
-        res.json(await PostsRepository.addPostComment(payload,req.user_pk));
+        res.json(await PostsRepository.addPostComment(payload, req.user_pk));
       } catch (error) {
         res.json(error);
       }
@@ -82,11 +88,31 @@ const PostsController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: PostReactionModel = req.body;
- 
-        res.json(await PostsRepository.addPostReaction(payload, req.user_pk));
-  
+
+      res.json(await PostsRepository.addPostReaction(payload, req.user_pk));
     }
   );
+
+  //reactions
+  router.post(
+    "/getPostReactionsAdmin",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const posts_pk: number = req.body.posts_pk;
+      res.json(await PostsRepository.getPostReactionsAdmin(posts_pk));
+    }
+  );
+
+  //comments
+  router.post(
+    "/getPostCommentsAdmin",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const posts_pk: number = req.body.posts_pk;
+      res.json(await PostsRepository.getPostCommentsAdmin(posts_pk));
+    }
+  );
+
   app.use("/api/posts/", router);
 };
 

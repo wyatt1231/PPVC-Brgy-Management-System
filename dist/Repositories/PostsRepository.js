@@ -52,6 +52,47 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
+// const getPosts = async (): Promise<ResponseModel> => {
+//   const con = await DatabaseConnection();
+//   try {
+//     const posts: Array<PostsModel> = await con.Query(
+//       `
+//       SELECT * FROM posts`,
+//       null
+//     );
+//     for (const post of posts) {
+//       post.user = await con.QuerySingle(
+//         `select * from vw_users where user_pk = @user_pk;`,
+//         {
+//           user_pk: post.encoder_pk,
+//         }
+//       );
+//       post.user.pic = await GetUploadedImage(post.user.pic);
+//       post.status = await con.QuerySingle(
+//         `select * from status where sts_pk = @sts_pk;`,
+//         {
+//           sts_pk: post.sts_pk,
+//         }
+//       );
+//       post.files = await con.Query(
+//         `select * from posts_file where posts_pk=@posts_pk`,
+//         {
+//           posts_pk: post.posts_pk,
+//         }
+//       );
+//     }
+//     return {
+//       success: true,
+//       data: posts,
+//     };
+//   } catch (error) {
+//     console.error(`error`, error);
+//     return {
+//       success: false,
+//       message: ErrorMessage(error),
+//     };
+//   }
+// };
 const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -154,7 +195,7 @@ const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, 
          encoder_pk=@encoder_pk;`, payload);
         if (sql_add_posts.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Post/", file);
+                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Posts/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -208,11 +249,11 @@ const addPostComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
-        const sql_add_post_comment = yield con.Modify(`INSERT INTO posts_comment SET
+        const sql_add_post_comment = yield con.Insert(`INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
       body=@body;`, payload);
-        if (sql_add_post_comment > 0) {
+        if (sql_add_post_comment.insertedId > 0) {
             con.Commit();
             return {
                 success: true,
@@ -293,6 +334,59 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
+//ADMIN POSTS
+const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`
+       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+        `, {
+            posts_pk: posts_pk,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+//ADMIN REACTIONS
+const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        const comments = yield con.Query(`
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+        `, {
+            posts_pk: posts_pk,
+        });
+        for (const comment of comments) {
+            comment.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
+                user_pk: comment.user_pk,
+            });
+            comment.user.pic = yield useFileUploader_2.GetUploadedImage(comment.user.pic);
+        }
+        return {
+            success: true,
+            data: comments,
+        };
+    }
+    catch (error) {
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addPosts,
     getPosts,
@@ -301,5 +395,7 @@ exports.default = {
     addPostComment,
     getPostsReaction,
     getPostsComments,
+    getPostReactionsAdmin,
+    getPostCommentsAdmin,
 };
 //# sourceMappingURL=PostsRepository.js.map

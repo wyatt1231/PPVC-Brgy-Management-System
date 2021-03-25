@@ -34,13 +34,8 @@ const generateNavLinks = (user: any): Array<IPageNavLinks> => {
         hasSubLinks: false,
       },
       {
-        to: "/admin/resident",
-        text: "Residents",
-        hasSubLinks: false,
-      },
-      {
-        to: "/admin/brgy-official",
-        text: "Brgy. Officials",
+        to: "/admin/post",
+        text: "Posts",
         hasSubLinks: false,
       },
       {
@@ -51,6 +46,16 @@ const generateNavLinks = (user: any): Array<IPageNavLinks> => {
       {
         to: "/admin/complaint",
         text: "Complaints",
+        hasSubLinks: false,
+      },
+      {
+        to: "/admin/resident",
+        text: "Residents",
+        hasSubLinks: false,
+      },
+      {
+        to: "/admin/brgy-official",
+        text: "Brgy. Officials",
         hasSubLinks: false,
       },
       {
