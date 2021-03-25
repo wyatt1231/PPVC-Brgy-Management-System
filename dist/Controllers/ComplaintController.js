@@ -44,10 +44,7 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
         const reported_by = req.body.reported_by;
         res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
     }));
-<<<<<<< HEAD
-=======
     // LOGS
->>>>>>> 59191f6 (try)
     router.post("/addComplaintLog", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ComplaintRepository_1.default.addComplaintLog(payload, req.user_pk));

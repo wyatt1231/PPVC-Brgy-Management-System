@@ -302,12 +302,12 @@ const getSingleComplaint = async (
       }
   
 
-    // single_complaint.status = await con.QuerySingle(
-    //   `Select * from status where sts_pk = @sts_pk;`,
-    //   {
-    //     sts_pk: single_complaint.sts_pk,
-    //   }
-    // );
+    file.status = await con.QuerySingle(
+      `Select * from status where sts_pk = @sts_pk;`,
+      {
+        sts_pk: file.sts_pk,
+      }
+    );
 
     con.Commit();
     return {
@@ -406,7 +406,6 @@ const getComplaintList = async (reported_by: string): Promise<ResponseModel> => 
       message: ErrorMessage(error),
     };
   }
-<<<<<<< HEAD
 }
 
 const getComplaintMessage = async (
@@ -416,18 +415,6 @@ const getComplaintMessage = async (
   try {
     const table_messages: Array<ComplaintMessageModel> = await con.Query(
       ` SELECT * FROM complaint_message WHERE  complaint_pk =@complaint_pk;`,
-=======
-};
-const getComplaintMessage = async (
-  complaint_pk: string
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const table_messages: Array<ComplaintMessageModel> = await con.Query(
-      `SELECT * from complaint_message where complaint_pk=@complaint_pk`,
->>>>>>> 59191f6 (try)
       {
         complaint_pk: complaint_pk,
       }

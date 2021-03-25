@@ -3,16 +3,10 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { UploadFile } from "../Hooks/useFileUploader";
 import { GetUploadedImage } from "../Hooks/useFileUploader";
 import { ResponseModel } from "../Models/ResponseModels";
-<<<<<<< HEAD
 import { PostCommentModel, PostFilesModel, PostsModel } from "../Models/PostsModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
-=======
-import {PostFilesModel, PostsModel} from '../Models/PostsModel'
-import { PostReactionModel } from "../Models/PostReactionModel";
-import {PostsCommentModel} from '../Models/PostsCommentModel'
->>>>>>> 039d6da (posts and complaints changes)
 
 
 const getPosts = async (): Promise<ResponseModel> => {
