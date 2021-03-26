@@ -8,7 +8,6 @@ import ComplaintRepository from "../Repositories/ComplaintRepository";
 
 const ComplaintController = async (app: Express): Promise<void> => {
   const router = Router();
-
   router.post(
     "/addComplaint",
     Authorize("admin,resident"),
@@ -49,8 +48,15 @@ const ComplaintController = async (app: Express): Promise<void> => {
     "/getComplaintTable",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
+      res.json(await ComplaintRepository.getComplaintTable());
+    }
+  );
+  router.post(
+    "/getComplaintList",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
       const reported_by: string = req.body.reported_by;
-      res.json(await ComplaintRepository.getComplaintTable(reported_by));
+      res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
 

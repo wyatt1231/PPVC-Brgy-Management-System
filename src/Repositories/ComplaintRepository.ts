@@ -18,7 +18,7 @@ const addComplaint = async (
       `
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        title=@title,
+        title=@subject,
         body=@body,
         sts_pk="P";
          `,
@@ -87,6 +87,45 @@ const addComplaint = async (
   }
 };
 
+const addComplaintMessage = async (
+  payload: ComplaintMessageModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_add_complaint_msg = await con.Insert(
+      `
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `,
+      payload
+    );
+
+    if (sql_add_complaint_msg.affectedRows > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The complaint has been updated successfully!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the complaint",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 const updateComplaint = async (
   payload: ComplaintModel
 ): Promise<ResponseModel> => {
@@ -213,12 +252,14 @@ const getComplaintLogTable = async (
       );
     }
 
+    con.Commit();
     return {
       success: true,
       data: log_table,
     };
   } catch (error) {
     console.error(`error`, error);
+    con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -233,43 +274,43 @@ const getSingleComplaint = async (
   try {
     await con.BeginTransaction();
 
-    const single_complaint: ComplaintModel = await con.QuerySingle(
-      `Select * from complaint where complaint_pk = @complaint_pk;`,
+    const data: ComplaintModel = await con.QuerySingle(
+      `SELECT * from complaint where complaint_pk = @complaint_pk`,
       {
         complaint_pk: complaint_pk,
       }
     );
 
-    single_complaint.complaint_file = await con.Query(
+    console.log(`complaints`, data);
+
+    data.complaint_file = await con.Query(
       `
-        select * from complaint_file where complaint_pk=@complaint_pk
-      `,
+            select * from complaint_file where complaint_pk=@complaint_pk
+          `,
       {
         complaint_pk: complaint_pk,
       }
     );
 
-    single_complaint.user = await con.QuerySingle(
+    data.user = await con.QuerySingle(
       `Select * from vw_users where user_pk = @user_pk`,
       {
-        user_pk: single_complaint.reported_by,
+        user_pk: data.reported_by,
       }
     );
-    single_complaint.user.pic = await GetUploadedImage(
-      single_complaint.user.pic
-    );
+    data.user.pic = await GetUploadedImage(data.user.pic);
 
-    single_complaint.status = await con.QuerySingle(
+    data.status = await con.QuerySingle(
       `Select * from status where sts_pk = @sts_pk;`,
       {
-        sts_pk: single_complaint.sts_pk,
+        sts_pk: data.sts_pk,
       }
     );
 
     con.Commit();
     return {
       success: true,
-      data: single_complaint,
+      data: data,
     };
   } catch (error) {
     await con.Rollback();
@@ -281,21 +322,17 @@ const getSingleComplaint = async (
   }
 };
 
-const getComplaintTable = async (
-  reported_by: string
-): Promise<ResponseModel> => {
+const getComplaintTable = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const complaint_table: Array<ComplaintModel> = await con.Query(
-      `Select * from complaint`,
-      {
-        reported_by: reported_by,
-      }
+    const data: Array<ComplaintModel> = await con.Query(
+      `SELECT * FROM complaint `,
+      null
     );
 
-    for (const complaint of complaint_table) {
+    for (const complaint of data) {
       complaint.complaint_file = await con.Query(
         `
         select * from complaint_file where complaint_pk=@complaint_pk
@@ -317,7 +354,7 @@ const getComplaintTable = async (
     con.Commit();
     return {
       success: true,
-      data: complaint_table,
+      data: data,
     };
   } catch (error) {
     await con.Rollback();
@@ -328,39 +365,35 @@ const getComplaintTable = async (
     };
   }
 };
-
-//messages
-
-const addComplaintMessage = async (
-  payload: ComplaintMessageModel
+const getComplaintList = async (
+  reported_by: string
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const sql_add_complaint_msg = await con.Insert(
-      `
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `,
-      payload
+    const data: Array<ComplaintModel> = await con.Query(
+      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
+      {
+        reported_by: reported_by,
+      }
     );
-
-    if (sql_add_complaint_msg.affectedRows > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "The complaint has been updated successfully!",
-      };
-    } else {
-      con.Rollback();
-      return {
-        success: false,
-        message: "No affected rows while updating the complaint",
-      };
+    for (const file of data) {
+      file.complaint_file = await con.Query(
+        `
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `,
+        {
+          complaint_pk: file.complaint_pk,
+        }
+      );
     }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
@@ -393,12 +426,15 @@ const getComplaintMessage = async (
       message.user.pic = await GetUploadedImage(message.user.pic);
     }
 
+    con.Commit();
+
     return {
       success: true,
       data: table_messages,
     };
   } catch (error) {
     console.error(`error`, error);
+    con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -407,12 +443,13 @@ const getComplaintMessage = async (
 };
 
 export default {
+  addComplaintMessage,
+  getComplaintList,
   addComplaint,
   updateComplaint,
   addComplaintLog,
-  addComplaintMessage,
+  getComplaintMessage,
   getSingleComplaint,
   getComplaintTable,
-  getComplaintMessage,
   getComplaintLogTable,
 };

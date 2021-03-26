@@ -19,7 +19,7 @@ const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, funct
         const sql_add_complaint = yield con.Insert(`
         INSERT INTO complaint SET
         reported_by=@reported_by,
-        title=@title,
+        title=@subject,
         body=@body,
         sts_pk="P";
          `, payload);
@@ -60,6 +60,40 @@ const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, funct
             return {
                 success: false,
                 message: "No affected rows while saving the complaint",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_add_complaint_msg = yield con.Insert(`
+            INSERT into complaint_message SET
+            complaint_pk=@complaint_pk,
+            body=@body,
+            sent_by=@sent_by;
+             `, payload);
+        if (sql_add_complaint_msg.affectedRows > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The complaint has been updated successfully!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the complaint",
             };
         }
     }
@@ -167,6 +201,7 @@ const getComplaintLogTable = (complaint_pk) => __awaiter(void 0, void 0, void 0,
                 sts_pk: log.sts_pk,
             });
         }
+        con.Commit();
         return {
             success: true,
             data: log_table,
@@ -174,6 +209,7 @@ const getComplaintLogTable = (complaint_pk) => __awaiter(void 0, void 0, void 0,
     }
     catch (error) {
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -184,25 +220,26 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const single_complaint = yield con.QuerySingle(`Select * from complaint where complaint_pk = @complaint_pk;`, {
+        const data = yield con.QuerySingle(`SELECT * from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
-        single_complaint.complaint_file = yield con.Query(`
-        select * from complaint_file where complaint_pk=@complaint_pk
-      `, {
+        console.log(`complaints`, data);
+        data.complaint_file = yield con.Query(`
+            select * from complaint_file where complaint_pk=@complaint_pk
+          `, {
             complaint_pk: complaint_pk,
         });
-        single_complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
-            user_pk: single_complaint.reported_by,
+        data.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+            user_pk: data.reported_by,
         });
-        single_complaint.user.pic = yield useFileUploader_1.GetUploadedImage(single_complaint.user.pic);
-        single_complaint.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk;`, {
-            sts_pk: single_complaint.sts_pk,
+        data.user.pic = yield useFileUploader_1.GetUploadedImage(data.user.pic);
+        data.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk;`, {
+            sts_pk: data.sts_pk,
         });
         con.Commit();
         return {
             success: true,
-            data: single_complaint,
+            data: data,
         };
     }
     catch (error) {
@@ -214,14 +251,12 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         };
     }
 });
-const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintTable = () => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const complaint_table = yield con.Query(`Select * from complaint`, {
-            reported_by: reported_by,
-        });
-        for (const complaint of complaint_table) {
+        const data = yield con.Query(`SELECT * FROM complaint `, null);
+        for (const complaint of data) {
             complaint.complaint_file = yield con.Query(`
         select * from complaint_file where complaint_pk=@complaint_pk
       `, {
@@ -235,7 +270,7 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         con.Commit();
         return {
             success: true,
-            data: complaint_table,
+            data: data,
         };
     }
     catch (error) {
@@ -247,31 +282,25 @@ const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, fun
         };
     }
 });
-//messages
-const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintList = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const sql_add_complaint_msg = yield con.Insert(`
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `, payload);
-        if (sql_add_complaint_msg.affectedRows > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The complaint has been updated successfully!",
-            };
+        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`, {
+            reported_by: reported_by,
+        });
+        for (const file of data) {
+            file.complaint_file = yield con.Query(`
+      select * from complaint_file where complaint_file_pk=@complaint_pk
+      `, {
+                complaint_pk: file.complaint_pk,
+            });
         }
-        else {
-            con.Rollback();
-            return {
-                success: false,
-                message: "No affected rows while updating the complaint",
-            };
-        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
     }
     catch (error) {
         yield con.Rollback();
@@ -294,6 +323,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
             });
             message.user.pic = yield useFileUploader_1.GetUploadedImage(message.user.pic);
         }
+        con.Commit();
         return {
             success: true,
             data: table_messages,
@@ -301,6 +331,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     }
     catch (error) {
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -308,13 +339,14 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.default = {
+    addComplaintMessage,
+    getComplaintList,
     addComplaint,
     updateComplaint,
     addComplaintLog,
-    addComplaintMessage,
+    getComplaintMessage,
     getSingleComplaint,
     getComplaintTable,
-    getComplaintMessage,
     getComplaintLogTable,
 };
 //# sourceMappingURL=ComplaintRepository.js.map

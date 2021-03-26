@@ -29,7 +29,7 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
     <>
       <FormDialog
         title="FAMILY ASSESSMENT DATA"
-        open={true}
+        open={false}
         // minWidth={900}
         maxWidth={"lg"}
         handleClose={() => {

@@ -5,18 +5,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseConnection = exports.DatabaseConfig = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
-exports.DatabaseConfig = mysql2_1.default.createPool({
-    host: "localhost",
-    user: "root",
-    password: "root sa",
-    database: "bms",
-    port: 3309,
-});
+let con = null;
+if (process.env.NODE_ENV === "production") {
+    con = {
+        host: "sql6.freemysqlhosting.net",
+        user: "sql6400894",
+        password: "R9R8CS57Mw",
+        database: "sql6400894",
+        port: 3306,
+        connectionLimit: 10,
+        waitForConnections: true,
+    };
+}
+else {
+    con = {
+        host: "localhost",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
+        connectionLimit: 10,
+        waitForConnections: true,
+    };
+}
+exports.DatabaseConfig = mysql2_1.default.createPool(con);
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
         exports.DatabaseConfig.getConnection((error, connection) => {
             if (error) {
-                console.log(`error`, error);
                 reject(error);
             }
             const Query = (sql, binding) => {
@@ -113,6 +129,7 @@ const DatabaseConnection = () => {
                         }
                         else {
                             if (result.length > 0) {
+                                // console.log(`result[0]`, result[0]);
                                 resolve(result[0]);
                             }
                             else {
@@ -125,6 +142,10 @@ const DatabaseConnection = () => {
             const BeginTransaction = () => {
                 return new Promise((resolve, reject) => {
                     connection.beginTransaction((err) => {
+                        if (err) {
+                            // connection.release();
+                            // connection.destroy();
+                        }
                         resolve();
                     });
                 });

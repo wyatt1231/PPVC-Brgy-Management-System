@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Button,
   Chip,
   Container,
@@ -18,18 +17,17 @@ import { NavLink } from "react-router-dom";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import DataTableSearch from "../../../Component/DataTableSearch";
 import DataTableSort from "../../../Component/DataTableSort";
+import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import { InvalidDateToDefault } from "../../../Hooks/UseDateParser";
 import useFilter from "../../../Hooks/useFilter";
-import { setResidentDataTableAction } from "../../../Services/Actions/ResidentActions";
 import { setPageLinks } from "../../../Services/Actions/PageActions";
+import { setResidentDataTableAction } from "../../../Services/Actions/ResidentActions";
 import ITableColumns from "../../../Services/Interface/ITableColumns";
 import ITableInitialSort from "../../../Services/Interface/ITableInitialSort";
-import { ResidentModel } from "../../../Services/Models/ResidentModels";
 import { PaginationModel } from "../../../Services/Models/PaginationModels";
+import { ResidentModel } from "../../../Services/Models/ResidentModels";
 import { RootStore } from "../../../Services/Store";
-import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
-import { text } from "express";
 
 interface DataTableResidentAdminInterface {}
 
@@ -122,6 +120,8 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
     const data_table: Array<ResidentModel> = useSelector(
       (store: RootStore) => store.ResidentReducer.resident_data_table?.table
     );
+
+    console.log(`data_table res`, data_table);
 
     const [
       tableSearch,

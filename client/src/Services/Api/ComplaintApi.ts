@@ -19,6 +19,7 @@ const getSingleComplaint = async (
   const response = await PostFetch(API_DEFAULT_ROUTE + "getSingleComplaint", {
     complaint_pk: complaint_pk,
   });
+  console.log(`complaint single`, response);
   return response;
 };
 

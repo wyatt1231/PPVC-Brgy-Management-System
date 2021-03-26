@@ -202,6 +202,8 @@ const updateResident = async (
 const getDataTableResident = async (
   payload: PaginationModel
 ): Promise<ResponseModel> => {
+  console.log(`res`);
+
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();

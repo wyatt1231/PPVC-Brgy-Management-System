@@ -75,7 +75,7 @@
     "typeface-poppins": "^1.1.13",
     "typeface-ribeye": "^1.1.13",
     "typeface-roboto": "^1.1.13",
-    "typescript": "^3.7.5",
+    "typescript": "^3.9.9",
     "yup": "^0.29.3"
   },
   "scripts": {

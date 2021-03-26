@@ -2,19 +2,36 @@ import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
 import { PaginationModel } from "../Models/PaginationModel";
 
-export const DatabaseConfig = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "root sa",
-  database: "bms",
-  port: 3309,
-});
+let con: mysql.PoolOptions | null = null;
+
+if (process.env.NODE_ENV === "production") {
+  con = {
+    host: "sql6.freemysqlhosting.net",
+    user: "sql6400894",
+    password: "R9R8CS57Mw",
+    database: "sql6400894",
+    port: 3306,
+    connectionLimit: 10,
+    waitForConnections: true,
+  };
+} else {
+  con = {
+    host: "localhost",
+    user: "root",
+    password: "root sa",
+    database: "bms",
+    port: 3309,
+    connectionLimit: 10,
+    waitForConnections: true,
+  };
+}
+
+export let DatabaseConfig = mysql.createPool(con);
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
   return new Promise((resolve, reject) => {
     DatabaseConfig.getConnection((error, connection) => {
       if (error) {
-        console.log(`error`, error);
         reject(error);
       }
 
@@ -115,6 +132,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
               reject(err);
             } else {
               if (result.length > 0) {
+                // console.log(`result[0]`, result[0]);
                 resolve(result[0]);
               } else {
                 resolve(null);
@@ -126,6 +144,10 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
       const BeginTransaction = (): Promise<void> => {
         return new Promise((resolve, reject) => {
           connection.beginTransaction((err) => {
+            if (err) {
+              // connection.release();
+              // connection.destroy();
+            }
             resolve();
           });
         });

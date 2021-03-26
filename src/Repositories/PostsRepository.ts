@@ -3,8 +3,11 @@ import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
-import { PostsFileModel } from "../Models/PostsFileModel";
-import { PostCommentModel, PostsModel } from "../Models/PostsModel";
+import {
+  PostCommentModel,
+  PostFilesModel,
+  PostsModel,
+} from "../Models/PostsModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
 const getPosts = async (): Promise<ResponseModel> => {
@@ -12,6 +15,53 @@ const getPosts = async (): Promise<ResponseModel> => {
 
   try {
     await con.BeginTransaction();
+    const data: Array<PostsModel> = await con.Query(
+      `
+        SELECT * FROM 
+      (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
+        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
+        LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
+        `,
+      null
+    );
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
+        null
+      );
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
+    }
+    for (const file of data) {
+      file.upload_files = await con.Query(
+        `
+        select * from posts_file where posts_pk=@posts_pk
+        `,
+        {
+          posts_pk: file.posts_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getPostsAdmin = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
     const posts: Array<PostsModel> = await con.Query(
       `
       SELECT * FROM posts`,
@@ -43,15 +93,14 @@ const getPosts = async (): Promise<ResponseModel> => {
       );
     }
 
-    await con.Insert(`INSERT INTO test SET test ='ewqewqeqweq' `, {});
-
-    await con.Commit();
+    con.Commit();
     return {
       success: true,
       data: posts,
     };
   } catch (error) {
-    await con.Rollback();
+    console.error(`error`, error);
+    con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -195,7 +244,7 @@ const addPosts = async (
 
     if (sql_add_posts.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/Post/", file);
+        const file_res = await UploadFile("src/Storage/Files/Posts/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -203,7 +252,7 @@ const addPosts = async (
           return file_res;
         }
 
-        const posts_file_payload: PostsFileModel = {
+        const posts_file_payload: PostFilesModel = {
           file_path: file_res.data.path,
           file_name: file_res.data.name,
           mimetype: file_res.data.mimetype,
@@ -253,7 +302,6 @@ const addPosts = async (
     };
   }
 };
-
 const addPostComment = async (
   payload: PostsCommentModel,
   user_pk: number
@@ -264,7 +312,7 @@ const addPostComment = async (
 
     payload.user_pk = user_pk;
 
-    const sql_add_post_comment = await con.Modify(
+    const sql_add_post_comment = await con.Insert(
       `INSERT INTO posts_comment SET
       posts_pk=@posts_pk,
       user_pk=@user_pk,
@@ -272,7 +320,7 @@ const addPostComment = async (
       payload
     );
 
-    if (sql_add_post_comment > 0) {
+    if (sql_add_post_comment.insertedId > 0) {
       con.Commit();
       return {
         success: true,
@@ -449,4 +497,5 @@ export default {
   getPostsComments,
   getPostReactionsAdmin,
   getPostCommentsAdmin,
+  getPostsAdmin,
 };
