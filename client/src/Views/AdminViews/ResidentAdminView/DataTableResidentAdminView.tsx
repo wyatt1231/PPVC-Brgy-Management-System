@@ -28,6 +28,8 @@ import ITableInitialSort from "../../../Services/Interface/ITableInitialSort";
 import { ResidentModel } from "../../../Services/Models/ResidentModels";
 import { PaginationModel } from "../../../Services/Models/PaginationModels";
 import { RootStore } from "../../../Services/Store";
+import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
+import { text } from "express";
 
 interface DataTableResidentAdminInterface {}
 
@@ -69,7 +71,12 @@ const initialTableSort: Array<ITableInitialSort> = [
 const tableColumns: Array<ITableColumns> = [
   {
     label: "Profile",
-    width: 250,
+    width: 200,
+    align: "left",
+  },
+  {
+    label: "Gender",
+    width: 50,
     align: "left",
   },
   {
@@ -97,6 +104,11 @@ const tableColumns: Array<ITableColumns> = [
     label: "Encoded At",
     width: 150,
     align: "left",
+  },
+  {
+    label: "Aksyon",
+    width: 50,
+    align: "center",
   },
 ];
 
@@ -168,7 +180,15 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
 
     return (
       <Container maxWidth="lg">
-        <Grid container spacing={3}>
+        <Grid
+          container
+          spacing={3}
+          style={{
+            backgroundColor: `#fff`,
+            padding: `1em`,
+            borderRadius: 10,
+          }}
+        >
           <Grid item xs={12} container justify="flex-end" alignItems="center">
             <Grid item>
               <NavLink to="/admin/resident/add">
@@ -254,7 +274,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                 style={{ height: "100%", minHeight: 500, borderRadius: 10 }}
               >
                 <LinearLoadingProgress show={table_loading} />
-                <Table stickyHeader size="small">
+                <Table stickyHeader>
                   <TableHead>
                     <TableRow>
                       {tableColumns.map((col, index) => (
@@ -284,7 +304,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                           <div className="table-cell-profile">
                             <CustomAvatar
                               className="image"
-                              variant="rounded"
+                              variant="circle"
                               src={`${row.pic}`}
                               errorMessage={`${row.first_name?.charAt(
                                 0
@@ -295,14 +315,15 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                               to={`/admin/resident/${row.resident_pk}`}
                             >
                               <span style={{ textTransform: "capitalize" }}>
-                                {row.first_name} {row.middle_name}{" "}
-                                {row.last_name} {row.suffix}
+                                {row.last_name}
+                                {", "}
+                                {row.first_name} {row.middle_name} {row.suffix}
                               </span>
                             </NavLink>
-                            <div className="sub-title">
-                              {row.gender === "m" ? "Male" : "Female"}
-                            </div>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {row.gender === "m" ? "Lalaki" : "Babae"}
                         </TableCell>
                         <TableCell>{row.purok}</TableCell>
 
@@ -318,9 +339,23 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                           />
                         </TableCell>
                         <TableCell>
-                          <div className="datetime">
+                          <small className="datetime">
                             {InvalidDateToDefault(row.encoded_at, "-")}
-                          </div>
+                          </small>
+                        </TableCell>
+                        <TableCell align="center">
+                          <IconButtonPopper
+                            buttons={[
+                              {
+                                text: "I-butang nga ulo sa pamilya",
+                                handleClick: () => console.log(`sad`),
+                              },
+                              {
+                                text: "I-butang na opisyal sa Brgy",
+                                handleClick: () => console.log(`sad`),
+                              },
+                            ]}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}

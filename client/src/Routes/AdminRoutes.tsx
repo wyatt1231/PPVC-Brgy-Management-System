@@ -10,6 +10,7 @@ import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
+import CreateFamily from "../Views/SharedViews/CreateFamily";
 // import DataTableResidentAdminView from "../Views/AdminView";
 
 const SysAdminRoutes = () => {
@@ -18,6 +19,8 @@ const SysAdminRoutes = () => {
       {/* <Route path="/admin/dashboard" exact>
         <DashboardAdminView />
       </Route> */}
+      {/* Shared */}
+      <CreateFamily />
 
       <Route path="/admin/administrator" exact>
         <DataTableCoAdminView />

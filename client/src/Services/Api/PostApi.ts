@@ -53,7 +53,7 @@ const addPostComment = async (
   payload: PostCommentModel
 ): Promise<IServerResponse> => {
   const response = await PostFetch(
-    API_DEFAULT_ROUTE + "addPostReaction",
+    API_DEFAULT_ROUTE + "addPostComment",
     payload
   );
   return response;

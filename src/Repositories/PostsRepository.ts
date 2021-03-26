@@ -1,16 +1,17 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import { UploadFile } from "../Hooks/useFileUploader";
-import { GetUploadedImage } from "../Hooks/useFileUploader";
-import { ResponseModel } from "../Models/ResponseModels";
-import { PostCommentModel, PostsModel } from "../Models/PostsModel";
+import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsFileModel } from "../Models/PostsFileModel";
+import { PostCommentModel, PostsModel } from "../Models/PostsModel";
+import { ResponseModel } from "../Models/ResponseModels";
 
 const getPosts = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
+    await con.BeginTransaction();
     const posts: Array<PostsModel> = await con.Query(
       `
       SELECT * FROM posts`,
@@ -42,12 +43,15 @@ const getPosts = async (): Promise<ResponseModel> => {
       );
     }
 
+    await con.Insert(`INSERT INTO test SET test ='ewqewqeqweq' `, {});
+
+    await con.Commit();
     return {
       success: true,
       data: posts,
     };
   } catch (error) {
-    console.error(`error`, error);
+    await con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -114,8 +118,8 @@ const getPostsReaction = async (): Promise<ResponseModel> => {
 
     const data: Array<PostsModel> = await con.Query(
       `
-        SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
-        `,
+          SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
+          `,
       null
     );
 
@@ -297,6 +301,7 @@ const addPostReaction = async (
   user_pk: number
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
 
@@ -324,7 +329,7 @@ const addPostReaction = async (
         return {
           success: false,
           message:
-            "1 Looks like something went wrong, unable to save your reaction!",
+            "Looks like something went wrong, unable to save your reaction!",
         };
       }
     } else {
@@ -368,11 +373,9 @@ const getPostReactionsAdmin = async (
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
-    await con.BeginTransaction();
-
     const data: Array<PostsModel> = await con.Query(
       `
-       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+       SELECT *,resident_pk as user_pk FROM posts_reaction  WHERE posts_pk=@posts_pk; 
         `,
       {
         posts_pk: posts_pk,
@@ -385,7 +388,7 @@ const getPostReactionsAdmin = async (
       data: data,
     };
   } catch (error) {
-    await con.Rollback();
+    con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -403,7 +406,7 @@ const getPostCommentsAdmin = async (
   try {
     const comments: Array<PostCommentModel> = await con.Query(
       `
-       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk order by encoded_at desc;
         `,
       {
         posts_pk: posts_pk,
@@ -420,12 +423,15 @@ const getPostCommentsAdmin = async (
       comment.user.pic = await GetUploadedImage(comment.user.pic);
     }
 
+    con.Commit();
     return {
       success: true,
       data: comments,
     };
   } catch (error) {
     console.error(`error`, error);
+
+    con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),

@@ -293,7 +293,7 @@ tr td {
 
 .table-cell-profile {
   display: grid;
-  grid-template-areas: "img title" "img sub";
+  grid-template-areas: "img title";
   grid-gap: 0.2em;
   align-items: center;
   align-content: center;
@@ -310,13 +310,9 @@ tr td {
 }
 .table-cell-profile .title {
   grid-area: title;
+  font-size: 1em;
   font-weight: 700;
-}
-.table-cell-profile .sub-title {
-  grid-area: sub;
-  font-size: 0.87em;
-  font-weight: 700;
-  color: rgba(0, 0, 0, 0.55);
+  border: none;
 }
 
 .autocomplete-picture {
@@ -339,4 +335,13 @@ tr td {
   font-size: 0.87em !important;
   letter-spacing: 0.3pt !important;
   word-spacing: 0.3pt !important;
+}
+
+.title {
+  padding: 0.3em 0;
+  margin: 0.5em 0;
+  opacity: 0.65;
+  font-weight: 900;
+  font-size: 0.9em;
+  border-bottom: 0.1em solid rgba(0, 0, 0, 0.1);
 }

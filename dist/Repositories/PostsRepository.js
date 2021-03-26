@@ -12,17 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
-const useFileUploader_2 = require("../Hooks/useFileUploader");
 const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
+        yield con.BeginTransaction();
         const posts = yield con.Query(`
       SELECT * FROM posts`, null);
         for (const post of posts) {
             post.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
                 user_pk: post.encoder_pk,
             });
-            post.user.pic = yield useFileUploader_2.GetUploadedImage(post.user.pic);
+            post.user.pic = yield useFileUploader_1.GetUploadedImage(post.user.pic);
             post.status = yield con.QuerySingle(`select * from status where sts_pk = @sts_pk;`, {
                 sts_pk: post.sts_pk,
             });
@@ -30,13 +30,15 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
                 posts_pk: post.posts_pk,
             });
         }
+        yield con.Insert(`INSERT INTO test SET test ='ewqewqeqweq' `, {});
+        yield con.Commit();
         return {
             success: true,
             data: posts,
         };
     }
     catch (error) {
-        console.error(`error`, error);
+        yield con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -59,7 +61,7 @@ const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* ()
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_2.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
             console.error(`error`, file.user_pk);
         }
         for (const file of data) {
@@ -89,8 +91,8 @@ const getPostsReaction = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
-        SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
-        `, null);
+          SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
+          `, null);
         con.Commit();
         return {
             success: true,
@@ -115,7 +117,7 @@ const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, functio
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_2.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
             console.error(`error`, file.user_pk);
         }
         con.Commit();
@@ -249,7 +251,7 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
                 con.Rollback();
                 return {
                     success: false,
-                    message: "1 Looks like something went wrong, unable to save your reaction!",
+                    message: "Looks like something went wrong, unable to save your reaction!",
                 };
             }
         }
@@ -288,9 +290,8 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
 const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
-        yield con.BeginTransaction();
         const data = yield con.Query(`
-       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+       SELECT *,resident_pk as user_pk FROM posts_reaction  WHERE posts_pk=@posts_pk; 
         `, {
             posts_pk: posts_pk,
         });
@@ -301,7 +302,7 @@ const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fu
         };
     }
     catch (error) {
-        yield con.Rollback();
+        con.Rollback();
         console.error(`error`, error);
         return {
             success: false,
@@ -314,7 +315,7 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         const comments = yield con.Query(`
-       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk order by encoded_at desc;
         `, {
             posts_pk: posts_pk,
         });
@@ -322,8 +323,9 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
             comment.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
                 user_pk: comment.user_pk,
             });
-            comment.user.pic = yield useFileUploader_2.GetUploadedImage(comment.user.pic);
+            comment.user.pic = yield useFileUploader_1.GetUploadedImage(comment.user.pic);
         }
+        con.Commit();
         return {
             success: true,
             data: comments,
@@ -331,6 +333,7 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
     }
     catch (error) {
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),

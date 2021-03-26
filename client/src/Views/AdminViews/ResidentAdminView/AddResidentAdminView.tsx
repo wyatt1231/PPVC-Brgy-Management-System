@@ -162,7 +162,13 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
         innerRef={formRef}
       >
         {({ values, errors, touched, setFieldValue }) => (
-          <Form className="">
+          <Form
+            className=""
+            style={{
+              backgroundColor: `#fff`,
+              padding: `1em 4em`,
+            }}
+          >
             <div className="">
               <div className="box-header">
                 <div className="form-title">
@@ -170,22 +176,26 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                 </div>
               </div>
               <div className="box-body">
-                <Grid container spacing={4}>
+                <Grid container spacing={2}>
                   <Grid xs={12} container justify="center" item>
                     <div style={{ padding: "1.5em 0" }}>
                       <PhotoField
                         label=""
-                        height={150}
-                        width={150}
+                        height={180}
+                        width={180}
                         selectedFile={pic}
                         name="pic"
-                        variant="rounded"
+                        variant="circle"
                         handleChange={handleSetPic}
                       />
                     </div>
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12}>
+                    <div className="title">Personal Information</div>
+                  </Grid>
+
+                  <Grid xs={12} item>
                     <FormikInputField
                       label="First Name"
                       name="first_name"
@@ -195,7 +205,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
                       label="Middle Name"
                       name="middle_name"
@@ -205,7 +215,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
                       label="Last Name"
                       name="last_name"
@@ -215,7 +225,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={3} item>
+                  <Grid sm={3} item>
                     <FormikInputField
                       label="Suffix"
                       name="suffix"
@@ -225,10 +235,10 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikRadio
                       name="gender"
-                      label="Gender"
+                      label="Choose the gender"
                       variant="vertical"
                       data={[
                         {
@@ -243,7 +253,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const label = "Birth Date";
                       const name = "birth_date";
@@ -278,7 +288,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "nationality";
                       const errorText =
@@ -289,7 +299,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Nationality"
+                          label="Choose a Nationality"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -309,7 +319,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "religion";
                       const errorText =
@@ -320,7 +330,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Religion"
+                          label="Choose a Religion"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -340,7 +350,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "civil_status";
                       const errorText =
@@ -351,7 +361,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Civil Status"
+                          label="Choose a Civil Status"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -371,7 +381,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  {/* <Grid xs={12} sm={6} item>
                     <FormikInputField
                       label="Dialect"
                       name="dialect"
@@ -379,13 +389,13 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       InputLabelProps={{ shrink: true }}
                       fullWidth
                     />
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid item xs={12}>
+                  {/* <Grid item xs={12}>
                     <Divider />
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid xs={12} sm={6} item>
+                  {/* <Grid xs={12} item>
                     <FormikInputField
                       label="Tribe"
                       name="tribe"
@@ -394,12 +404,12 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       fullWidth
                       type="text"
                     />
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikRadio
                       name="with_disability"
-                      label="With Disability?"
+                      label="Does the resident have disability?"
                       variant="vertical"
                       data={[
                         {
@@ -414,30 +424,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Email Address"
-                      name="email"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                      type="email"
-                    />
-                  </Grid>
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Phone Number"
-                      name="phone"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                      InputProps={{
-                        inputComponent: MaskedPhoneNumber,
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
                       label="Purok"
                       name="purok"
@@ -447,7 +434,36 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12}>
+                    <div className="title">Account Information</div>
+                  </Grid>
+
+                  <Grid xs={12} item>
+                    <FormikInputField
+                      label="Email Address (Used as username)"
+                      name="email"
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                      type="email"
+                      required
+                    />
+                  </Grid>
+                  <Grid xs={12} item>
+                    <FormikInputField
+                      label="Phone Number"
+                      name="phone"
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                      InputProps={{
+                        inputComponent: MaskedPhoneNumber,
+                      }}
+                      required
+                    />
+                  </Grid>
+
+                  {/* <Grid xs={12} sm={6} item>
                     <FormikInputField
                       label="Voting Precinct"
                       name="voting_precinct"
@@ -455,13 +471,13 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       InputLabelProps={{ shrink: true }}
                       fullWidth
                     />
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid item xs={12}>
+                  {/* <Grid item xs={12}>
                     <Divider />
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid xs={12} sm={6} item>
+                  {/* <Grid xs={12} sm={6} item>
                     <FormikRadio
                       name="is_employed"
                       label="Is he/she Employed?"
@@ -519,6 +535,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       fullWidth
                     />
                   </Grid>
+               */}
                 </Grid>
               </div>
             </div>
