@@ -8,6 +8,9 @@ import ResidentController from "../Controllers/ResidentController";
 import UserController from "../Controllers/UserController";
 import PostsController from "../Controllers/PostsController";
 
+import PostsMobileController from "../Controllers/PostsMobileController";
+import NewsMobileController from "../Controllers/NewsMobileController";
+import ComplaintsMobileController from "../Controllers/ComplaintsMobileController";
 export const ControllerRegistry = async (app: Express) => {
   await UserController(app);
   await AdminController(app);
@@ -17,6 +20,10 @@ export const ControllerRegistry = async (app: Express) => {
   await BrgyOfficialController(app);
   await DashboardController(app);
   await PostsController(app);
+
+  await PostsMobileController(app);
+  await NewsMobileController(app);
+  await ComplaintsMobileController(app);
 };
 
 export default ControllerRegistry;

@@ -8,23 +8,7 @@ import ComplaintRepository from "../Repositories/ComplaintRepository";
 
 const ComplaintController = async (app: Express): Promise<void> => {
   const router = Router();
-  router.post(
-    "/addComplaint",
-    Authorize("admin,resident"),
-    async (req: Request & { files: any } & UserClaims, res: Response) => {
-      const payload: ComplaintModel = req.body;
-      payload.reported_by = req.user_pk;
-
-      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
-
-      res.json(
-        await ComplaintRepository.addComplaint(
-          payload,
-          files instanceof Array ? files : [files]
-        )
-      );
-    }
-  );
+  
 
   router.post(
     "/updateComplaint",
@@ -34,14 +18,7 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.updateComplaint(payload));
     }
   );
-  router.post(
-    "/getComplaintList",
-    Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const reported_by: string = req.body.reported_by;
-      res.json(await ComplaintRepository.getComplaintList(reported_by));
-    }
-  );
+  
   router.post(
     "/getSingleComplaint",
     Authorize("admin,resident"),
@@ -57,14 +34,6 @@ const ComplaintController = async (app: Express): Promise<void> => {
     async (req: Request & UserClaims, res: Response) => {
       const reported_by: string = req.body.reported_by;
       res.json(await ComplaintRepository.getComplaintTable(reported_by));
-    }
-  );
-  router.post(
-    "/getComplaintList",
-    Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const reported_by: string = req.body.reported_by;
-      res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
 

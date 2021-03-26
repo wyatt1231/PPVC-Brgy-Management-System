@@ -87,6 +87,7 @@ const ComplaintChatSocket = (io: Server) => {
               },
             ],
           });
+       
         }
 
         const updated_found_room = findRoom(complaint_pk);
@@ -99,7 +100,8 @@ const ComplaintChatSocket = (io: Server) => {
       });
 
       socket.on("sendMessage", (complaint_pk: string) => {
-        io.of(SOCKET_NAMESPACE).to(complaint_pk).emit("allMessage");
+          io.of(SOCKET_NAMESPACE).to(complaint_pk).emit("allMessage");
+          console.log("getmessages")
       });
     });
 };

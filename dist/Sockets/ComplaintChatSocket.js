@@ -89,6 +89,7 @@ const ComplaintChatSocket = (io) => {
         });
         socket.on("sendMessage", (complaint_pk) => {
             io.of(SOCKET_NAMESPACE).to(complaint_pk).emit("allMessage");
+            console.log("getmessages");
         });
     });
 };

@@ -21,6 +21,9 @@ const NewsController_1 = __importDefault(require("../Controllers/NewsController"
 const ResidentController_1 = __importDefault(require("../Controllers/ResidentController"));
 const UserController_1 = __importDefault(require("../Controllers/UserController"));
 const PostsController_1 = __importDefault(require("../Controllers/PostsController"));
+const PostsMobileController_1 = __importDefault(require("../Controllers/PostsMobileController"));
+const NewsMobileController_1 = __importDefault(require("../Controllers/NewsMobileController"));
+const ComplaintsMobileController_1 = __importDefault(require("../Controllers/ComplaintsMobileController"));
 const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* () {
     yield UserController_1.default(app);
     yield AdminController_1.default(app);
@@ -30,6 +33,9 @@ const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* 
     yield BrgyOfficialController_1.default(app);
     yield DashboardController_1.default(app);
     yield PostsController_1.default(app);
+    yield PostsMobileController_1.default(app);
+    yield NewsMobileController_1.default(app);
+    yield ComplaintsMobileController_1.default(app);
 });
 exports.ControllerRegistry = ControllerRegistry;
 exports.default = exports.ControllerRegistry;
