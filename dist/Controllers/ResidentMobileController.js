@@ -20,6 +20,9 @@ const ResidentMobileController = (app) => __awaiter(void 0, void 0, void 0, func
         const payload = req.body;
         res.json(yield ResidentMobileRepository_1.default.addMobileResident(payload));
     }));
+    router.post("/getresidents", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield ResidentMobileRepository_1.default.getresidents());
+    }));
     app.use("/api/residentmobile/", router);
 });
 exports.default = ResidentMobileController;

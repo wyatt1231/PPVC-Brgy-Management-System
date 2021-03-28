@@ -112,3 +112,47 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
     };
   }
 };
+
+
+export const userinfo = async (user_pk: number): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const user_data = await con.QuerySingle(
+      `  SELECT u.user_pk,u.user_type,u.full_name,r.* FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
+      where u.user_pk = @user_pk
+      `,
+      {
+        user_pk,
+      }
+    );
+
+    if (user_data.user_type === "admin") {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM administrator WHERE user_pk=${user_pk} LIMIT 1`,
+        null
+      );
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
+    } else if (user_data.user_type === "resident") {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`,
+        null
+      );
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
+    }
+
+    await con.Commit();
+    return {
+      success: true,
+      data: user_data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};

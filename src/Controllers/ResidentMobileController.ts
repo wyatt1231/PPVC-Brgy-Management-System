@@ -15,6 +15,12 @@ router.post(
       res.json(await ResidentMobileRepository.addMobileResident(payload));
     }
   );
+router.post(
+    "/getresidents",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getresidents());
+    }
+  );
   
   app.use("/api/residentmobile/", router);
 };

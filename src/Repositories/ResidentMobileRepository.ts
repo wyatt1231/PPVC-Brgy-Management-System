@@ -117,7 +117,36 @@ const addMobileResident = async (
   };
 
   
+const getresidents = async (
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      const data: Array<ResidentModel> = await con.Query(
+        `SELECT * FROM resident`,
+        
+            null
+        
+      );
+     
+  
+      con.Commit();
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
+    }
+  };
 export default {
     addMobileResident,
+    getresidents
 
   };

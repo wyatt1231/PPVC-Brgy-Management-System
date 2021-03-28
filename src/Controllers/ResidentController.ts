@@ -10,7 +10,7 @@ const ResidentController = async (app: Express): Promise<void> => {
 
   router.post(
     "/getDataTableResident",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request, res: Response) => {
       const payload: PaginationModel = req.body;
       res.json(await ResidentRepository.getDataTableResident(payload));
@@ -46,7 +46,7 @@ const ResidentController = async (app: Express): Promise<void> => {
 
   router.post(
     "/searchResident",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const search: string = req.body.value;
       res.json(await ResidentRepository.searchResident(search));

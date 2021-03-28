@@ -105,7 +105,28 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         };
     }
 });
+const getresidents = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT * FROM resident`, null);
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addMobileResident,
+    getresidents
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map

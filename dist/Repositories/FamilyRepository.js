@@ -20,7 +20,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             console.log(`fam  pk`);
         }
         else {
-            console.log(` none fam pk`);
+            console.log(` none fam pk` + payload.fam_pk);
         }
         const sql_add_fam = yield con.Insert(`INSERT INTO family SET
         ulo_pamilya = @ulo_pamilya,

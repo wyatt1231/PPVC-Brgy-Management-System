@@ -5,14 +5,15 @@ import { FamilyModel } from "../Models/FamilyModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
 const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
+
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-
+ 
     if (payload.fam_pk) {
       console.log(`fam  pk`);
     } else {
-      console.log(` none fam pk`);
+      console.log(` none fam pk`+ payload.fam_pk);
     }
 
     const sql_add_fam = await con.Insert(
@@ -30,6 +31,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
 
     if (sql_add_fam.insertedId > 0) {
       for (const fam of payload.fam_members) {
+     
         fam.encoded_by = payload.encoded_by;
         fam.fam_pk = sql_add_fam.insertedId;
         const sql_add_fam_member = await con.Insert(
@@ -39,7 +41,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
               rel = @rel,
               encoded_by = @encoded_by;
               `,
-          fam
+              fam
         );
 
         if (sql_add_fam_member.insertedId <= 0) {
