@@ -24,6 +24,14 @@ const PostsController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
+    "/getSinglePostWithPhoto",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const posts_pk: string = req.body.posts_pk;
+      res.json(await PostsMobileRepository.getSinglePostWithPhoto(posts_pk));
+    }
+  );
+  router.post(
     "/getPostsComments",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {

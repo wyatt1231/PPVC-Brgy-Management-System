@@ -365,8 +365,55 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
     }
   };
   
+  const getSinglePostWithPhoto = async (
+    posts_pk: string
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      const data: Array<PostsModel> = await con.Query(
+        `
+        SELECT * FROM 
+        (    
+    SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+          ,u.full_name user_full_name,u.pic user_pic FROM posts p
+          LEFT JOIN STATUS s ON p.sts_pk = s.sts_pk 
+          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
+        `,
+        {
+            posts_pk: posts_pk,
+        }
+      );
+  
+      for (const file of data) {
+        file.upload_files = await con.Query(
+          `
+        select * from posts_file where posts_pk=@posts_pk
+        `,
+          {
+            posts_pk: file.posts_pk,
+          }
+        );
+      }
+  
+      con.Commit();
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
+    }
+  };
 export default {
     addPosts,
+    getSinglePostWithPhoto,
     getPosts,
     getUserPosts,
     addPostReaction,

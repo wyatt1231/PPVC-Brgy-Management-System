@@ -291,8 +291,45 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
+const getSinglePostWithPhoto = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`
+        SELECT * FROM 
+        (    
+    SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+          ,u.full_name user_full_name,u.pic user_pic FROM posts p
+          LEFT JOIN STATUS s ON p.sts_pk = s.sts_pk 
+          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
+        `, {
+            posts_pk: posts_pk,
+        });
+        for (const file of data) {
+            file.upload_files = yield con.Query(`
+        select * from posts_file where posts_pk=@posts_pk
+        `, {
+                posts_pk: file.posts_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addPosts,
+    getSinglePostWithPhoto,
     getPosts,
     getUserPosts,
     addPostReaction,
