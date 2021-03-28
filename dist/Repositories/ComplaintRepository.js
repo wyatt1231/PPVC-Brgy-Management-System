@@ -200,6 +200,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
             });
             message.user.pic = yield useFileUploader_1.GetUploadedImage(message.user.pic);
         }
+        con.Commit();
         return {
             success: true,
             data: table_messages,
@@ -207,6 +208,7 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
     }
     catch (error) {
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -237,19 +239,10 @@ const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, funct
                 message: "No affected rows while updating the complaint",
             };
         }
-<<<<<<< HEAD
-=======
-        con.Commit();
-        return {
-            success: true,
-            data: table_messages,
-        };
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
     }
     catch (error) {
         yield con.Rollback();
         console.error(`error`, error);
-        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),

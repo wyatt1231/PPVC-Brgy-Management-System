@@ -2,36 +2,6 @@ import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
 import { PaginationModel } from "../Models/PaginationModel";
 
-<<<<<<< HEAD
-export let DatabaseConfig = (): mysql.Pool => {
-  if (process.env.NODE_ENV === "production") {
-    // return mysql.createPool({
-    //   host: "us-cdbr-east-03.cleardb.com",
-    //   user: "bed41c71c3944a",
-    //   password: "f1ec4cc8",
-    //   database: "heroku_fcd8378bc75cb9b",
-    //   port: 3306,
-    //   connectionLimit: 10,
-    // });
-    return mysql.createPool({
-      host: "sql6.freemysqlhosting.net",
-      user: "sql6400894",
-      password: "R9R8CS57Mw",
-      database: "sql6400894",
-      port: 3306,
-      connectionLimit: 10,
-    });
-  } else {
-    return mysql.createPool({
-      host: "127.0.0.1",
-      user: "root",
-      password: "rootsa",
-      database: "bms",
-      port: 3309,
-    });
-  }
-};
-=======
 let con: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
@@ -48,7 +18,7 @@ if (process.env.NODE_ENV === "production") {
   con = {
     host: "localhost",
     user: "root",
-    password: "root sa",
+    password: "rootsa",
     database: "bms",
     port: 3309,
     connectionLimit: 10,
@@ -57,7 +27,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export let DatabaseConfig = mysql.createPool(con);
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
   return new Promise((resolve, reject) => {

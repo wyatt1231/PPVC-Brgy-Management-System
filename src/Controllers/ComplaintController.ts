@@ -18,11 +18,6 @@ const ComplaintController = async (app: Express): Promise<void> => {
       res.json(await ComplaintRepository.updateComplaint(payload));
     }
   );
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
   router.post(
     "/getSingleComplaint",
     Authorize("admin,resident"),
