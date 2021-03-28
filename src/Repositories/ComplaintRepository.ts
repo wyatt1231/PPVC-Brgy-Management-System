@@ -365,6 +365,7 @@ const getComplaintTable = async (): Promise<ResponseModel> => {
     };
   }
 };
+
 const getComplaintList = async (
   reported_by: string
 ): Promise<ResponseModel> => {

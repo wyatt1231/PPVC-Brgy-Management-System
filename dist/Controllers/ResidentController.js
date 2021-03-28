@@ -17,11 +17,11 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const ResidentRepository_1 = __importDefault(require("../Repositories/ResidentRepository"));
 const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
-    router.post("/getDataTableResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getDataTableResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ResidentRepository_1.default.getDataTableResident(payload));
     }));
-    router.post("/addResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ResidentRepository_1.default.addResident(payload, req.user_pk));
     }));
@@ -33,7 +33,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
         const resident_pk = req.body.resident_pk;
         res.json(yield ResidentRepository_1.default.getSingleResident(resident_pk));
     }));
-    router.post("/searchResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/searchResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const search = req.body.value;
         res.json(yield ResidentRepository_1.default.searchResident(search));
     }));

@@ -39,8 +39,13 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
                 fam_pk: payload.fam_pk,
             });
             for (const fam of payload.fam_members) {
+<<<<<<< HEAD
                 fam.encoded_by = payload.encoded_by;
                 fam.fam_pk = payload.fam_pk;
+=======
+                fam.fam_pk = sql_add_fam.insertedId;
+                fam.encoded_by = payload.encoded_by;
+>>>>>>> 158ff8ebfca762a1bf456943593e8a734043057a
                 const sql_add_fam_member = yield con.Insert(`INSERT INTO family_member SET
               fam_pk = @fam_pk,
               resident_pk = @resident_pk,
@@ -58,7 +63,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             con.Commit();
             return {
                 success: true,
-                message: "The news has been published successfully!",
+                message: "The Family has been added successfully!",
             };
         }
         else {

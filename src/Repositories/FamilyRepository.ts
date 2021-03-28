@@ -5,15 +5,17 @@ import { FamilyModel } from "../Models/FamilyModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
 const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
+
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-
+ 
     if (payload.fam_pk) {
       console.log(`fam  pk`);
     } else {
       console.log(` none fam pk`);
     }
+<<<<<<< HEAD
 
     const found_ulo_pamilya = await con.QuerySingle(
       `SELECT fam_pk FROM family WHERE ulo_pamilya = @ulo_pamilya;`,
@@ -47,13 +49,36 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
         fam.encoded_by = payload.encoded_by;
         fam.fam_pk = payload.fam_pk;
         const sql_add_fam_member = await con.Insert(
+=======
+    const sql_add_fam = await con.Insert(
+      `INSERT INTO family SET
+        ulo_pamilya = @ulo_pamilya,
+        okasyon_balay = @okasyon_balay,
+        straktura = @straktura,
+        kadugayon_pagpuyo = @kadugayon_pagpuyo,
+        okasyon_yuta = @okasyon_yuta,
+        kaligon_balay = @kaligon_balay,
+        encoded_by = @encoded_by;
+        `,
+      payload
+    );
+
+    if (sql_add_fam.insertedId > 0) {
+ 
+      for (const fam of payload.fam_members) {
+     
+        fam.fam_pk = sql_add_fam.insertedId;
+        fam.encoded_by = payload.encoded_by;
+      
+        const sql_add_fam_member = await con.Insert (
+>>>>>>> 158ff8ebfca762a1bf456943593e8a734043057a
           `INSERT INTO family_member SET
               fam_pk = @fam_pk,
               resident_pk = @resident_pk,
               rel = @rel,
               encoded_by = @encoded_by;
               `,
-          fam
+              fam
         );
 
         if (sql_add_fam_member.insertedId <= 0) {
@@ -68,7 +93,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
       con.Commit();
       return {
         success: true,
-        message: "The news has been published successfully!",
+        message: "The Family has been added successfully!",
       };
     } else {
       const sql_add_fam = await con.Insert(

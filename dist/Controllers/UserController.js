@@ -42,6 +42,9 @@ const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     router.post("/currentUser", Authorize_1.default(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield user_repo.currentUser(req.user_pk));
     }));
+    router.post("/userinfo", Authorize_1.default(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield user_repo.userinfo(req.user_pk));
+    }));
     app.use("/api/user/", router);
 });
 exports.default = UserController;
