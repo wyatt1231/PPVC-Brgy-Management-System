@@ -20,7 +20,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             console.log(`fam  pk`);
         }
         else {
-            console.log(` none fam pk` + payload.fam_pk);
+            console.log(` none fam pk`);
         }
         const sql_add_fam = yield con.Insert(`INSERT INTO family SET
         ulo_pamilya = @ulo_pamilya,
@@ -33,8 +33,8 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         `, payload);
         if (sql_add_fam.insertedId > 0) {
             for (const fam of payload.fam_members) {
-                fam.encoded_by = payload.encoded_by;
                 fam.fam_pk = sql_add_fam.insertedId;
+                fam.encoded_by = payload.encoded_by;
                 const sql_add_fam_member = yield con.Insert(`INSERT INTO family_member SET
               fam_pk = @fam_pk,
               resident_pk = @resident_pk,
@@ -52,7 +52,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             con.Commit();
             return {
                 success: true,
-                message: "The news has been published successfully!",
+                message: "The Family has been added successfully!",
             };
         }
         else {
