@@ -21,7 +21,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
         const payload = req.body;
         res.json(yield ResidentRepository_1.default.getDataTableResident(payload));
     }));
-    router.post("/addResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ResidentRepository_1.default.addResident(payload, req.user_pk));
     }));

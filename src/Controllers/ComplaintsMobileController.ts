@@ -17,6 +17,13 @@ router.post(
       payload.sent_by = req.user_pk;
       res.json(await ComplaintMobileRepository.addComplaintMessage(payload));
     }
+  );  router.post(
+    "/getSingleComplaint",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const complaint_pk: number = req.body.complaint_pk;
+      res.json(await ComplaintMobileRepository.getSingleComplaint(complaint_pk));
+    }
   );
 
   router.post(

@@ -10,8 +10,6 @@ import {
 } from "../Models/PostsModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
-<<<<<<< HEAD
-=======
 const getPosts = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
 
@@ -60,7 +58,6 @@ const getPosts = async (): Promise<ResponseModel> => {
     };
   }
 };
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
 
 const getPostsAdmin = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -111,8 +108,6 @@ const getPostsAdmin = async (): Promise<ResponseModel> => {
   }
 };
 
-<<<<<<< HEAD
-=======
 const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -419,7 +414,6 @@ const addPostReaction = async (
   }
 };
 
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
 //ADMIN POSTS
 
 const getPostReactionsAdmin = async (

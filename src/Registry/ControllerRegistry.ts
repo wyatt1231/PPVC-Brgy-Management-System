@@ -11,6 +11,7 @@ import PostsController from "../Controllers/PostsController";
 import PostsMobileController from "../Controllers/PostsMobileController";
 import NewsMobileController from "../Controllers/NewsMobileController";
 import ComplaintsMobileController from "../Controllers/ComplaintsMobileController";
+import ResidentMobileController from "../Controllers/ResidentMobileController";
 export const ControllerRegistry = async (app: Express) => {
   await UserController(app);
   await AdminController(app);
@@ -23,6 +24,7 @@ export const ControllerRegistry = async (app: Express) => {
 
   await PostsMobileController(app);
   await NewsMobileController(app);
+  await ResidentMobileController(app);
   await ComplaintsMobileController(app);
 };
 

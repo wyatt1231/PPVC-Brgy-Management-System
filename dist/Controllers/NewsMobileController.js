@@ -26,6 +26,14 @@ const NewsMobileController = (app) => __awaiter(void 0, void 0, void 0, function
             res.json(error);
         }
     }));
+    router.post("/getNewsDataPublished", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield NewsMobileRepository_1.default.getNewsDataPublished());
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
     router.post("/getSingleNewsWithPhoto", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const news_pk = req.body.news_pk;
         res.json(yield NewsMobileRepository_1.default.getSingleNewsWithPhoto(news_pk));

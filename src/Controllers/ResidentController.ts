@@ -19,7 +19,7 @@ const ResidentController = async (app: Express): Promise<void> => {
 
   router.post(
     "/addResident",
-    Authorize("admin"),
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: AdministratorModel = req.body;
       res.json(await ResidentRepository.addResident(payload, req.user_pk));

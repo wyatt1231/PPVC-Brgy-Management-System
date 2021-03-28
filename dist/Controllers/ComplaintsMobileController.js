@@ -22,6 +22,10 @@ const ComplaintMobileController = (app) => __awaiter(void 0, void 0, void 0, fun
         payload.sent_by = req.user_pk;
         res.json(yield ComplaintsMobileRepository_1.default.addComplaintMessage(payload));
     }));
+    router.post("/getSingleComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const complaint_pk = req.body.complaint_pk;
+        res.json(yield ComplaintsMobileRepository_1.default.getSingleComplaint(complaint_pk));
+    }));
     router.post("/getComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintsMobileRepository_1.default.getComplaintMessage(complaint_pk));

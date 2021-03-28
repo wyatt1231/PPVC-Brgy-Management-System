@@ -22,6 +22,17 @@ const NewsMobileController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
+    "/getNewsDataPublished",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await NewsMobileRepository.getNewsDataPublished());
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
     "/getSingleNewsWithPhoto",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
