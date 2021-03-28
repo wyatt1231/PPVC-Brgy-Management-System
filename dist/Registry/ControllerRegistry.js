@@ -21,6 +21,7 @@ const NewsController_1 = __importDefault(require("../Controllers/NewsController"
 const ResidentController_1 = __importDefault(require("../Controllers/ResidentController"));
 const UserController_1 = __importDefault(require("../Controllers/UserController"));
 const PostsController_1 = __importDefault(require("../Controllers/PostsController"));
+const FamilyController_1 = __importDefault(require("../Controllers/FamilyController"));
 const PostsMobileController_1 = __importDefault(require("../Controllers/PostsMobileController"));
 const NewsMobileController_1 = __importDefault(require("../Controllers/NewsMobileController"));
 const ComplaintsMobileController_1 = __importDefault(require("../Controllers/ComplaintsMobileController"));
@@ -38,6 +39,7 @@ const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* 
     yield NewsMobileController_1.default(app);
     yield ResidentMobileController_1.default(app);
     yield ComplaintsMobileController_1.default(app);
+    yield FamilyController_1.default(app);
 });
 exports.ControllerRegistry = ControllerRegistry;
 exports.default = exports.ControllerRegistry;

@@ -210,7 +210,7 @@ const getDataTableResident = async (
 
     const data: Array<ResidentModel> = await con.QueryPagination(
       `
-      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
       first_name like concat('%',@search,'%')
@@ -268,12 +268,14 @@ const getSingleResident = async (
     await con.BeginTransaction();
 
     const data = await con.QuerySingle(
-      `SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc  FROM resident a 
-      LEFT JOIN status s ON s.sts_pk = a.sts_pk where r.resident_pk =@resident_pk`,
+      `SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc  FROM resident r 
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk where r.resident_pk =@resident_pk`,
       {
         resident_pk: resident_pk,
       }
     );
+
+    data.pic = await GetUploadedImage(data.pic);
 
     con.Commit();
     return {

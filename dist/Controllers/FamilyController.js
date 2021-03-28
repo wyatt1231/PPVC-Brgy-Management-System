@@ -14,22 +14,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
-const PostsRepository_1 = __importDefault(require("../Repositories/PostsRepository"));
-const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
+const FamilyRepository_1 = __importDefault(require("../Repositories/FamilyRepository"));
+const FamilyController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
-    router.post("/getPostsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostsRepository_1.default.getPostsAdmin());
+    router.post("/addFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        payload.encoded_by = req.user_pk;
+        res.json(yield FamilyRepository_1.default.addFamily(payload));
     }));
-    router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
+    router.post("/getSingleFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const ulo_pamilya = req.body.ulo_pamilya;
+        res.json(yield FamilyRepository_1.default.getSingleFamily(ulo_pamilya));
     }));
-    //comments
-    router.post("/getPostCommentsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
-    }));
-    app.use("/api/posts/", router);
+    app.use("/api/family/", router);
 });
-exports.default = PostsController;
-//# sourceMappingURL=PostsController.js.map
+exports.default = FamilyController;
+//# sourceMappingURL=FamilyController.js.map

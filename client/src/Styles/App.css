@@ -345,3 +345,28 @@ tr td {
   font-size: 0.9em;
   border-bottom: 0.1em solid rgba(0, 0, 0, 0.1);
 }
+
+.info-group-column {
+  display: grid;
+  align-items: center;
+  align-content: center;
+  /* justify-content: start; */
+  /* grid-auto-flow: column; */
+
+  padding: 0.5em 0;
+}
+
+.info-group-column .label {
+  opacity: 0.7;
+  font-weight: 900;
+  font-size: 0.7em;
+  padding: 0.1em 0;
+}
+
+.info-group-column .value {
+  font-weight: 500;
+  font-size: 1em;
+  padding: 0.1em 0;
+  border-bottom: 0.01em solid rgba(0, 0, 0, 0.1);
+  width: 100%;
+}

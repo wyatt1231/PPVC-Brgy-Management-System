@@ -6,8 +6,6 @@ import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintFilesModel, ComplaintModel } from "../Models/ComplaintModels";
 import { ResponseModel } from "../Models/ResponseModels";
 
-<<<<<<< HEAD
-=======
 const addComplaint = async (
   payload: ComplaintModel,
   files: Array<File>
@@ -128,7 +126,6 @@ const addComplaintMessage = async (
     };
   }
 };
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
 const updateComplaint = async (
   payload: ComplaintModel
 ): Promise<ResponseModel> => {
@@ -368,8 +365,7 @@ const getComplaintTable = async (): Promise<ResponseModel> => {
     };
   }
 };
-<<<<<<< HEAD
-=======
+
 const getComplaintList = async (
   reported_by: string
 ): Promise<ResponseModel> => {
@@ -408,7 +404,6 @@ const getComplaintList = async (
     };
   }
 };
->>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
 
 const getComplaintMessage = async (
   complaint_pk: number
@@ -448,53 +443,13 @@ const getComplaintMessage = async (
   }
 };
 
-const addComplaintMessage = async (
-  payload: ComplaintMessageModel
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-
-
-    const sql_add_complaint_msg = await con.Insert(
-      `
-            INSERT into complaint_message SET
-            complaint_pk=@complaint_pk,
-            body=@body,
-            sent_by=@sent_by;
-             `,
-      payload
-    );
-
-    if (sql_add_complaint_msg.affectedRows > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "The complaint has been updated successfully!",
-      };
-    } else {
-      con.Rollback();
-      return {
-        success: false,
-        message: "No affected rows while updating the complaint",
-      };
-    }
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
 export default {
   addComplaintMessage,
-  getComplaintMessage,
+  getComplaintList,
+  addComplaint,
   updateComplaint,
   addComplaintLog,
-
+  getComplaintMessage,
   getSingleComplaint,
   getComplaintTable,
   getComplaintLogTable,

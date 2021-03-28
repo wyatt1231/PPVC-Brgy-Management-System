@@ -33,7 +33,7 @@ const updateResidentApi = async (
 };
 
 const getSingleResident = async (
-  resident_pk: string
+  resident_pk: string | number
 ): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "getSingleResident", {
     resident_pk: resident_pk,

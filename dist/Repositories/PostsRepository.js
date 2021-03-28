@@ -378,6 +378,13 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.default = {
+    addPosts,
+    getPosts,
+    getUserPosts,
+    addPostReaction,
+    addPostComment,
+    getPostsReaction,
+    getPostsComments,
     getPostReactionsAdmin,
     getPostCommentsAdmin,
     getPostsAdmin,

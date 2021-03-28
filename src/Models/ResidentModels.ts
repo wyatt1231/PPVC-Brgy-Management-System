@@ -30,4 +30,5 @@ export interface ResidentModel {
   sts_backgroundColor?: string;
   encoder_pk?: number;
   encoded_at?: Date;
+  ulo_pamilya?: string;
 }

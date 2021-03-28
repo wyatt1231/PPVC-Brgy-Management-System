@@ -8,7 +8,23 @@ import ComplaintRepository from "../Repositories/ComplaintRepository";
 
 const ComplaintController = async (app: Express): Promise<void> => {
   const router = Router();
-  
+  router.post(
+    "/addComplaint",
+    Authorize("admin,resident"),
+    async (req: Request & { files: any } & UserClaims, res: Response) => {
+      const payload: ComplaintModel = req.body;
+      payload.reported_by = req.user_pk;
+
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+
+      res.json(
+        await ComplaintRepository.addComplaint(
+          payload,
+          files instanceof Array ? files : [files]
+        )
+      );
+    }
+  );
 
   router.post(
     "/updateComplaint",
@@ -32,6 +48,14 @@ const ComplaintController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       res.json(await ComplaintRepository.getComplaintTable());
+    }
+  );
+  router.post(
+    "/getComplaintList",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const reported_by: string = req.body.reported_by;
+      res.json(await ComplaintRepository.getComplaintList(reported_by));
     }
   );
 

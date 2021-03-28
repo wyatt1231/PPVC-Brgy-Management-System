@@ -488,6 +488,13 @@ const getPostCommentsAdmin = async (
 };
 
 export default {
+  addPosts,
+  getPosts,
+  getUserPosts,
+  addPostReaction,
+  addPostComment,
+  getPostsReaction,
+  getPostsComments,
   getPostReactionsAdmin,
   getPostCommentsAdmin,
   getPostsAdmin,

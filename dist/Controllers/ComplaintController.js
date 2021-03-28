@@ -17,6 +17,13 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const ComplaintRepository_1 = __importDefault(require("../Repositories/ComplaintRepository"));
 const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
+    router.post("/addComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b;
+        const payload = req.body;
+        payload.reported_by = req.user_pk;
+        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+        res.json(yield ComplaintRepository_1.default.addComplaint(payload, files instanceof Array ? files : [files]));
+    }));
     router.post("/updateComplaint", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield ComplaintRepository_1.default.updateComplaint(payload));
@@ -27,6 +34,10 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/getComplaintTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield ComplaintRepository_1.default.getComplaintTable());
+    }));
+    router.post("/getComplaintList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const reported_by = req.body.reported_by;
+        res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
     }));
     // LOGS
     router.post("/addComplaintLog", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {

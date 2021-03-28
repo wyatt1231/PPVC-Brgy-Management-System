@@ -10,6 +10,18 @@ const NewsController = async (app: Express): Promise<void> => {
   const router = Router();
 
   router.post(
+    "/getNewsComments",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const news_pk: string = req.body.news_pk;
+        res.json(await NewsRepository.getNewsComments(news_pk));
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
     "/getNewsDataTable",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
@@ -29,6 +41,27 @@ const NewsController = async (app: Express): Promise<void> => {
       } catch (error) {
         res.json(error);
       }
+    }
+  );
+  router.post(
+    "/addNews",
+    Authorize("admin"),
+    async (req: Request & { files: any } & UserClaims, res: Response) => {
+      const payload: NewsModel = req.body;
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+
+      if (files instanceof Array) {
+      } else {
+        files = [files];
+      }
+
+      res.json(
+        await NewsRepository.addNews(
+          payload,
+          files instanceof Array ? files : [files],
+          req.user_pk
+        )
+      );
     }
   );
 
@@ -67,7 +100,33 @@ const NewsController = async (app: Express): Promise<void> => {
       res.json(await NewsRepository.getSingleNews(news_pk));
     }
   );
-  
+  router.post(
+    "/getSingleNewsWithPhoto",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const news_pk: string = req.body.news_pk;
+      res.json(await NewsRepository.getSingleNewsWithPhoto(news_pk));
+    }
+  );
+
+  router.post(
+    "/addNewsComment",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const payload: NewsCommentModel = req.body;
+      res.json(await NewsRepository.addNewsComment(payload, req.user_pk));
+    }
+  );
+
+  router.post(
+    "/addNewsReaction",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const payload: NewsReactionModel = req.body;
+      res.json(await NewsRepository.addNewsReaction(payload, req.user_pk));
+    }
+  );
+
   router.post(
     "/toggleLike",
     Authorize("admin,resident"),
