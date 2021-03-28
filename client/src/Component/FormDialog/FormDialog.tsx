@@ -91,7 +91,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
         }}
       >
         <DialogTitleStyle theme={theme} disableTypography={true}>
-          <div className="title">{title}</div>
+          <div className="dialog-title">{title}</div>
           <div className="toolbar">
             <Tooltip title="">
               <IconButton size="small" onClick={handleClose}>
@@ -122,8 +122,9 @@ const DialogTitleStyle = styled(DialogTitle)`
   align-content: center;
   grid-gap: 1em;
 
-  .title {
+  .dialog-title {
     font-weight: 900;
+    color: ${(p) => p.theme.palette.primary.contrastText} !important;
   }
 
   .toolbar {

@@ -21,6 +21,7 @@ const NewsController_1 = __importDefault(require("../Controllers/NewsController"
 const ResidentController_1 = __importDefault(require("../Controllers/ResidentController"));
 const UserController_1 = __importDefault(require("../Controllers/UserController"));
 const PostsController_1 = __importDefault(require("../Controllers/PostsController"));
+const FamilyController_1 = __importDefault(require("../Controllers/FamilyController"));
 const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* () {
     yield UserController_1.default(app);
     yield AdminController_1.default(app);
@@ -30,6 +31,7 @@ const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* 
     yield BrgyOfficialController_1.default(app);
     yield DashboardController_1.default(app);
     yield PostsController_1.default(app);
+    yield FamilyController_1.default(app);
 });
 exports.ControllerRegistry = ControllerRegistry;
 exports.default = exports.ControllerRegistry;

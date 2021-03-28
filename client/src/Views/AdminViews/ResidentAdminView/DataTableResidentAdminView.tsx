@@ -21,7 +21,10 @@ import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopp
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import { InvalidDateToDefault } from "../../../Hooks/UseDateParser";
 import useFilter from "../../../Hooks/useFilter";
-import { setPageLinks } from "../../../Services/Actions/PageActions";
+import {
+  setPageLinks,
+  setSelectedHeadFam,
+} from "../../../Services/Actions/PageActions";
 import { setResidentDataTableAction } from "../../../Services/Actions/ResidentActions";
 import ITableColumns from "../../../Services/Interface/ITableColumns";
 import ITableInitialSort from "../../../Services/Interface/ITableInitialSort";
@@ -83,16 +86,15 @@ const tableColumns: Array<ITableColumns> = [
     align: "left",
   },
   {
+    label: "Ulo Sa Pamilya",
+    width: 50,
+    align: "left",
+  },
+  {
     label: "Email Address",
     width: 150,
     align: "left",
   },
-  {
-    label: "Mobile Number",
-    width: 90,
-    align: "left",
-  },
-
   {
     label: "Status",
     width: 50,
@@ -327,8 +329,19 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                         </TableCell>
                         <TableCell>{row.purok}</TableCell>
 
+                        <TableCell>
+                          <Chip
+                            label={row.ulo_pamilya}
+                            style={{
+                              // color: row.ulu_pamilya === "oo" ? "blue" :"red",
+                              color: `#fff`,
+                              backgroundColor:
+                                row.ulo_pamilya === "oo" ? "blue" : "red",
+                            }}
+                          />
+                        </TableCell>
+
                         <TableCell>{row.email}</TableCell>
-                        <TableCell>{row.phone}</TableCell>
                         <TableCell>
                           <Chip
                             style={{
@@ -347,8 +360,14 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                           <IconButtonPopper
                             buttons={[
                               {
-                                text: "I-butang nga ulo sa pamilya",
-                                handleClick: () => console.log(`sad`),
+                                text: "I-set na ulo sa pamilya",
+                                handleClick: () =>
+                                  dispatch(
+                                    setSelectedHeadFam({
+                                      open: true,
+                                      resident_pk: row.resident_pk,
+                                    })
+                                  ),
                               },
                               {
                                 text: "I-butang na opisyal sa Brgy",

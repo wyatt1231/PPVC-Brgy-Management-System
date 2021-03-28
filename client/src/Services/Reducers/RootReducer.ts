@@ -8,6 +8,7 @@ import BrgyOfficialReducer from "./BrgyOfficialReducer";
 import NewsReducer from "./NewsReducer";
 import ComplaintReducer from "./ComplaintReducer";
 import PostReducer from "./PostReducer";
+import FamilyReducer from "./FamilyReducer";
 
 const RootReducer = combineReducers({
   UserReducer,
@@ -18,6 +19,7 @@ const RootReducer = combineReducers({
   NewsReducer,
   ComplaintReducer,
   PostReducer,
+  FamilyReducer,
 });
 
 export default RootReducer;
