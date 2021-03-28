@@ -1,11 +1,10 @@
 import { Container, Grid } from "@material-ui/core";
 import moment from "moment";
-import React, { FC, memo, useCallback, useEffect, useState } from "react";
+import React, { FC, memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CircularLoadingProgress from "../../../Component/CircularLoadingProgress";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
-import NewsActions from "../../../Services/Actions/NewsActions";
 import { setPageLinks } from "../../../Services/Actions/PageActions";
 import PostActions from "../../../Services/Actions/PostActions";
 import { RootStore } from "../../../Services/Store";
@@ -38,8 +37,6 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
     dispatch(PostActions.setPosts());
   }, [dispatch]);
 
-  console.log(`posts`, posts);
-
   return (
     <Container maxWidth="lg">
       <LinearLoadingProgress show={fetch_posts} />
@@ -71,7 +68,7 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
                     <div className="time">{moment(p.encoded_at).fromNow()}</div>
                   </div>
                   <div className="body">{p.body}</div>
-                  <PostReaction />
+                  <PostReaction posts_pk={p.posts_pk} />
                 </StyledPostItem>
               ))}
             </div>

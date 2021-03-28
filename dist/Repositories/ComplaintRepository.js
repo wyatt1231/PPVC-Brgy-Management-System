@@ -107,6 +107,7 @@ const getComplaintLogTable = (complaint_pk) => __awaiter(void 0, void 0, void 0,
                 sts_pk: log.sts_pk,
             });
         }
+        con.Commit();
         return {
             success: true,
             data: log_table,
@@ -114,6 +115,7 @@ const getComplaintLogTable = (complaint_pk) => __awaiter(void 0, void 0, void 0,
     }
     catch (error) {
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -124,22 +126,21 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`, {
+        const data = yield con.QuerySingle(`SELECT * from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
-        for (var file of data) {
-            file.complaint_file = yield con.Query(`
+        console.log(`complaints`, data);
+        data.complaint_file = yield con.Query(`
             select * from complaint_file where complaint_pk=@complaint_pk
           `, {
-                complaint_pk: complaint_pk,
-            });
-            file.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
-                user_pk: file.reported_by,
-            });
-            file.user.pic = yield useFileUploader_1.GetUploadedImage(file.user.pic);
-        }
-        file.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk;`, {
-            sts_pk: file.sts_pk,
+            complaint_pk: complaint_pk,
+        });
+        data.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+            user_pk: data.reported_by,
+        });
+        data.user.pic = yield useFileUploader_1.GetUploadedImage(data.user.pic);
+        data.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk;`, {
+            sts_pk: data.sts_pk,
         });
         con.Commit();
         return {
@@ -156,13 +157,11 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         };
     }
 });
-const getComplaintTable = (reported_by) => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintTable = () => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`, {
-            reported_by: reported_by,
-        });
+        const data = yield con.Query(`SELECT * FROM complaint `, null);
         for (const complaint of data) {
             complaint.complaint_file = yield con.Query(`
         select * from complaint_file where complaint_pk=@complaint_pk
@@ -238,10 +237,19 @@ const addComplaintMessage = (payload) => __awaiter(void 0, void 0, void 0, funct
                 message: "No affected rows while updating the complaint",
             };
         }
+<<<<<<< HEAD
+=======
+        con.Commit();
+        return {
+            success: true,
+            data: table_messages,
+        };
+>>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
     }
     catch (error) {
         yield con.Rollback();
         console.error(`error`, error);
+        con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),

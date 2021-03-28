@@ -10,54 +10,59 @@ import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
+import CreateFamily from "../Views/SharedViews/CreateFamily";
 // import DataTableResidentAdminView from "../Views/AdminView";
 
 const SysAdminRoutes = () => {
   return (
-    <Switch>
-      {/* <Route path="/admin/dashboard" exact>
+    <>
+      <CreateFamily />
+      <Switch>
+        {/* <Route path="/admin/dashboard" exact>
         <DashboardAdminView />
       </Route> */}
+        {/* Shared */}
 
-      <Route path="/admin/administrator" exact>
-        <DataTableCoAdminView />
-      </Route>
-      <Route path="/admin/administrator/add" exact>
-        <AddCoAdminView />
-      </Route>
+        <Route path="/admin/administrator" exact>
+          <DataTableCoAdminView />
+        </Route>
+        <Route path="/admin/administrator/add" exact>
+          <AddCoAdminView />
+        </Route>
 
-      <Route path="/admin/resident" exact>
-        <DataTableResidentAdminView />
-      </Route>
+        <Route path="/admin/resident" exact>
+          <DataTableResidentAdminView />
+        </Route>
 
-      <Route path="/admin/resident/add" exact>
-        <AddResidentAdminView />
-      </Route>
+        <Route path="/admin/resident/add" exact>
+          <AddResidentAdminView />
+        </Route>
 
-      <Route path="/admin/brgy-official" exact>
-        <DataTableBrgyOfficialAdminView />
-      </Route>
+        <Route path="/admin/brgy-official" exact>
+          <DataTableBrgyOfficialAdminView />
+        </Route>
 
-      <Route path="/admin/brgy-official/add" exact>
-        <AddBrgyOfficialAdminView />
-      </Route>
+        <Route path="/admin/brgy-official/add" exact>
+          <AddBrgyOfficialAdminView />
+        </Route>
 
-      <Route path="/admin/news" exact>
-        <DtNewsAdminView />
-      </Route>
+        <Route path="/admin/news" exact>
+          <DtNewsAdminView />
+        </Route>
 
-      <Route path="/admin/post" exact>
-        <DtPostAdminView />
-      </Route>
+        <Route path="/admin/post" exact>
+          <DtPostAdminView />
+        </Route>
 
-      <Route path="/admin/complaint" exact>
-        <DtComplaintAdminView />
-      </Route>
+        <Route path="/admin/complaint" exact>
+          <DtComplaintAdminView />
+        </Route>
 
-      <Route path="/admin/complaint/:complaint_pk" exact>
-        <ManageComplaintAdminView />
-      </Route>
-    </Switch>
+        <Route path="/admin/complaint/:complaint_pk" exact>
+          <ManageComplaintAdminView />
+        </Route>
+      </Switch>
+    </>
   );
 };
 

@@ -17,7 +17,46 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const PostsRepository_1 = __importDefault(require("../Repositories/PostsRepository"));
 const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
+<<<<<<< HEAD
+=======
+    router.post("/getPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield PostsRepository_1.default.getPosts());
+    }));
+    router.post("/getUserPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield PostsRepository_1.default.getUserPosts(req.user_pk));
+    }));
+    router.post("/getPostsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const posts_pk = req.body.posts_pk;
+            res.json(yield PostsRepository_1.default.getPostsComments(posts_pk));
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
+    router.post("/addPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b;
+        const payload = req.body;
+        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+        res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
+    }));
+    router.post("/getPostsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield PostsRepository_1.default.getPostsReaction());
+    }));
+    router.post("/addPostComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        res.json(yield PostsRepository_1.default.addPostComment(payload, req.user_pk));
+    }));
+    router.post("/addPostReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        console.log(`sdasd payload`, payload);
+        res.json(yield PostsRepository_1.default.addPostReaction(payload, req.user_pk));
+    }));
+>>>>>>> ca47e1e77b938248fafacbc2f5e2845758c51c91
     //reactions
+    router.post("/getPostsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield PostsRepository_1.default.getPostsAdmin());
+    }));
     router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const posts_pk = req.body.posts_pk;
         res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));

@@ -18,6 +18,7 @@ export const setResidentDataTableAction = (payload: PaginationModel) => async (
     const response: IServerResponse = await ResidentApi.getResidentDataTableApi(
       payload
     );
+    console.log(`resident res`, response);
     dispatch({
       type: "fetch_resident_data_table",
       fetch_resident_data_table: false,

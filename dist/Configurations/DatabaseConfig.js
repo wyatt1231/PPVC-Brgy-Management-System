@@ -3,41 +3,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.query = exports.DatabaseConnection = exports.DatabaseConfig = void 0;
+exports.DatabaseConnection = exports.DatabaseConfig = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
-let DatabaseConfig = () => {
-    if (process.env.NODE_ENV === "production") {
-        // return mysql.createPool({
-        //   host: "us-cdbr-east-03.cleardb.com",
-        //   user: "bed41c71c3944a",
-        //   password: "f1ec4cc8",
-        //   database: "heroku_fcd8378bc75cb9b",
-        //   port: 3306,
-        //   connectionLimit: 10,
-        // });
-        return mysql2_1.default.createPool({
-            host: "sql6.freemysqlhosting.net",
-            user: "sql6400894",
-            password: "R9R8CS57Mw",
-            database: "sql6400894",
-            port: 3306,
-            connectionLimit: 10,
-        });
-    }
-    else {
-        return mysql2_1.default.createPool({
-            host: "127.0.0.1",
-            user: "root",
-            password: "rootsa",
-            database: "bms",
-            port: 3309,
-        });
-    }
-};
-exports.DatabaseConfig = DatabaseConfig;
+let con = null;
+if (process.env.NODE_ENV === "production") {
+    con = {
+        host: "sql6.freemysqlhosting.net",
+        user: "sql6400894",
+        password: "R9R8CS57Mw",
+        database: "sql6400894",
+        port: 3306,
+        connectionLimit: 10,
+        waitForConnections: true,
+    };
+}
+else {
+    con = {
+        host: "localhost",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
+        connectionLimit: 10,
+        waitForConnections: true,
+    };
+}
+exports.DatabaseConfig = mysql2_1.default.createPool(con);
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
-        exports.DatabaseConfig().getConnection((error, connection) => {
+        exports.DatabaseConfig.getConnection((error, connection) => {
             if (error) {
                 reject(error);
             }
@@ -59,11 +53,7 @@ const DatabaseConnection = () => {
                     });
                 });
             };
-            const QueryPagination = (sql, pagination
-            // binding: any,
-            // sort: SqlSort,
-            // page: SqlPage
-            ) => {
+            const QueryPagination = (sql, pagination) => {
                 return new Promise((resolve, reject) => {
                     const { filters, sort, page } = pagination;
                     const { success, message, query } = queryFormat(sql, filters);
@@ -139,6 +129,7 @@ const DatabaseConnection = () => {
                         }
                         else {
                             if (result.length > 0) {
+                                // console.log(`result[0]`, result[0]);
                                 resolve(result[0]);
                             }
                             else {
@@ -152,11 +143,10 @@ const DatabaseConnection = () => {
                 return new Promise((resolve, reject) => {
                     connection.beginTransaction((err) => {
                         if (err) {
-                            reject(err);
+                            // connection.release();
+                            // connection.destroy();
                         }
-                        else {
-                            resolve();
-                        }
+                        resolve();
                     });
                 });
             };
@@ -164,12 +154,8 @@ const DatabaseConnection = () => {
                 return new Promise((resolve, reject) => {
                     connection.commit((err) => {
                         connection.release();
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            resolve();
-                        }
+                        connection.destroy();
+                        resolve();
                     });
                 });
             };
@@ -177,13 +163,16 @@ const DatabaseConnection = () => {
                 return new Promise((resolve) => {
                     connection.rollback(() => {
                         connection.release();
+                        connection.destroy();
                         resolve();
                     });
                 });
             };
             const Release = () => {
                 return new Promise((resolve) => {
-                    resolve(connection.release());
+                    connection.release();
+                    connection.destroy();
+                    resolve();
                 });
             };
             resolve({
@@ -201,41 +190,6 @@ const DatabaseConnection = () => {
     });
 };
 exports.DatabaseConnection = DatabaseConnection;
-// const queryFormat = (query: string, values: any): QueryFormatModel => {
-//   const formattedQuery: QueryFormatModel = {
-//     success: true,
-//     query: query,
-//   };
-//   formattedQuery.query = query.replace(
-//     /\@(\w+)/g,
-//     (str: string, key: string | Array<string>) => {
-//       if (typeof key === "string") {
-//         if (values.hasOwnProperty(key)) {
-//           if (values[key]) {
-//             return mysql.escape(values[key]);
-//           } else {
-//             return "(NULL)";
-//           }
-//         } else {
-//           if (typeof formattedQuery.message === "undefined") {
-//             formattedQuery.message = `Column value error : ${key} cannot be found`;
-//           }
-//           formattedQuery.success = false;
-//           return str;
-//         }
-//       }
-//       if (key instanceof Array) {
-//         for (let i = 0; i < key.length; i++) {
-//           key[i] = mysql.escape(key[i]);
-//         }
-//         const joined_arr = key.join(",");
-//         return joined_arr;
-//       }
-//       return str;
-//     }
-//   );
-//   return formattedQuery;
-// };
 const queryFormat = (query, values) => {
     const formattedQuery = {
         success: true,
@@ -273,14 +227,4 @@ const queryFormat = (query, values) => {
     });
     return formattedQuery;
 };
-const query = (sql, binding) => {
-    return new Promise((resolve, reject) => {
-        exports.DatabaseConfig().query(sql, binding, (err, result) => {
-            if (err)
-                reject(err);
-            resolve(result);
-        });
-    });
-};
-exports.query = query;
 //# sourceMappingURL=DatabaseConfig.js.map

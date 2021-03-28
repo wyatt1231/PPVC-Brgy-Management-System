@@ -36,8 +36,75 @@ export const StyledPostItem = styled.div`
   }
 
   .reactions {
+    .stats {
+      padding: 0.2em 0;
+      display: grid;
+      grid-auto-flow: column;
+      grid-gap: 1em;
+      align-items: center;
+      align-content: center;
+      justify-content: start;
+      font-size: 0.85em;
+    }
+
+    .actions {
+      padding: 0.2em 0;
+      display: grid;
+      grid-gap: 1em;
+      grid-auto-flow: column;
+      justify-content: center;
+      justify-items: center;
+      align-items: center;
+      align-content: center;
+    }
   }
 
-  .comments {
+  .add-comment {
+    grid-area: add-comment;
+    display: grid;
+    align-items: center;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr auto;
+    grid-gap: 0.5em;
+  }
+
+  .comment {
+    grid-area: comment;
+    display: grid;
+    grid-gap: 0.5em;
+    width: 100%;
+    .comment-item {
+      display: grid;
+      grid-template-areas: "img user-name time" "img content content";
+      justify-content: start;
+      align-content: start;
+      width: 100%;
+      padding: 0.5em;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      grid-auto-columns: auto 1fr auto;
+
+      .img {
+        grid-area: img;
+        margin-right: 0.5em;
+      }
+      .user-name {
+        grid-area: user-name;
+        font-weight: 600;
+        font-size: 0.9em;
+      }
+
+      .content {
+        grid-area: content;
+        font-size: 0.84em;
+        /* opacity: 0.6; */
+        padding: 7px;
+        border-radius: 7px;
+        background-color: #f5f5f5;
+      }
+      .time {
+        font-size: 0.8em;
+        opacity: 0.9;
+      }
+    }
   }
 `;

@@ -6,7 +6,7 @@ const API_DEFAULT_ROUTE = `api/posts/`;
 
 //posts
 const getPosts = async (): Promise<IServerResponse> => {
-  const response = await PostFetch(API_DEFAULT_ROUTE + "getPosts", null);
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getPostsAdmin", null);
   return response;
 };
 
@@ -53,7 +53,7 @@ const addPostComment = async (
   payload: PostCommentModel
 ): Promise<IServerResponse> => {
   const response = await PostFetch(
-    API_DEFAULT_ROUTE + "addPostReaction",
+    API_DEFAULT_ROUTE + "addPostComment",
     payload
   );
   return response;
