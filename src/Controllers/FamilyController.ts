@@ -25,6 +25,13 @@ const FamilyController = async (app: Express): Promise<void> => {
       res.json(await FamilyRepository.getSingleFamily(ulo_pamilya));
     }
   );
+  router.post(
+    "/getAllFamily",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await FamilyRepository.getAllFamily());
+    }
+  );
 
   app.use("/api/family/", router);
 };

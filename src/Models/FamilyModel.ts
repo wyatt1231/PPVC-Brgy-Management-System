@@ -10,6 +10,7 @@ export interface FamilyModel {
   kaligon_balay?: string;
   encoded_at?: Date | string;
   encoded_by?: number;
+  ulo_pamilya_info: ResidentModel;
   fam_members: Array<FamMemberModel>;
 }
 

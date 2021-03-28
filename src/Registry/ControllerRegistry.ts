@@ -22,3 +22,25 @@ export const ControllerRegistry = async (app: Express) => {
 };
 
 export default ControllerRegistry;
+
+//update family
+//view all fam
+//add fam
+
+//fix login
+// dashboard
+//   death chart
+// population chart
+//age range by year
+
+//total population
+//total deaths
+//PWD
+//senior citizen
+//children
+//infant
+
+//male female ratio
+//pie chart
+
+//infant children sc

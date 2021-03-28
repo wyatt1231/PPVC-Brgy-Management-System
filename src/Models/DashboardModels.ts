@@ -19,3 +19,14 @@ export interface AgeRangeModel {
   age_range?: string;
   total?: number;
 }
+
+export interface YearlyStatsModel {
+  x: string | number;
+  y: string | number;
+}
+
+export interface OverallPopulationModel {
+  labels: Array<number>;
+  death: Array<YearlyStatsModel>;
+  alive: Array<YearlyStatsModel>;
+}

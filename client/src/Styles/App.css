@@ -370,3 +370,69 @@ tr td {
   border-bottom: 0.01em solid rgba(0, 0, 0, 0.1);
   width: 100%;
 }
+
+canvas {
+  background-color: #fff;
+}
+
+.stats-item {
+  height: 100%;
+  width: 100%;
+  border-radius: 10px;
+  background-color: #fff;
+  min-width: 200px;
+  padding: 1.5em 2.5em;
+  text-align: center;
+}
+
+.stats-item .label {
+  /* font-size: 0.9em; */
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.stats-item .value {
+  font-size: 2em;
+  font-weight: 900;
+}
+
+.sekso-ctnr {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: start;
+  grid-gap: 1em;
+  align-content: start;
+  align-items: start;
+}
+
+.sekso-ctnr .sekso-item {
+  display: grid;
+  grid-template-areas: "img label" "img val" "img graph";
+  align-items: start;
+  align-content: start;
+  padding: 0.5em;
+}
+
+.sekso-ctnr .sekso-item .dp {
+  grid-area: img;
+  height: 150px;
+  width: 50px;
+  margin-right: 0.5em;
+}
+.sekso-ctnr .sekso-item .label {
+  grid-area: label;
+  font-size: 0.9em;
+  opacity: 0.6;
+  font-weight: 900;
+}
+.sekso-ctnr .sekso-item .value {
+  grid-area: val;
+  align-self: start;
+  font-weight: 900;
+  font-size: 2em;
+}
+
+.sekso-ctnr .sekso-item .graph {
+  grid-area: graph;
+  width: 100px;
+}

@@ -7,11 +7,11 @@ const DashboardController = async (app: Express): Promise<void> => {
   const router = Router();
 
   router.post(
-    "/getYearlyPopulationStats",
+    "/overallPopulation",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await DashboardRepository.getYearlyPopulationStats());
+        res.json(await DashboardRepository.overallPopulation());
       } catch (error) {
         res.json(error);
       }
@@ -19,14 +19,11 @@ const DashboardController = async (app: Express): Promise<void> => {
   );
 
   router.post(
-    "/getPopulationOfYearStats",
+    "/ageGroupStats",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const current_year = req.body.current_year;
       try {
-        res.json(
-          await DashboardRepository.getPopulationOfYearStats(current_year)
-        );
+        res.json(await DashboardRepository.ageGroupStats());
       } catch (error) {
         res.json(error);
       }
@@ -34,11 +31,23 @@ const DashboardController = async (app: Express): Promise<void> => {
   );
 
   router.post(
-    "/getAgeGroupStats",
+    "/genderStats",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await DashboardRepository.getAgeGroupStats());
+        res.json(await DashboardRepository.genderStats());
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+
+  router.post(
+    "/lifeStageStats",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.lifeStageStats());
       } catch (error) {
         res.json(error);
       }

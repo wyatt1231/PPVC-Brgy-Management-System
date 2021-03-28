@@ -17,26 +17,33 @@ const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const DashboardRepository_1 = __importDefault(require("../Repositories/DashboardRepository"));
 const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
-    router.post("/getYearlyPopulationStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/overallPopulation", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.getYearlyPopulationStats());
+            res.json(yield DashboardRepository_1.default.overallPopulation());
         }
         catch (error) {
             res.json(error);
         }
     }));
-    router.post("/getPopulationOfYearStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const current_year = req.body.current_year;
+    router.post("/ageGroupStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.getPopulationOfYearStats(current_year));
+            res.json(yield DashboardRepository_1.default.ageGroupStats());
         }
         catch (error) {
             res.json(error);
         }
     }));
-    router.post("/getAgeGroupStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/genderStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.getAgeGroupStats());
+            res.json(yield DashboardRepository_1.default.genderStats());
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
+    router.post("/lifeStageStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.lifeStageStats());
         }
         catch (error) {
             res.json(error);

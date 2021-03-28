@@ -193,6 +193,7 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
       OR phone like concat('%',@search,'%')
       OR email like concat('%',@search,'%')
       OR sts_desc like concat('%',@search,'%')
+      OR ulo_pamilya like concat('%',@search,'%')
       `, payload);
         const hasMore = data.length > payload.page.limit;
         if (hasMore) {
