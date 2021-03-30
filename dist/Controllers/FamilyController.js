@@ -26,6 +26,9 @@ const FamilyController = (app) => __awaiter(void 0, void 0, void 0, function* ()
         const ulo_pamilya = req.body.ulo_pamilya;
         res.json(yield FamilyRepository_1.default.getSingleFamily(ulo_pamilya));
     }));
+    router.post("/getAllFamily", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield FamilyRepository_1.default.getAllFamily());
+    }));
     app.use("/api/family/", router);
 });
 exports.default = FamilyController;

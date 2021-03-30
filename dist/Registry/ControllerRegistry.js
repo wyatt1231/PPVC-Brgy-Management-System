@@ -45,4 +45,21 @@ const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.ControllerRegistry = ControllerRegistry;
 exports.default = exports.ControllerRegistry;
+//update family
+//view all fam
+//add fam
+//fix login
+// dashboard
+//   death chart
+// population chart
+//age range by year
+//total population
+//total deaths
+//PWD
+//senior citizen
+//children
+//infant
+//male female ratio
+//pie chart
+//infant children sc
 //# sourceMappingURL=ControllerRegistry.js.map

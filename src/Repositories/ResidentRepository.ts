@@ -222,6 +222,7 @@ const getDataTableResident = async (
       OR phone like concat('%',@search,'%')
       OR email like concat('%',@search,'%')
       OR sts_desc like concat('%',@search,'%')
+      OR ulo_pamilya like concat('%',@search,'%')
       `,
       payload
     );

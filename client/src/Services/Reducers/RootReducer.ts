@@ -9,6 +9,7 @@ import NewsReducer from "./NewsReducer";
 import ComplaintReducer from "./ComplaintReducer";
 import PostReducer from "./PostReducer";
 import FamilyReducer from "./FamilyReducer";
+import DashboardReducer from "./DashboardReducer";
 
 const RootReducer = combineReducers({
   UserReducer,
@@ -20,6 +21,7 @@ const RootReducer = combineReducers({
   ComplaintReducer,
   PostReducer,
   FamilyReducer,
+  DashboardReducer,
 });
 
 export default RootReducer;

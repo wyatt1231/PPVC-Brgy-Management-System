@@ -6,6 +6,7 @@ import AddCoAdminView from "../Views/AdminViews/CoAdminView/AddCoAdminView";
 import DataTableCoAdminView from "../Views/AdminViews/CoAdminView/DataTableCoAdminView";
 import DtComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/DtComplaintAdminView";
 import ManageComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/ManageComplaintAdminView";
+import DashbboardAdminView from "../Views/AdminViews/DashbboardAdminView";
 import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
@@ -18,10 +19,9 @@ const SysAdminRoutes = () => {
     <>
       <CreateFamily />
       <Switch>
-        {/* <Route path="/admin/dashboard" exact>
-        <DashboardAdminView />
-      </Route> */}
-        {/* Shared */}
+        <Route path="/admin/dashboard" exact>
+          <DashbboardAdminView />
+        </Route>
 
         <Route path="/admin/administrator" exact>
           <DataTableCoAdminView />
