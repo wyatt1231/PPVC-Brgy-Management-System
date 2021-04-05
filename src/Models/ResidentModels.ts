@@ -32,3 +32,11 @@ export interface ResidentModel {
   encoded_at?: Date;
   ulo_pamilya?: string;
 }
+export interface SearchResident{
+  SearchFullname?:string
+}
+export interface ForgotPass{
+  currentpassword?:string;
+  password?:string;
+  email?:string;
+}

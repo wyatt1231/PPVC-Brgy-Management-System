@@ -77,14 +77,14 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
                 con.Commit();
                 return {
                     success: true,
-                    message: "The resident has been added successfully",
+                    message: "Successfully Registered",
                 };
             }
             else {
                 con.Rollback();
                 return {
                     success: false,
-                    message: "No affected rows while adding the resident",
+                    message: "Registration Failed. Try Again Later",
                 };
             }
         }
@@ -92,7 +92,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
             con.Rollback();
             return {
                 success: false,
-                message: "No affected rows while adding the user",
+                message: "Registration Failed. Try Again Later",
             };
         }
     }
@@ -105,11 +105,13 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         };
     }
 });
-const getresidents = () => __awaiter(void 0, void 0, void 0, function* () {
+const getresidents = (searchname) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * FROM resident`, null);
+        const data = yield con.Query(`SELECT * FROM resident WHERE CONCAT(first_name,' ',middle_name,' ',last_name) like concat('%',@SearchFullname,'%')`, {
+            SearchFullname: searchname
+        });
         con.Commit();
         return {
             success: true,
@@ -125,8 +127,81 @@ const getresidents = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
+const resetpassword = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_get_old_pass = yield con.QuerySingle(`SELECT AES_ENCRYPT(password,email)  FROM user WHERE password=AES_ENCRYPT(@currentpassword,@email)`, {
+            email: payload.email,
+            currentpassword: payload.currentpassword,
+        });
+        if (sql_get_old_pass != null) {
+            const sql_update_pass = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`, payload);
+            if (sql_update_pass > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                    message: "Your password has been reset!",
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "Something Went Wrong",
+                };
+            }
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "Incorrect Current Password",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const forgotpassword = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_update_pass = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`, payload);
+        if (sql_update_pass > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "Your password has been reset!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "Something Went Wrong",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addMobileResident,
-    getresidents
+    getresidents,
+    resetpassword,
+    forgotpassword
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map
