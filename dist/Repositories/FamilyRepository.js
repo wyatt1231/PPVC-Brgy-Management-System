@@ -16,6 +16,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
+        console.log(payload.fam_members);
         if (payload.fam_pk) {
             console.log(`fam  pk`);
         }
@@ -27,7 +28,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         });
         if (found_ulo_pamilya === null || found_ulo_pamilya === void 0 ? void 0 : found_ulo_pamilya.fam_pk) {
             payload.fam_pk = found_ulo_pamilya.fam_pk;
-            const sql_update_fam = yield con.Insert(`UPDATE family SET
+            const sql_update_fam = yield con.Modify(`UPDATE family SET
           okasyon_balay = @okasyon_balay,
           straktura = @straktura,
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
@@ -35,9 +36,12 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           kaligon_balay = @kaligon_balay
           WHERE fam_pk=@fam_pk;
           `, payload);
-            const truncate_fam_members = yield con.Modify(`Delete  from family_member where fam_pk=@fam_pk;`, {
-                fam_pk: payload.fam_pk,
-            });
+            // const truncate_fam_members = await con.Modify(
+            //   `Delete  from family_member where fam_pk=@fam_pk;`,
+            //   {
+            //     fam_pk: payload.fam_pk,
+            //   }
+            // );
             for (const fam of payload.fam_members) {
                 fam.encoded_by = payload.encoded_by;
                 fam.fam_pk = payload.fam_pk;

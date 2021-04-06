@@ -8,7 +8,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-
+console.log(payload.fam_members)
     if (payload.fam_pk) {
       console.log(`fam  pk`);
     } else {
@@ -24,7 +24,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
 
     if (found_ulo_pamilya?.fam_pk) {
       payload.fam_pk = found_ulo_pamilya.fam_pk;
-      const sql_update_fam = await con.Insert(
+      const sql_update_fam = await con.Modify(
         `UPDATE family SET
           okasyon_balay = @okasyon_balay,
           straktura = @straktura,
@@ -36,12 +36,12 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
         payload
       );
 
-      const truncate_fam_members = await con.Modify(
-        `Delete  from family_member where fam_pk=@fam_pk;`,
-        {
-          fam_pk: payload.fam_pk,
-        }
-      );
+      // const truncate_fam_members = await con.Modify(
+      //   `Delete  from family_member where fam_pk=@fam_pk;`,
+      //   {
+      //     fam_pk: payload.fam_pk,
+      //   }
+      // );
 
       for (const fam of payload.fam_members) {
         fam.encoded_by = payload.encoded_by;
