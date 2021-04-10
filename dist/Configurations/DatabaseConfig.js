@@ -8,11 +8,11 @@ const mysql2_1 = __importDefault(require("mysql2"));
 let con = null;
 if (process.env.NODE_ENV === "production") {
     con = {
-        host: "sql6.freemysqlhosting.net",
-        user: "sql6400894",
-        password: "R9R8CS57Mw",
-        database: "sql6400894",
-        port: 3306,
+        host: "204.2.195.101",
+        user: "admin",
+        password: "bmscaps01",
+        database: "bms",
+        port: 26880,
         connectionLimit: 10,
         waitForConnections: true,
     };
@@ -21,7 +21,7 @@ else {
     con = {
         host: "localhost",
         user: "root",
-        password: "rootsa",
+        password: "root sa",
         database: "bms",
         port: 3309,
         connectionLimit: 10,

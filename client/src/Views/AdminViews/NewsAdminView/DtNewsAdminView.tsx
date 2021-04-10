@@ -1,4 +1,4 @@
-import { Chip, Container, Grid } from "@material-ui/core";
+import { Button, Chip, Container, Grid } from "@material-ui/core";
 import moment from "moment";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +15,7 @@ import { NewsModel } from "../../../Services/Models/NewsModels";
 import { RootStore } from "../../../Services/Store";
 import AddNewsAdminView from "./AddNewsAdminView";
 import EditNewsAdminView from "./EditNewsAdminView";
+import FilterDtNewsAdminView from "./FilterDtNewsAdminView";
 import NewsCommentAdminView from "./NewsCommentAdminView";
 import { StyledNewsContainer } from "./styles";
 
@@ -120,7 +121,17 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
     <Container maxWidth="lg">
       <LinearLoadingProgress show={fetch_news_table} />
       <Grid container spacing={3}>
-        <Grid item xs={12} container justify="flex-end" alignItems="center">
+        <Grid
+          item
+          xs={12}
+          spacing={2}
+          container
+          justify="flex-end"
+          alignItems="center"
+        >
+          <Grid item>
+            <FilterDtNewsAdminView />
+          </Grid>
           <Grid item>
             <AddNewsAdminView />
           </Grid>

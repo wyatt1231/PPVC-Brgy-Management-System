@@ -1,18 +1,17 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Grid } from "@material-ui/core";
-import React, { FC, memo, useCallback, useEffect, useState } from "react";
+import React, { FC, memo, useCallback, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import CustomStepper from "../../../Component/CustomStepper/CustomStepper";
 import FormDialog from "../../../Component/FormDialog/FormDialog";
+import DateFieldHookForm from "../../../Component/HookForm/DateFieldHookForm";
 import DropzoneFieldHookForm from "../../../Component/HookForm/DropzoneFieldHookForm";
 import MultiRadioFieldHookForm from "../../../Component/HookForm/MultiRadioFieldHookForm";
+import SingleCheckboxHookForm from "../../../Component/HookForm/SingleCheckboxHookForm";
 import TextFieldHookForm from "../../../Component/HookForm/TextFieldHookForm";
 import ObjectToFormDataHelper from "../../../Helpers/ObjectToFormDataHelper";
-import NewsActions from "../../../Services/Actions/NewsActions";
-import { setGeneralPrompt } from "../../../Services/Actions/PageActions";
-import { NewsModel } from "../../../Services/Models/NewsModels";
 
 interface AddNewsAdminProps {}
 
@@ -26,6 +25,8 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
     title: "",
     audience: "",
     body: "",
+    priority: false,
+    occur_at: new Date(),
     uploaded_files: [],
   });
 
@@ -38,7 +39,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
   const form_add_news = useForm({
     resolver: yupResolver(validate_main_details),
     defaultValues: form_payload,
-    mode: "onBlur",
+    mode: "onChange",
   });
 
   const handleSetOpenNewsDialog = useCallback((open: boolean) => {
@@ -47,44 +48,85 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
 
   const Steps = [
     {
-      label: "Main Details",
+      label: "Punuan sa Detalya",
       View: (
         <div>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <MultiRadioFieldHookForm
                 name="audience"
-                label="Audience"
+                label="Para kinsa ang balita?"
                 radio_items={[
                   {
                     value: "r",
-                    label: "Residents Only",
+                    label: "Residente lang",
                   },
                   {
                     value: "b",
-                    label: "Brgy. Officials Only",
+                    label: "Mga Opisyal sa brgy lang",
                   },
                   {
                     value: "all",
-                    label: "All",
+                    label: "Tanan",
                   },
                 ]}
               />
             </Grid>
+
+            <Grid item xs={12}>
+              <DateFieldHookForm
+                type="date"
+                name="occur_at"
+                label="Unsang adlawa mahitabo?"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                clearable
+                disablePast={true}
+                fullWidth
+                // inputVariant="outlined"
+                autoOk
+                defaultValue={null}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              {/* <MultiRadioFieldHookForm
+                label="Importante o prayoridad ni nga balita"
+                name="sts_pk"
+                row={true}
+                radio_items={[
+                  {
+                    label: "Dili",
+                    value: "n",
+                  },
+                  {
+                    label: "Oo",
+                    value: "y",
+                  },
+                ]}
+              /> */}
+              <SingleCheckboxHookForm
+                label="Importante o prayoridad ni nga balita"
+                name="priority"
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <TextFieldHookForm
                 fullWidth
                 name="title"
-                label="News Title"
+                label="Titulo sa Balita"
                 InputLabelProps={{
                   shrink: true,
                 }}
               />
             </Grid>
+
             <Grid item xs={12}>
               <TextFieldHookForm
                 name="body"
-                label="News Content/Body"
+                label="Sulod sa balita"
                 fullWidth
                 multiline={true}
                 rows={4}
@@ -98,7 +140,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
       ),
     },
     {
-      label: "Files",
+      label: "Mga File",
       View: (
         <Grid item container>
           <Grid item xs={12}>
@@ -135,30 +177,30 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
 
   const handleSubmitForm = useCallback(
     (data) => {
-      if (active_step === Steps.length - 1) {
-        const payload = ObjectToFormDataHelper(data);
+      console.log(`payload`, data);
 
+      if (active_step === Steps.length - 1) {
         console.log(`data`, data);
+
+        const payload = ObjectToFormDataHelper(data);
 
         data?.uploaded_files?.forEach((f) => {
           payload.append("uploaded_files", f);
         });
 
-        console.log(`payload`, payload);
-
-        dispatch(
-          setGeneralPrompt({
-            open: true,
-            continue_callback: () =>
-              dispatch(
-                NewsActions.addNews(payload, () => {
-                  dispatch(NewsActions.setNewsDataTable());
-                  form_add_news.reset();
-                  handleSetOpenNewsDialog(false);
-                })
-              ),
-          })
-        );
+        // dispatch(
+        //   setGeneralPrompt({
+        //     open: true,
+        //     continue_callback: () =>
+        //       dispatch(
+        //         NewsActions.addNews(payload, () => {
+        //           dispatch(NewsActions.setNewsDataTable());
+        //           form_add_news.reset();
+        //           handleSetOpenNewsDialog(false);
+        //         })
+        //       ),
+        //   })
+        // );
       } else {
         handleNext();
       }
@@ -166,21 +208,24 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
     [active_step]
   );
 
-  useEffect(() => {
-    set_form_payload((prev) => {
-      return {
-        ...prev,
-        ...form_add_news.getValues(),
-      };
-    });
-  }, [active_step]);
+  // useEffect(() => {
+  //   if (active_step > 0) {
+  //     alert(`.`);
+  //     set_form_payload((prev) => {
+  //       return {
+  //         ...prev,
+  //         ...form_add_news.getValues(),
+  //       };
+  //     });
+  //   }
+  // }, [active_step]);
 
-  useEffect(() => {
-    form_add_news.reset({
-      form_payload,
-      ...form_add_news.getValues(),
-    });
-  }, [form_payload]);
+  // useEffect(() => {
+  //   form_add_news.reset({
+  //     form_payload,
+  //     ...form_add_news.getValues(),
+  //   });
+  // }, [form_payload]);
 
   return (
     <div>
@@ -191,10 +236,10 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
           handleSetOpenNewsDialog(true);
         }}
       >
-        Create News
+        Pagbuhat og Balita
       </Button>
       <FormDialog
-        title="News Publishing Form"
+        title="Porma sa pagbuhat og balita"
         handleClose={() => handleSetOpenNewsDialog(false)}
         open={open_add_news_dialog}
         minWidth={500}
@@ -219,7 +264,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
               }}
               variant="contained"
             >
-              Reset
+              Usabon
             </Button>
             <Button
               onClick={() => {
@@ -229,7 +274,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
               variant="contained"
               color="secondary"
             >
-              Back
+              Balik
             </Button>
             <Button
               variant="contained"
@@ -237,7 +282,7 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(() => {
               color="primary"
               type="submit"
             >
-              {active_step === Steps.length - 1 ? `Submit` : "Next"}
+              {active_step === Steps.length - 1 ? `Ipasa` : "Sunod"}
             </Button>
           </>
         }

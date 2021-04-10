@@ -273,12 +273,12 @@ tr td {
   /* font-size: 0.95em; */
 }
 
-.MuiChip-label {
+/* .MuiChip-label {
   font-weight: 600 !important;
   font-family: Nunito !important;
   letter-spacing: 0.3pt;
   word-spacing: 0.3pt;
-}
+} */
 
 .form-title {
   padding: 0.5em 0;
@@ -330,12 +330,12 @@ tr td {
   font-weight: 700;
 }
 
-.MuiChip-label {
+/* .MuiChip-label {
   font-weight: 900 !important;
   font-size: 0.87em !important;
   letter-spacing: 0.3pt !important;
   word-spacing: 0.3pt !important;
-}
+} */
 
 .title {
   padding: 0.3em 0;

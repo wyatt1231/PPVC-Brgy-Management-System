@@ -300,7 +300,7 @@ const getSinglePostWithPhoto = (posts_pk) => __awaiter(void 0, void 0, void 0, f
         (    
     SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
           ,u.full_name user_full_name,u.pic user_pic FROM posts p
-          LEFT JOIN STATUS s ON p.sts_pk = s.sts_pk 
+          LEFT JOIN status s ON p.sts_pk = s.sts_pk 
           LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
         `, {
             posts_pk: posts_pk,

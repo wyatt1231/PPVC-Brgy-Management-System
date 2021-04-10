@@ -123,8 +123,6 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
       (store: RootStore) => store.ResidentReducer.resident_data_table?.table
     );
 
-    console.log(`data_table res`, data_table);
-
     const [
       tableSearch,
       tableLimit,
