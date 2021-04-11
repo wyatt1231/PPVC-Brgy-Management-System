@@ -16,7 +16,6 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        console.log(payload.fam_members);
         if (payload.fam_pk) {
             console.log(`fam  pk`);
         }
@@ -28,7 +27,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         });
         if (found_ulo_pamilya === null || found_ulo_pamilya === void 0 ? void 0 : found_ulo_pamilya.fam_pk) {
             payload.fam_pk = found_ulo_pamilya.fam_pk;
-            const sql_update_fam = yield con.Modify(`UPDATE family SET
+            const sql_update_fam = yield con.Insert(`UPDATE family SET
           okasyon_balay = @okasyon_balay,
           straktura = @straktura,
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
@@ -36,10 +35,16 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           kaligon_balay = @kaligon_balay
           WHERE fam_pk=@fam_pk;
           `, payload);
+<<<<<<< HEAD
             const truncate_fam_members = yield con.Modify(` Delete  from family_member where fam_pk=@fam_pk;`, {
                 fam_pk: payload.fam_pk,
             });
             console.log("members" + JSON.stringify(payload.fam_members));
+=======
+            const truncate_fam_members = yield con.Modify(`Delete  from family_member where fam_pk=@fam_pk;`, {
+                fam_pk: payload.fam_pk,
+            });
+>>>>>>> 83cd7ecfac0fb87c975a8902e38d1f5f246af5dd
             for (const fam of payload.fam_members) {
                 fam.encoded_by = payload.encoded_by;
                 fam.fam_pk = payload.fam_pk;
@@ -189,9 +194,59 @@ const getAllFamily = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
+const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const all_family = yield con.QuerySingle(`
+      SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
+        `, {
+            resident_pk: resident_pk,
+        });
+        if (!all_family) {
+            con.Rollback();
+            return {
+                success: true,
+                data: null,
+            };
+        }
+        all_family.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk;`, {
+            resident_pk: all_family.ulo_pamilya,
+        });
+        if ((_a = all_family === null || all_family === void 0 ? void 0 : all_family.ulo_pamilya_info) === null || _a === void 0 ? void 0 : _a.pic) {
+            all_family.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(all_family.ulo_pamilya_info.pic);
+        }
+        all_family.fam_members = yield con.Query(`
+            SELECT * FROM family_member WHERE fam_pk = @fam_pk
+            `, {
+            fam_pk: all_family.fam_pk,
+        });
+        for (const fm of all_family.fam_members) {
+            fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
+                resident_pk: fm.resident_pk,
+            });
+            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: all_family,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addFamily,
     getSingleFamily,
     getAllFamily,
+    getFamilyOfResident,
 };
 //# sourceMappingURL=FamilyRepository.js.map

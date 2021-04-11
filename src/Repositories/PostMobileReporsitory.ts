@@ -19,25 +19,13 @@ const getPosts = async (): Promise<ResponseModel> => {
       `
         SELECT * FROM 
       (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic FROM posts p
+        ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" ORDER BY p.encoded_at DESC)tmp;
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
         `,
       null
     );
-    for (const posts_reaction of data) {
-      posts_reaction.reactions = await con.Query(
-        `
-        SELECT COUNT(reaction)as likes FROM posts_reaction WHERE posts_pk=@posts_pk
-      `,
-        {
-          posts_pk: posts_reaction.posts_pk,
-        }
-      );
-    }
-
-
     for (const file of data) {
       const sql_get_pic = await con.QuerySingle(
         `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
@@ -80,25 +68,15 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
         `
           SELECT * FROM 
         (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
-          ,u.full_name user_full_name,u.pic user_pic FROM posts p
+          ,u.full_name user_full_name,u.pic user_pic,COUNT( pr.reaction)likes FROM posts p
           LEFT JOIN status s ON p.sts_pk = s.sts_pk 
           LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk ORDER BY p.encoded_at DESC)tmp;
+          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
           `,
         {
           user_pk,
         }
       );
-      for (const posts_reaction of data) {
-        posts_reaction.reactions = await con.Query(
-          `
-          SELECT COUNT(reaction)as likes FROM posts_reaction WHERE posts_pk=@posts_pk
-        `,
-          {
-            posts_pk: posts_reaction.posts_pk,
-          }
-        );
-      }
       for (const file of data) {
         const sql_get_pic = await con.QuerySingle(
           `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,

@@ -4,16 +4,19 @@ import NewsApi from "../Api/NewsApi";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
+import { ScrollPaginationModel } from "../Models/PaginationModels";
 import { NewsReducerTypes } from "../Types/NewsTypes";
 import { PageReducerTypes } from "../Types/PageTypes";
 
-const setNewsDataTable = () => async (dispatch: Dispatch<NewsReducerTypes>) => {
+const setNewsDataTable = (payload: ScrollPaginationModel) => async (
+  dispatch: Dispatch<NewsReducerTypes>
+) => {
   try {
     dispatch({
       type: "fetch_news_table",
       fetch_news_table: true,
     });
-    const response: IServerResponse = await NewsApi.getNewsDataTable();
+    const response: IServerResponse = await NewsApi.getNewsDataTable(payload);
 
     if (response.success) {
       dispatch({

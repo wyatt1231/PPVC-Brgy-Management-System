@@ -2,7 +2,6 @@ import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
 import { AdministratorModel } from "../Models/AdministratorModels";
 import { PaginationModel } from "../Models/PaginationModel";
-import { ForgotPass, SearchResident } from "../Models/ResidentModels";
 import { UserClaims } from "../Models/UserModels";
 import ResidentMobileRepository from "../Repositories/ResidentMobileRepository";
 
@@ -19,24 +18,10 @@ router.post(
 router.post(
     "/getresidents",
     async (req: Request & UserClaims, res: Response) => {
-      const searchname: string = req.body.searchname;
-      res.json(await ResidentMobileRepository.getresidents(searchname));
+      res.json(await ResidentMobileRepository.getresidents());
     }
   );
-router.post(
-    "/updatepassword",
-    async (req: Request & UserClaims, res: Response) => {
-      const payload: ForgotPass = req.body;
-      res.json(await ResidentMobileRepository.resetpassword(payload));
-    }
-  );
-router.post(
-    "/forgotpassword",
-    async (req: Request & UserClaims, res: Response) => {
-      const payload: ForgotPass = req.body;
-      res.json(await ResidentMobileRepository.forgotpassword(payload));
-    }
-  );
+  
   app.use("/api/residentmobile/", router);
 };
 

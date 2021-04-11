@@ -34,6 +34,14 @@ const ResidentController = async (app: Express): Promise<void> => {
       res.json(await ResidentRepository.updateResident(payload, req.user_pk));
     }
   );
+  router.post(
+    "/toggleResidentStatus",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const resident_pk: number = req.body.resident_pk;
+      res.json(await ResidentRepository.toggleResidentStatus(resident_pk));
+    }
+  );
 
   router.post(
     "/getSingleResident",

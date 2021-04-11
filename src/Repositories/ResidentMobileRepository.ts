@@ -5,7 +5,7 @@ import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
 import { GenerateSearch } from "../Hooks/useSearch";
 import { isValidPicture } from "../Hooks/useValidator";
 import { PaginationModel } from "../Models/PaginationModel";
-import { ForgotPass, ResidentModel, SearchResident } from "../Models/ResidentModels";
+import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
 
@@ -90,20 +90,20 @@ const addMobileResident = async (
           con.Commit();
           return {
             success: true,
-            message: "Successfully Registered",
+            message: "The resident has been added successfully",
           };
         } else {
           con.Rollback();
           return {
             success: false,
-            message: "Registration Failed. Try Again Later",
+            message: "No affected rows while adding the resident",
           };
         }
       } else {
         con.Rollback();
         return {
           success: false,
-          message: "Registration Failed. Try Again Later",
+          message: "No affected rows while adding the user",
         };
       }
     } catch (error) {
@@ -118,18 +118,15 @@ const addMobileResident = async (
 
   
 const getresidents = async (
-  searchname:string
   ): Promise<ResponseModel> => {
     const con = await DatabaseConnection();
     try {
       await con.BeginTransaction();
   
-      const data: Array<SearchResident> = await con.Query(
-        `SELECT * FROM resident WHERE CONCAT(first_name,' ',middle_name,' ',last_name) like concat('%',@SearchFullname,'%')`,
+      const data: Array<ResidentModel> = await con.Query(
+        `SELECT * FROM resident`,
         
-            {
-              SearchFullname:searchname
-            }
+            null
         
       );
      
@@ -148,105 +145,8 @@ const getresidents = async (
       };
     }
   };
-  
-const resetpassword = async (
-    payload: ForgotPass,
-  ): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-   
-    try {
-      await con.BeginTransaction();
-     
-      const sql_get_old_pass = await con.QuerySingle(
-        `SELECT AES_ENCRYPT(password,email)  FROM user WHERE password=AES_ENCRYPT(@currentpassword,@email)`,
-        {
-          email:  payload.email,
-          currentpassword:  payload.currentpassword,
-        }
-      );
-   
- if(sql_get_old_pass!=null){
-  const sql_update_pass = await con.Modify(
-    `UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`,
-    payload
-  );
-
-  if (sql_update_pass > 0) {
-    con.Commit();
-    return {
-      success: true,
-      message: "Your password has been reset!",
-    };
-  } else {
-    con.Rollback();
-    return {
-      success: false,
-      message:
-        "Something Went Wrong",
-    };
-  }
- }else {
-  con.Rollback();
-  return {
-    success: false,
-    message:
-      "Incorrect Current Password",
-  };
-}
-     
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
-    }
-  };
-
-const forgotpassword = async (
-    payload: ForgotPass,
-  ): Promise<ResponseModel> => {
-    const con = await DatabaseConnection();
-   
-    try {
-      await con.BeginTransaction();
-     
-   
-  const sql_update_pass = await con.Modify(
-    `UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`,
-    payload
-  );
-
-  if (sql_update_pass > 0) {
-    con.Commit();
-    return {
-      success: true,
-      message: "Your password has been reset!",
-    };
-  } else {
-    con.Rollback();
-    return {
-      success: false,
-      message:
-        "Something Went Wrong",
-    };
-  }
- 
-     
-    } catch (error) {
-      await con.Rollback();
-      console.error(`error`, error);
-      return {
-        success: false,
-        message: ErrorMessage(error),
-      };
-    }
-  };
 export default {
     addMobileResident,
-    getresidents,
-    resetpassword,
-    forgotpassword
+    getresidents
 
   };

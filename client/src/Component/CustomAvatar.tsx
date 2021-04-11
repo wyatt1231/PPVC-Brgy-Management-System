@@ -7,10 +7,11 @@ interface ICustomAvatar {
   variant?: "circle" | "rounded" | "square";
   height?: number;
   width?: number;
+  style?: React.CSSProperties;
 }
 
 const CustomAvatar: React.FC<ICustomAvatar> = memo(
-  ({ src, errorMessage, className, variant, height, width }) => {
+  ({ src, errorMessage, className, variant, height, width, style }) => {
     const theme: any = useTheme();
     return src === "" ||
       src === "null" ||
@@ -24,6 +25,7 @@ const CustomAvatar: React.FC<ICustomAvatar> = memo(
           width: theme.spacing(width ? width : 5),
           backgroundColor: theme.palette.primary.main,
           color: theme.palette.secondary.contrastText,
+          ...style,
         }}
       >
         <div
@@ -45,6 +47,7 @@ const CustomAvatar: React.FC<ICustomAvatar> = memo(
         style={{
           height: theme.spacing(height ? height : 5),
           width: theme.spacing(width ? width : 5),
+          ...style,
         }}
         src={`data:image/jpg;base64,${src}`}
       />

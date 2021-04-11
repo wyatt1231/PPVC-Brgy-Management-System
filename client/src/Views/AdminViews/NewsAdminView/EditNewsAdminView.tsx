@@ -6,9 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import CircularLoadingProgress from "../../../Component/CircularLoadingProgress";
 import FormDialog from "../../../Component/FormDialog/FormDialog";
+import DateFieldHookForm from "../../../Component/HookForm/DateFieldHookForm";
 import MultiRadioFieldHookForm from "../../../Component/HookForm/MultiRadioFieldHookForm";
+import SingleCheckboxHookForm from "../../../Component/HookForm/SingleCheckboxHookForm";
 import TextFieldHookForm from "../../../Component/HookForm/TextFieldHookForm";
 import LoadingButton from "../../../Component/LoadingButton";
+import { InvalidDateToDefault } from "../../../Hooks/UseDateParser";
 import NewsActions from "../../../Services/Actions/NewsActions";
 import { setGeneralPrompt } from "../../../Services/Actions/PageActions";
 import { NewsModel } from "../../../Services/Models/NewsModels";
@@ -18,6 +21,7 @@ interface EditNewsAdminProps {
   news_pk: number;
   open: boolean;
   handleSetOpen: (open: boolean) => void;
+  handleRefetchTable: () => void;
 }
 const validate_main_details: any = yup.object({
   audience: yup.string().required().label("Audience"),
@@ -26,7 +30,7 @@ const validate_main_details: any = yup.object({
 });
 
 export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
-  ({ news_pk, open, handleSetOpen }) => {
+  ({ news_pk, open, handleSetOpen, handleRefetchTable }) => {
     const dispatch = useDispatch();
 
     const single_news = useSelector(
@@ -57,7 +61,9 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
             continue_callback: () =>
               dispatch(
                 NewsActions.updateNews(payload, () => {
-                  dispatch(NewsActions.setNewsDataTable());
+                  // dispatch(NewsActions.setNewsDataTable());
+                  handleRefetchTable();
+                  dispatch(NewsActions.setSingleNews(news_pk));
                   form_edit_news.reset();
                   handleSetOpen(false);
                 })
@@ -75,6 +81,8 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
           title: single_news.title,
           body: single_news.body,
           audience: single_news.audience,
+          is_prio: single_news.is_prio === 1 ? true : false,
+          pub_date: InvalidDateToDefault(single_news.pub_date, null),
         });
       }
     }, [single_news]);
@@ -102,6 +110,78 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
                     id="form_edit_news"
                   >
                     <div>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          <MultiRadioFieldHookForm
+                            name="audience"
+                            label="Para kinsa ang balita?"
+                            radio_items={[
+                              {
+                                value: "r",
+                                label: "Residente lang",
+                              },
+                              {
+                                value: "b",
+                                label: "Mga Opisyal sa brgy lang",
+                              },
+                              {
+                                value: "all",
+                                label: "Tanan",
+                              },
+                            ]}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <DateFieldHookForm
+                            type="date"
+                            name="pub_date"
+                            label="Unsang adlawa mahitabo?"
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            clearable
+                            disablePast={true}
+                            fullWidth
+                            // inputVariant="outlined"
+                            autoOk
+                            defaultValue={null}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <SingleCheckboxHookForm
+                            label="Importante o prayoridad ni nga balita?"
+                            name="is_prio"
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <TextFieldHookForm
+                            fullWidth
+                            name="title"
+                            label="Ulo sa Balita"
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <TextFieldHookForm
+                            name="body"
+                            label="Sulod sa balita"
+                            fullWidth
+                            multiline={true}
+                            rows={4}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+
+                      {/*                       
                       <Grid container spacing={2}>
                         <Grid item xs={12}>
                           <MultiRadioFieldHookForm
@@ -146,6 +226,7 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
                           />
                         </Grid>
                       </Grid>
+                    */}
                     </div>
                   </form>
                 </FormProvider>

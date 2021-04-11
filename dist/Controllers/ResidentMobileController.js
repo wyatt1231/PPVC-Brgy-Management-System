@@ -21,16 +21,7 @@ const ResidentMobileController = (app) => __awaiter(void 0, void 0, void 0, func
         res.json(yield ResidentMobileRepository_1.default.addMobileResident(payload));
     }));
     router.post("/getresidents", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const searchname = req.body.searchname;
-        res.json(yield ResidentMobileRepository_1.default.getresidents(searchname));
-    }));
-    router.post("/updatepassword", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield ResidentMobileRepository_1.default.resetpassword(payload));
-    }));
-    router.post("/forgotpassword", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield ResidentMobileRepository_1.default.forgotpassword(payload));
+        res.json(yield ResidentMobileRepository_1.default.getresidents());
     }));
     app.use("/api/residentmobile/", router);
 });

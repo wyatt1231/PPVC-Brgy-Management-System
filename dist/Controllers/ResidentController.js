@@ -29,6 +29,10 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
         const payload = req.body;
         res.json(yield ResidentRepository_1.default.updateResident(payload, req.user_pk));
     }));
+    router.post("/toggleResidentStatus", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const resident_pk = req.body.resident_pk;
+        res.json(yield ResidentRepository_1.default.toggleResidentStatus(resident_pk));
+    }));
     router.post("/getSingleResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const resident_pk = req.body.resident_pk;
         res.json(yield ResidentRepository_1.default.getSingleResident(resident_pk));

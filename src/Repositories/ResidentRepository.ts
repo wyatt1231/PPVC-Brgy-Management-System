@@ -56,6 +56,8 @@ const addResident = async (
         user_pk: sql_insert_user.insertedId,
         encoder_pk: user_pk,
         birth_date: parseInvalidDateToDefault(payload.birth_date),
+        died_date: parseInvalidDateToDefault(payload.died_date),
+        resident_date: parseInvalidDateToDefault(payload.resident_date),
       };
 
       const sql_add_resident = await con.Insert(
@@ -82,7 +84,11 @@ const addResident = async (
          house_income=@house_income,     
          house_status=@house_status,     
          voting_precinct=@voting_precinct,  
-         house_ownership=@house_ownership,  
+         house_ownership=@house_ownership,
+         kita=@kita,
+         educ=@educ,  
+         resident_date=@resident_date,  
+         died_date=@died_date,  
          sts_pk='A',
          encoder_pk=@encoder_pk;`,
         resident_payload
@@ -126,6 +132,22 @@ const updateResident = async (
   try {
     await con.BeginTransaction();
 
+    const user_payload: UserModel = {
+      full_name: `${payload.last_name}, ${payload.first_name}`,
+      email: payload.email,
+      encoder_pk: user_pk,
+    };
+
+    const update_user = await con.Insert(
+      `UPDATE user SET
+      email=@email,
+      password=AES_ENCRYPT(@email,@email),
+      full_name=@full_name
+      where user_pk=@encoder_pk;
+      `,
+      user_payload
+    );
+
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
         base_url: "./src/Storage/Files/Images/",
@@ -144,34 +166,40 @@ const updateResident = async (
     const resident_payload: ResidentModel = {
       ...payload,
       encoder_pk: user_pk,
+      birth_date: parseInvalidDateToDefault(payload.birth_date),
+      died_date: parseInvalidDateToDefault(payload.died_date),
+      resident_date: parseInvalidDateToDefault(payload.resident_date),
     };
 
     const sql_edit_resident = await con.Modify(
       `UPDATE resident SET
+        user_pk=@user_pk,
+        pic=@pic,              
         first_name=@first_name,       
         middle_name=@middle_name,      
         last_name=@last_name,        
-        prefix=@prefix,           
+        suffix=@suffix,           
         gender=@gender,           
         birth_date=@birth_date,       
         nationality=@nationality,      
         religion=@religion,         
         civil_status=@civil_status,  
-        dialect=@dialect,          
-        tribe=@tribe,  
-        with_disability=@with_disability,  
-
         purok=@purok,   
         phone=@phone,    
         email=@email,  
-        voting_precinct=@voting_precinct,  
-
+        dialect=@dialect,          
+        tribe=@tribe,            
+        with_disability=@with_disability,  
         is_employed=@is_employed,      
         employment=@employment,       
         house_income=@house_income,     
         house_status=@house_status,     
-        house_ownership=@house_ownership,  
-        encoder_pk=@encoder_pk
+        voting_precinct=@voting_precinct,  
+        house_ownership=@house_ownership,
+        kita=@kita,
+        educ=@educ,  
+        resident_date=@resident_date,  
+        died_date=@died_date
         WHERE resident_pk=@resident_pk;`,
       resident_payload
     );
@@ -181,6 +209,45 @@ const updateResident = async (
       return {
         success: true,
         message: "The resident has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const toggleResidentStatus = async (
+  resident_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_edit_resident = await con.Modify(
+      `UPDATE resident SET
+        sts_pk=if(sts_pk = 'A' , 'X', 'A') 
+        WHERE resident_pk=@resident_pk;`,
+      {
+        resident_pk: resident_pk,
+      }
+    );
+
+    if (sql_edit_resident > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The resident status has been updated successfully",
       };
     } else {
       con.Rollback();
@@ -268,7 +335,7 @@ const getSingleResident = async (
   try {
     await con.BeginTransaction();
 
-    const data = await con.QuerySingle(
+    const data: ResidentModel = await con.QuerySingle(
       `SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc  FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk where r.resident_pk =@resident_pk`,
       {
@@ -277,6 +344,13 @@ const getSingleResident = async (
     );
 
     data.pic = await GetUploadedImage(data.pic);
+
+    data.status = await con.QuerySingle(
+      `select * from status where sts_pk = @sts_pk;`,
+      {
+        sts_pk: data.sts_pk,
+      }
+    );
 
     con.Commit();
     return {
@@ -328,4 +402,5 @@ export default {
   getDataTableResident,
   getSingleResident,
   searchResident,
+  toggleResidentStatus,
 };

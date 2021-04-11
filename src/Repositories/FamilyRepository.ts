@@ -8,7 +8,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-console.log(payload.fam_members)
+
     if (payload.fam_pk) {
       console.log(`fam  pk`);
     } else {
@@ -24,7 +24,7 @@ console.log(payload.fam_members)
 
     if (found_ulo_pamilya?.fam_pk) {
       payload.fam_pk = found_ulo_pamilya.fam_pk;
-      const sql_update_fam = await con.Modify(
+      const sql_update_fam = await con.Insert(
         `UPDATE family SET
           okasyon_balay = @okasyon_balay,
           straktura = @straktura,
@@ -37,12 +37,11 @@ console.log(payload.fam_members)
       );
 
       const truncate_fam_members = await con.Modify(
-        ` Delete  from family_member where fam_pk=@fam_pk;`,
+        `Delete  from family_member where fam_pk=@fam_pk;`,
         {
           fam_pk: payload.fam_pk,
         }
       );
-        console.log("members"+JSON.stringify(payload.fam_members))
       for (const fam of payload.fam_members) {
         fam.encoded_by = payload.encoded_by;
         fam.fam_pk = payload.fam_pk;
@@ -239,8 +238,81 @@ const getAllFamily = async (): Promise<ResponseModel> => {
   }
 };
 
+const getFamilyOfResident = async (
+  resident_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const all_family: FamilyModel = await con.QuerySingle(
+      `
+      SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
+        `,
+      {
+        resident_pk: resident_pk,
+      }
+    );
+
+    if (!all_family) {
+      con.Rollback();
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
+    all_family.ulo_pamilya_info = await con.QuerySingle(
+      `select * from resident where resident_pk=@resident_pk;`,
+      {
+        resident_pk: all_family.ulo_pamilya,
+      }
+    );
+
+    if (all_family?.ulo_pamilya_info?.pic) {
+      all_family.ulo_pamilya_info.pic = await GetUploadedImage(
+        all_family.ulo_pamilya_info.pic
+      );
+    }
+
+    all_family.fam_members = await con.Query(
+      `
+            SELECT * FROM family_member WHERE fam_pk = @fam_pk
+            `,
+      {
+        fam_pk: all_family.fam_pk,
+      }
+    );
+
+    for (const fm of all_family.fam_members) {
+      fm.resident_info = await con.QuerySingle(
+        `select * from resident where resident_pk = @resident_pk`,
+        {
+          resident_pk: fm.resident_pk,
+        }
+      );
+
+      fm.resident_info.pic = await GetUploadedImage(fm.resident_info.pic);
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: all_family,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   addFamily,
   getSingleFamily,
   getAllFamily,
+  getFamilyOfResident,
 };

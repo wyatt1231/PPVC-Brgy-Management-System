@@ -28,7 +28,17 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     }));
     router.post("/getNewsDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield NewsRepository_1.default.getNewsDataTable());
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.getNewsDataTable(payload));
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
+    router.post("/getNewsFiles", Authorize_1.default(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.getNewsFiles(payload));
         }
         catch (error) {
             res.json(error);

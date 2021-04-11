@@ -123,8 +123,6 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
       (store: RootStore) => store.ResidentReducer.resident_data_table?.table
     );
 
-    console.log(`data_table res`, data_table);
-
     const [
       tableSearch,
       tableLimit,
@@ -369,10 +367,10 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                                     })
                                   ),
                               },
-                              {
-                                text: "I-butang na opisyal sa Brgy",
-                                handleClick: () => console.log(`sad`),
-                              },
+                              // {
+                              //   text: "I-butang na opisyal sa Brgy",
+                              //   handleClick: () => console.log(`sad`),
+                              // },
                             ]}
                           />
                         </TableCell>
