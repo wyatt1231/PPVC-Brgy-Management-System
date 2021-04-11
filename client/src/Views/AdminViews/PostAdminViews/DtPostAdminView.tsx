@@ -93,7 +93,7 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
                 style={{
                   display: `grid`,
                   gridGap: `1em`,
-                  padding: `0 5em`,
+                  padding: `1em`,
                 }}
               >
                 {posts?.map((p, i) => (

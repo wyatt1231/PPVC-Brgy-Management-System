@@ -1,15 +1,15 @@
 import styled from "styled-components";
 
 export const StyledPostItem = styled.div`
-  padding: 1em;
+  padding: 0.5em;
   background-color: #fff;
-  border-radius: 7px;
   align-items: start;
   align-content: start;
   display: grid;
   grid-gap: 0.7em;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  border: 0.01em solid rgba(0, 0, 0, 0.1);
+  margin: 0.5em 1em;
+  /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); */
+  border-bottom: 0.1em solid rgba(0, 0, 0, 0.3);
   .header {
     display: grid;
     grid-auto-columns: auto 1fr;
@@ -46,6 +46,9 @@ export const StyledPostItem = styled.div`
       align-items: center;
       align-content: center;
       justify-content: start;
+      justify-items: start;
+      width: 100%;
+
       font-size: 0.85em;
     }
 

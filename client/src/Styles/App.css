@@ -332,8 +332,12 @@ tr td {
 
 .error {
   color: red;
-  font-size: 0.7em;
+  font-size: 1em;
   font-weight: 700;
+  display: grid;
+  width: 100%;
+  padding: 1em;
+  text-align: center;
 }
 
 /* .MuiChip-label {

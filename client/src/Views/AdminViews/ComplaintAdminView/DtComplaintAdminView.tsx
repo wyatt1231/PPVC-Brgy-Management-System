@@ -85,33 +85,31 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
   return (
     <Container maxWidth="lg">
       <LinearLoadingProgress show={fetch_complaint_table} />
-      <Grid container spacing={3}>
-        <Grid item xs={12} container justify="flex-end" alignItems="center">
-          <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleOpenFilterDialog(true)}
-            >
-              Pagsala
-            </Button>
-          </Grid>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={3}>
+          <FilterDtComplaintAdminView
+            handleSetTableFilter={handleSetTableFilter}
+            table_filter={table_filter}
+            handleRefetchTable={handleRefetchTable}
+          />
         </Grid>
 
-        <Grid item xs={12}>
-          <Container
-            maxWidth="sm"
+        <Grid item xs={12} md={9}>
+          <div
             style={{
               minHeight: `100vh`,
               backgroundColor: `#fff`,
               borderRadius: `7px`,
-              padding: `.5em `,
+              padding: `1em `,
               display: `grid`,
-              gridGap: `1em`,
+              gridGap: `1.5em`,
               alignContent: `start`,
               alignItems: `start`,
             }}
           >
+            {complaint_table?.length <= 0 && (
+              <div className="error">No complaints found!!!</div>
+            )}
             {complaint_table?.map((comp, index) => (
               <StyledComplaintItem key={index}>
                 <div className="header">
@@ -157,20 +155,9 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
                 <div className="body">{comp?.body}</div>
               </StyledComplaintItem>
             ))}
-          </Container>
+          </div>
         </Grid>
       </Grid>
-
-      {table_filter.filters && open_filter_dialog && (
-        <FilterDtComplaintAdminView
-          handleSetTableFilter={handleSetTableFilter}
-          table_filter={table_filter}
-          handleRefetchTable={handleRefetchTable}
-          open_filter_dialog={open_filter_dialog}
-          handleOpenFilterDialog={handleOpenFilterDialog}
-          // handleCloseFilterDialog={handleCloseFilterDialog}
-        />
-      )}
     </Container>
   );
 });

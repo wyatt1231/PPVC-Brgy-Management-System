@@ -151,10 +151,10 @@ export const PostReaction: FC<IPostReaction> = memo(({ posts_pk }) => {
         <>
           <div className="reactions">
             <div className="stats">
-              <div className="stats-item">
+              <div className="react-stats-item">
                 <b>{total_likes}</b> Likes
               </div>
-              <div className="stats-item">
+              <div className="react-stats-item">
                 <b>{comments?.length}</b> Comments
               </div>
             </div>

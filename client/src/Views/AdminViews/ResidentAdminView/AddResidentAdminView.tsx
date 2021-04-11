@@ -404,6 +404,14 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                           id: "6",
                           label: "Purok 6",
                         },
+                        {
+                          id: "7",
+                          label: "Purok 7",
+                        },
+                        {
+                          id: "8",
+                          label: "Purok 8",
+                        },
                       ]}
                     />
                   </Grid>

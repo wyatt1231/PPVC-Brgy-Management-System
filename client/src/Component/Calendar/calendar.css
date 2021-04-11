@@ -30,11 +30,13 @@
 }
 
 .fc-button {
-  background-color: #581b98 !important;
-  font-size: 0.8em !important;
+  background-color: #ff5959 !important;
+  font-size: 0.87em !important;
   text-transform: uppercase !important;
-  padding: 0.5em 1em !important;
+  padding: 0.6em 1em !important;
   opacity: 1 !important;
+  border-radius: 25px !important;
+  border: none !important;
 }
 
 .fc-header-toolbar.fc-toolbar {

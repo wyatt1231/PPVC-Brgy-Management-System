@@ -6,6 +6,8 @@ export const StyledNewsContainer = styled(Container)`
   grid-gap: 1em !important;
   width: 100%;
   padding: 0.5em 1em;
+  margin: 0 1em;
+  border-bottom: 0.05em solid rgba(0, 0, 0, 0.2);
 
   .news-item {
     padding: 1em;

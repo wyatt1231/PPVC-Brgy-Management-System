@@ -166,139 +166,145 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
   return (
     <Container maxWidth="lg">
       <Grid container spacing={3}>
-        <Grid item xs={6}>
-          <CustomButtonGroup
-            color="secondary"
-            getViewValue={handleSetView}
-            buttons={[
-              {
-                onClick: () => console.log(`1`),
-                text: "Timeline View",
-              },
-              {
-                onClick: () => console.log(`2`),
-                text: "Calendar View",
-              },
-            ]}
+        <Grid item xs={12} md={3}>
+          <FilterDtNewsAdminView
+            handleSetTableFilter={handleSetTableFilter}
+            table_filter={table_filter}
+            handleRefetchTable={handleRefetchTable}
           />
         </Grid>
-        <Grid
-          item
-          xs={6}
-          spacing={2}
-          container
-          justify="flex-end"
-          alignItems="center"
-        >
-          <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleOpenFilterDialog(true)}
-            >
-              Pagsala
-            </Button>
-          </Grid>
-          <Grid item>
-            <AddNewsAdminView handleRefetchTable={handleRefetchTable} />
-          </Grid>
-        </Grid>
+        <Grid item xs={12} md={9}>
+          <div
+            style={{
+              minHeight: `100vh`,
+              backgroundColor: `#fff`,
+              borderRadius: `7px`,
+              padding: `1em `,
+              display: `grid`,
+              gridGap: `1.5em`,
+              alignContent: `start`,
+              alignItems: `start`,
+            }}
+          >
+            <Grid container>
+              <Grid item xs={12} md={6}>
+                <CustomButtonGroup
+                  color="secondary"
+                  getViewValue={handleSetView}
+                  buttons={[
+                    {
+                      onClick: () => console.log(`1`),
+                      text: "Timeline View",
+                    },
+                    {
+                      onClick: () => console.log(`2`),
+                      text: "Calendar View",
+                    },
+                  ]}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                spacing={2}
+                container
+                justify="flex-end"
+                alignItems="center"
+              >
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleOpenFilterDialog(true)}
+                  >
+                    Pagsala
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <AddNewsAdminView handleRefetchTable={handleRefetchTable} />
+                </Grid>
+              </Grid>
 
-        <Grid item xs={12}>
-          <LinearLoadingProgress show={fetch_news_table} />
+              <Grid item xs={12}>
+                <LinearLoadingProgress show={fetch_news_table} />
 
-          {view === 0 ? (
-            news_table?.map((news, index) => (
-              <StyledNewsContainer key={index} maxWidth={"sm"}>
-                <div className="news-item">
-                  <div className="header">
-                    <div className="profile">
-                      <CustomAvatar
-                        className="img"
-                        src={news.user.pic}
-                        errorMessage={news?.user?.full_name?.charAt(0)}
-                      />
-                      <div className="name">{news?.user?.full_name}</div>
-                      <div className="time">
-                        {moment(news?.encoded_at).fromNow()}
+                {view === 0 ? (
+                  news_table?.map((news, index) => (
+                    <StyledNewsContainer key={index}>
+                      <div className="news-item">
+                        <div className="header">
+                          <div className="profile">
+                            <CustomAvatar
+                              className="img"
+                              src={news.user.pic}
+                              errorMessage={news?.user?.full_name?.charAt(0)}
+                            />
+                            <div className="name">{news?.user?.full_name}</div>
+                            <div className="time">
+                              {moment(news?.encoded_at).fromNow()}
+                            </div>
+                          </div>
+                          <div className="actions">
+                            <IconButtonPopper
+                              buttons={RenderNewsAction(news)}
+                            />
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            justifySelf: `start`,
+                          }}
+                        >
+                          <Chip
+                            label={news?.status?.sts_desc}
+                            style={{
+                              color: news?.status?.sts_color,
+                              backgroundColor:
+                                news?.status?.sts_backgroundColor,
+                            }}
+                          />
+                        </div>
+
+                        <div
+                          className="petsa"
+                          style={{
+                            fontSize: `.87em`,
+                          }}
+                        >
+                          Karong{" "}
+                          {InvalidDateToDefault(news?.pub_date, "walay petsa")}
+                        </div>
+
+                        <div className="news-title">
+                          {news?.is_prio === 1 && (
+                            <LabelImportantRoundedIcon
+                              fontSize={"small"}
+                              color="primary"
+                            />
+                          )}
+
+                          <div>{news?.title}</div>
+                        </div>
+                        <div className="body">{news.body}</div>
+
+                        <NewsFilesDialog news_pk={news.news_pk} />
                       </div>
-                    </div>
-                    <div className="actions">
-                      <IconButtonPopper buttons={RenderNewsAction(news)} />
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      justifySelf: `start`,
-                    }}
-                  >
-                    <Chip
-                      label={news?.status?.sts_desc}
-                      style={{
-                        color: news?.status?.sts_color,
-                        backgroundColor: news?.status?.sts_backgroundColor,
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    className="petsa"
-                    style={{
-                      fontSize: `.87em`,
-                    }}
-                  >
-                    Karong {InvalidDateToDefault(news?.pub_date, "walay petsa")}
-                  </div>
-
-                  <div className="news-title">
-                    {news?.is_prio === 1 && (
-                      <LabelImportantRoundedIcon
-                        fontSize={"small"}
-                        color="primary"
-                      />
-                    )}
-
-                    <div>{news?.title}</div>
-                  </div>
-                  <div className="body">{news.body}</div>
-
-                  <NewsFilesDialog news_pk={news.news_pk} />
-
-                  {/* <div className="files">
-                  {news.upload_files.map((file, index) => (
-                    <div key={index} className="file">
-                      {file?.mimetype?.includes("image") && (
-                        <img
-                          key={index}
-                          alt=""
-                          src={FTP_BASE_URL + file?.file_path}
-                        />
-                      )}
-                      {file?.mimetype?.includes("video") && (
-                        <video
-                          key={index}
-                          src={FTP_BASE_URL + file?.file_path}
-                          controls
-                        ></video>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <NewsCommentAdminView news={news} /> */}
-                </div>
-              </StyledNewsContainer>
-            ))
-          ) : (
-            <CalNewsAdminView
-              open_edit_dialog={open_edit_dialog}
-              handleSetOpenEditDialog={handleSetOpenEditDialog}
-              selected_news_pk={selected_news_pk}
-              handleSetSelectedNews={handleSetSelectedNews}
-              handleRefetchTable={handleRefetchTable}
-            />
-          )}
+                    </StyledNewsContainer>
+                  ))
+                ) : (
+                  <CalNewsAdminView
+                    open_edit_dialog={open_edit_dialog}
+                    handleSetOpenEditDialog={handleSetOpenEditDialog}
+                    selected_news_pk={selected_news_pk}
+                    handleSetSelectedNews={handleSetSelectedNews}
+                    handleRefetchTable={handleRefetchTable}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </div>
         </Grid>
       </Grid>
       {open_edit_dialog && selected_news_pk && (
@@ -307,16 +313,6 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
           handleSetOpen={handleSetOpenEditDialog}
           news_pk={selected_news_pk}
           handleRefetchTable={handleRefetchTable}
-        />
-      )}
-      {table_filter.filters && open_filter_dialog && (
-        <FilterDtNewsAdminView
-          handleSetTableFilter={handleSetTableFilter}
-          table_filter={table_filter}
-          handleRefetchTable={handleRefetchTable}
-          open_filter_dialog={open_filter_dialog}
-          handleOpenFilterDialog={handleOpenFilterDialog}
-          // handleCloseFilterDialog={handleCloseFilterDialog}
         />
       )}
     </Container>
