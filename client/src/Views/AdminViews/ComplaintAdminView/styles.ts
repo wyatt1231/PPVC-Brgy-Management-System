@@ -43,7 +43,7 @@ export const StyledComplaintItem = styled.div`
     }
   }
 
-  .title {
+  .complaint-title {
     font-weight: 600;
   }
 
@@ -51,6 +51,7 @@ export const StyledComplaintItem = styled.div`
     padding: 0.5em;
     background-color: #f5f5f5;
     border-radius: 7px;
+    font-size: 0.8em;
   }
 `;
 

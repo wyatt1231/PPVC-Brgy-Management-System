@@ -1,6 +1,6 @@
-import { Container, Grid } from "@material-ui/core";
+import { Button, Chip, Container, Grid } from "@material-ui/core";
 import moment from "moment";
-import React, { FC, memo, useEffect } from "react";
+import React, { FC, memo, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import CustomAvatar from "../../../Component/CustomAvatar";
@@ -8,7 +8,12 @@ import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopp
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import ComplaintActions from "../../../Services/Actions/ComplaintActions";
 import { setPageLinks } from "../../../Services/Actions/PageActions";
+import {
+  PaginationModel,
+  ScrollPaginationModel,
+} from "../../../Services/Models/PaginationModels";
 import { RootStore } from "../../../Services/Store";
+import FilterDtComplaintAdminView from "./FilterDtComplaintAdminView";
 import { StyledComplaintItem } from "./styles";
 
 interface DtComplaintAdminViewProps {}
@@ -21,11 +26,43 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
     (store: RootStore) => store.ComplaintReducer.complaints_table
   );
 
-  console.log(`news_table`, complaint_table);
-
   const fetch_complaint_table = useSelector(
     (store: RootStore) => store.ComplaintReducer.fetch_complaints_table
   );
+
+  const [refetch_table, set_refetch_table] = useState(0);
+  const handleRefetchTable = useCallback(() => {
+    set_refetch_table((c) => c + 1);
+  }, []);
+
+  const [table_filter, set_table_filter] = useState<PaginationModel>({
+    filters: {
+      search: "",
+      date_from: null,
+      date_to: null,
+      sts_pk: ["P", "OP", "C"],
+    },
+    sort: {
+      direction: "desc",
+      column: "reported_at",
+    },
+  });
+
+  const handleSetTableFilter = useCallback(
+    (table_filter: ScrollPaginationModel) => {
+      set_table_filter(table_filter);
+    },
+    []
+  );
+
+  const [open_filter_dialog, set_open_filter_dialog] = useState(false);
+  const handleOpenFilterDialog = useCallback((open: boolean) => {
+    set_open_filter_dialog(open);
+  }, []);
+
+  useEffect(() => {
+    dispatch(ComplaintActions.setComplaintTable(table_filter));
+  }, [dispatch, refetch_table]);
 
   useEffect(() => {
     let mounted = true;
@@ -45,16 +82,20 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
     return () => (mounted = false);
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(ComplaintActions.setComplaintTable());
-  }, [dispatch]);
-
   return (
     <Container maxWidth="lg">
       <LinearLoadingProgress show={fetch_complaint_table} />
       <Grid container spacing={3}>
         <Grid item xs={12} container justify="flex-end" alignItems="center">
-          <Grid item>{/* <AddNewsAdminView /> */}</Grid>
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleOpenFilterDialog(true)}
+            >
+              Pagsala
+            </Button>
+          </Grid>
         </Grid>
 
         <Grid item xs={12}>
@@ -77,15 +118,24 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
                   <CustomAvatar
                     className="img"
                     src={comp?.user?.pic}
-                    height={3}
-                    width={3}
+                    // height={4}
+                    // width={4}
                     errorMessage={comp?.user?.full_name?.charAt(0)}
                   />
 
                   <div className="name">{comp?.user?.full_name}</div>
                   <div className="time">
-                    {moment(comp.reported_at).fromNow()}
+                    {moment(comp?.reported_at).fromNow()}
                   </div>
+
+                  <Chip
+                    label={comp?.status?.sts_desc}
+                    style={{
+                      color: comp?.status?.sts_color,
+                      backgroundColor: comp?.status?.sts_backgroundColor,
+                      margin: `.3em 0`,
+                    }}
+                  />
 
                   <div className="act">
                     <IconButtonPopper
@@ -102,7 +152,7 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
                   </div>
                 </div>
 
-                <div className="title">{comp?.title}</div>
+                <div className="complaint-title">{comp?.title}</div>
 
                 <div className="body">{comp?.body}</div>
               </StyledComplaintItem>
@@ -110,6 +160,17 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
           </Container>
         </Grid>
       </Grid>
+
+      {table_filter.filters && open_filter_dialog && (
+        <FilterDtComplaintAdminView
+          handleSetTableFilter={handleSetTableFilter}
+          table_filter={table_filter}
+          handleRefetchTable={handleRefetchTable}
+          open_filter_dialog={open_filter_dialog}
+          handleOpenFilterDialog={handleOpenFilterDialog}
+          // handleCloseFilterDialog={handleCloseFilterDialog}
+        />
+      )}
     </Container>
   );
 });

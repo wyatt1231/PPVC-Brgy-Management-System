@@ -36,7 +36,6 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
   }, []);
 
   const [refetch_table, set_refetch_table] = useState(0);
-
   const handleRefetchTable = useCallback(() => {
     set_refetch_table((c) => c + 1);
   }, []);

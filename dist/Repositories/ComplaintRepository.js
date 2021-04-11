@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
+const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const addComplaint = (payload, files) => __awaiter(void 0, void 0, void 0, function* () {
@@ -251,11 +252,18 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         };
     }
 });
-const getComplaintTable = () => __awaiter(void 0, void 0, void 0, function* () {
+const getComplaintTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * FROM complaint `, null);
+        console.log(`payload`, payload);
+        const data = yield con.QueryPagination(`SELECT * FROM complaint
+       WHERE
+      title like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND reported_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "reported_at")}
+      AND reported_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "reported_at")}
+      `, payload);
         for (const complaint of data) {
             complaint.complaint_file = yield con.Query(`
         select * from complaint_file where complaint_pk=@complaint_pk
@@ -266,6 +274,9 @@ const getComplaintTable = () => __awaiter(void 0, void 0, void 0, function* () {
                 user_pk: complaint.reported_by,
             });
             complaint.user.pic = yield useFileUploader_1.GetUploadedImage(complaint.user.pic);
+            complaint.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk`, {
+                sts_pk: complaint.sts_pk,
+            });
         }
         con.Commit();
         return {

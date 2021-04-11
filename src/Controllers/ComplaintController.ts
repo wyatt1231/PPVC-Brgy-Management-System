@@ -3,6 +3,7 @@ import Authorize from "../Middlewares/Authorize";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintModel } from "../Models/ComplaintModels";
+import { PaginationModel } from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
 import ComplaintRepository from "../Repositories/ComplaintRepository";
 
@@ -47,7 +48,8 @@ const ComplaintController = async (app: Express): Promise<void> => {
     "/getComplaintTable",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await ComplaintRepository.getComplaintTable());
+      const payload: PaginationModel = req.body;
+      res.json(await ComplaintRepository.getComplaintTable(payload));
     }
   );
   router.post(
