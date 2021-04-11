@@ -85,7 +85,7 @@ const addMobileResident = async (
            encoder_pk=@encoder_pk;`,
           resident_payload
         );
-  
+  console.log(payload.with_disability)
         if (sql_add_resident.insertedId > 0) {
           con.Commit();
           return {
@@ -118,19 +118,21 @@ const addMobileResident = async (
 
   
 const getresidents = async (
+   search:string
   ): Promise<ResponseModel> => {
     const con = await DatabaseConnection();
+    console.log(search)
     try {
       await con.BeginTransaction();
   
       const data: Array<ResidentModel> = await con.Query(
-        `SELECT * FROM resident`,
+        `SELECT * FROM resident WHERE first_name LIKE concat('%',@search,'%') || last_name LIKE concat('%',@search,'%')`,
         
-            null
+      { 
+         search:search
+        }
         
       );
-     
-  
       con.Commit();
       return {
         success: true,

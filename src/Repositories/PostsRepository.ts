@@ -450,6 +450,7 @@ const getPostReactionsAdmin = async (
 const getPostCommentsAdmin = async (
   posts_pk: number
 ): Promise<ResponseModel> => {
+  console.log(posts_pk)
   const con = await DatabaseConnection();
   try {
     const comments: Array<PostCommentModel> = await con.Query(
