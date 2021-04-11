@@ -36,13 +36,13 @@ console.log(payload.fam_members)
         payload
       );
 
-      // const truncate_fam_members = await con.Modify(
-      //   `Delete  from family_member where fam_pk=@fam_pk;`,
-      //   {
-      //     fam_pk: payload.fam_pk,
-      //   }
-      // );
-
+      const truncate_fam_members = await con.Modify(
+        ` Delete  from family_member where fam_pk=@fam_pk;`,
+        {
+          fam_pk: payload.fam_pk,
+        }
+      );
+        console.log("members"+JSON.stringify(payload.fam_members))
       for (const fam of payload.fam_members) {
         fam.encoded_by = payload.encoded_by;
         fam.fam_pk = payload.fam_pk;
