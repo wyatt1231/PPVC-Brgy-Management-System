@@ -35,16 +35,9 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           kaligon_balay = @kaligon_balay
           WHERE fam_pk=@fam_pk;
           `, payload);
-<<<<<<< HEAD
-            const truncate_fam_members = yield con.Modify(` Delete  from family_member where fam_pk=@fam_pk;`, {
-                fam_pk: payload.fam_pk,
-            });
-            console.log("members" + JSON.stringify(payload.fam_members));
-=======
             const truncate_fam_members = yield con.Modify(`Delete  from family_member where fam_pk=@fam_pk;`, {
                 fam_pk: payload.fam_pk,
             });
->>>>>>> 83cd7ecfac0fb87c975a8902e38d1f5f246af5dd
             for (const fam of payload.fam_members) {
                 fam.encoded_by = payload.encoded_by;
                 fam.fam_pk = payload.fam_pk;
