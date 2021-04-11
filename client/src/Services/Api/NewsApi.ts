@@ -2,13 +2,16 @@ import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
+import { ScrollPaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/news/`;
 
-const getNewsDataTable = async (): Promise<IServerResponse> => {
+const getNewsDataTable = async (
+  payload: ScrollPaginationModel
+): Promise<IServerResponse> => {
   const response = await PostFetch(
     API_DEFAULT_ROUTE + "getNewsDataTable",
-    null
+    payload
   );
   return response;
 };
@@ -39,6 +42,13 @@ const unpublishNews = async (news_pk: number): Promise<IServerResponse> => {
 
 const getSingleNews = async (news_pk: number): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "getSingleNews", {
+    news_pk,
+  });
+  return response;
+};
+
+const getNewsFiles = async (news_pk: number): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getNewsFiles", {
     news_pk,
   });
   return response;
@@ -92,4 +102,5 @@ export default {
   addNewsReaction,
   updateNewsReaction,
   toggleLike,
+  getNewsFiles,
 };

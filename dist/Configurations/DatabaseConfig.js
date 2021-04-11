@@ -18,6 +18,15 @@ if (process.env.NODE_ENV === "production") {
     };
 }
 else {
+    // con = {
+    //   host: "204.2.195.101",
+    //   user: "admin",
+    //   password: "bmscaps01",
+    //   database: "bms",
+    //   port: 26880,
+    //   connectionLimit: 10,
+    //   waitForConnections: true,
+    // };
     con = {
         host: "localhost",
         user: "root",
@@ -64,10 +73,14 @@ const DatabaseConnection = () => {
                     }
                     const full_query = `
           ${query} 
-          ORDER BY ${sort.column} ${sort.direction}
-          LIMIT ${mysql2_1.default.escape(page.begin)}, ${mysql2_1.default.escape(page.limit)} `;
+          ORDER BY ${sort.column} ${sort.direction}` +
+                        (page
+                            ? `
+        LIMIT ${mysql2_1.default.escape(page.begin)}, ${mysql2_1.default.escape(page.limit)} `
+                            : "");
                     connection.query(full_query, (err, result) => {
                         if (err) {
+                            console.log(`full_query `, full_query);
                             reject(err);
                         }
                         else {
@@ -202,9 +215,15 @@ const queryFormat = (query, values) => {
                     return "(NULL)";
                 }
                 if (values[key] instanceof Array) {
-                    const formatArritem = values[key].map((v) => mysql2_1.default.escape(v));
-                    const arr_rep = formatArritem.join(",");
-                    return ` (${arr_rep}) `;
+                    const furnished_arr = values[key].filter((v) => !!v);
+                    if (furnished_arr.length > 0) {
+                        const formatArritem = furnished_arr.map((v) => mysql2_1.default.escape(v));
+                        const arr_rep = formatArritem.join(",");
+                        return ` (${arr_rep}) `;
+                    }
+                    else {
+                        return ` ('') `;
+                    }
                 }
                 return mysql2_1.default.escape(values[key]);
             }
@@ -216,13 +235,19 @@ const queryFormat = (query, values) => {
                 return str;
             }
         }
-        if (key instanceof Array) {
-            for (let i = 0; i < key.length; i++) {
-                key[i] = mysql2_1.default.escape(key[i]);
-            }
-            const joined_arr = key.join(",");
-            return joined_arr;
-        }
+        // if (key instanceof Array) {
+        //   console.log(`array -> array `);
+        //   if (key.length > 0) {
+        //     for (let i = 0; i < key.length; i++) {
+        //       key[i] = mysql.escape(key[i]);
+        //     }
+        //     const joined_arr = key.join(",");
+        //     return joined_arr;
+        //   } else {
+        //     console.log(`key`, key);
+        //     return "";
+        //   }
+        // }
         return str;
     });
     return formattedQuery;

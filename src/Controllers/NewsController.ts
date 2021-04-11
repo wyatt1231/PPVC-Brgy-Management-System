@@ -3,6 +3,10 @@ import Authorize from "../Middlewares/Authorize";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
+import {
+  PaginationModel,
+  ScrollPaginationModel,
+} from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
 import NewsRepository from "../Repositories/NewsRepository";
 
@@ -26,7 +30,21 @@ const NewsController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await NewsRepository.getNewsDataTable());
+        const payload: PaginationModel = req.body;
+        res.json(await NewsRepository.getNewsDataTable(payload));
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+
+  router.post(
+    "/getNewsFiles",
+    Authorize(),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const payload: number = req.body.news_pk;
+        res.json(await NewsRepository.getNewsFiles(payload));
       } catch (error) {
         res.json(error);
       }

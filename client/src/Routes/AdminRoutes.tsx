@@ -11,6 +11,7 @@ import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
+import ManageResidentAdminView from "../Views/AdminViews/ResidentAdminView/ManageResidentAdminView";
 import CreateFamily from "../Views/SharedViews/CreateFamily";
 // import DataTableResidentAdminView from "../Views/AdminView";
 
@@ -36,6 +37,9 @@ const SysAdminRoutes = () => {
 
         <Route path="/admin/resident/add" exact>
           <AddResidentAdminView />
+        </Route>
+        <Route path="/admin/resident/:resident_pk" exact strict>
+          <ManageResidentAdminView />
         </Route>
 
         <Route path="/admin/brgy-official" exact>

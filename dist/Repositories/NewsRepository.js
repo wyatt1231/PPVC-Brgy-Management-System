@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
+const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
@@ -116,45 +117,59 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
         };
     }
 });
-const getNewsDataTable = () => __awaiter(void 0, void 0, void 0, function* () {
+const getNewsDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`
-      SELECT * FROM 
-      (
-        SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk order by n.encoded_at desc) tmp;
-      `, null);
-        for (const file of data) {
-            file.upload_files = yield con.Query(`
-      select * from news_file where news_pk=@news_pk
-      `, {
-                news_pk: file.news_pk,
+        console.log(`payload`, payload);
+        const news_table = yield con.QueryPagination(`
+      SELECT * FROM news WHERE
+      title like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "encoded_at")}
+      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "encoded_at")}
+      `, payload);
+        // console.log(`news_table`, news_table);
+        for (const news of news_table) {
+            news.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
+                sts_pk: news.sts_pk,
             });
-            file.comments = yield con.Query(`
-        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
-        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
-        `, {
-                news_pk: file.news_pk,
+            news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
+                user_pk: news.encoder_pk,
             });
-            for (const com of file.comments) {
-                com.pic = yield useFileUploader_1.GetUploadedImage(com.pic);
+            if ((_a = news === null || news === void 0 ? void 0 : news.user) === null || _a === void 0 ? void 0 : _a.pic) {
+                news.user.pic = yield useFileUploader_1.GetUploadedImage((_b = news === null || news === void 0 ? void 0 : news.user) === null || _b === void 0 ? void 0 : _b.pic);
             }
-            file.likes = yield con.Query(`
-        SELECT  u.full_name,nl.liked_by FROM news_likes nl JOIN vw_users u
-        ON nl.liked_by = u.user_pk
-        WHERE nl.news_pk = @news_pk;
-        `, {
-                news_pk: file.news_pk,
-            });
         }
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: news_table,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getNewsFiles = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const files_table = yield con.Query(`
+      SELECT * FROM news_file where news_pk =@news_pk; 
+      `, {
+            news_pk: news_pk,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: files_table,
         };
     }
     catch (error) {
@@ -171,10 +186,16 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
+        payload.pub_date = useDateParser_1.parseInvalidDateToDefault(payload.pub_date, "(NULL)");
+        payload.is_prio =
+            payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
+        console.log(`add payload`, payload);
         const sql_add_news = yield con.Insert(`INSERT INTO news SET
          title=@title,
          audience=@audience,
          body=@body,
+         pub_date=@pub_date,
+         is_prio=@is_prio,
          encoder_pk=@encoder_pk;`, payload);
         if (sql_add_news.insertedId > 0) {
             for (const file of files) {
@@ -220,7 +241,7 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
     }
     catch (error) {
         yield con.Rollback();
-        console.error(`error`, error);
+        // console.error(`error`, error);
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -298,10 +319,15 @@ const updateNews = (payload, user_pk) => __awaiter(void 0, void 0, void 0, funct
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
+        payload.pub_date = useDateParser_1.parseInvalidDateToDefault(payload.pub_date, "(NULL)");
+        payload.is_prio =
+            payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
         const sql_add_news = yield con.Modify(`UPDATE news SET
        title=@title,
        body=@body,
        audience=@audience,
+       pub_date=@pub_date,
+       is_prio=@is_prio,
        encoder_pk=@encoder_pk
        where news_pk=@news_pk;`, payload);
         if (sql_add_news > 0) {
@@ -508,16 +534,26 @@ const toggleLike = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 const getSingleNews = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c, _d;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.QuerySingle(`select * from news where news_pk = @news_pk`, {
+        const news = yield con.QuerySingle(`select * from news where news_pk = @news_pk`, {
             news_pk: news_pk,
         });
+        news.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
+            sts_pk: news.sts_pk,
+        });
+        news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
+            user_pk: news.encoder_pk,
+        });
+        if ((_c = news === null || news === void 0 ? void 0 : news.user) === null || _c === void 0 ? void 0 : _c.pic) {
+            news.user.pic = yield useFileUploader_1.GetUploadedImage((_d = news === null || news === void 0 ? void 0 : news.user) === null || _d === void 0 ? void 0 : _d.pic);
+        }
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: news,
         };
     }
     catch (error) {
@@ -543,5 +579,6 @@ exports.default = {
     getSingleNewsWithPhoto,
     getNewsComments,
     toggleLike,
+    getNewsFiles,
 };
 //# sourceMappingURL=NewsRepository.js.map

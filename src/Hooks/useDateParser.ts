@@ -18,6 +18,19 @@ export const parseInvalidDateToDefault = (
   return null;
 };
 
+export const sqlFilterDate = (
+  date: Date | string,
+  column: string
+): string | null => {
+  const d = moment(date);
+
+  if (d.isValid()) {
+    return `'${d.format("YYYY-MM-DD")}'`;
+  }
+
+  return column;
+};
+
 export const parseInvalidTimeToDefault = (
   date: string,
   defaultString?: string

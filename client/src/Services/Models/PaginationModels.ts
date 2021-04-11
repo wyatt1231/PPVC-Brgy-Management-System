@@ -16,3 +16,8 @@ export interface PaginationModel {
   sort: SqlSort;
   filters: TableFilterModel;
 }
+
+export interface ScrollPaginationModel {
+  sort: SqlSort;
+  filters: any;
+}

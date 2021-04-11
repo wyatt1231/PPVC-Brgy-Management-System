@@ -367,10 +367,10 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                                     })
                                   ),
                               },
-                              {
-                                text: "I-butang na opisyal sa Brgy",
-                                handleClick: () => console.log(`sad`),
-                              },
+                              // {
+                              //   text: "I-butang na opisyal sa Brgy",
+                              //   handleClick: () => console.log(`sad`),
+                              // },
                             ]}
                           />
                         </TableCell>

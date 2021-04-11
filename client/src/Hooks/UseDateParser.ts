@@ -67,7 +67,7 @@ export const InvalidTimeToDefault = (
 };
 
 export const InvalidDateToDefault = (
-  date: Date | null,
+  date: Date | null | string,
   defaultString: string
 ): string => {
   if (!date) {

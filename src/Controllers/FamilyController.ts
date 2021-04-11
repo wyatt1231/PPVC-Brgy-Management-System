@@ -25,6 +25,16 @@ const FamilyController = async (app: Express): Promise<void> => {
       res.json(await FamilyRepository.getSingleFamily(ulo_pamilya));
     }
   );
+
+  router.post(
+    "/getFamilyOfResident",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const resident_pk: number = req.body.resident_pk;
+      res.json(await FamilyRepository.getFamilyOfResident(resident_pk));
+    }
+  );
+
   router.post(
     "/getAllFamily",
     Authorize("admin"),

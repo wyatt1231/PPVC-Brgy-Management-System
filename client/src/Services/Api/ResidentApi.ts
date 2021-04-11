@@ -32,6 +32,15 @@ const updateResidentApi = async (
   return response;
 };
 
+const toggleResidentStatus = async (
+  resident_pk: number
+): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "toggleResidentStatus", {
+    resident_pk,
+  });
+  return response;
+};
+
 const getSingleResident = async (
   resident_pk: string | number
 ): Promise<IServerResponse> => {
@@ -46,4 +55,5 @@ export default {
   addResidentApi,
   updateResidentApi,
   getSingleResident,
+  toggleResidentStatus,
 };

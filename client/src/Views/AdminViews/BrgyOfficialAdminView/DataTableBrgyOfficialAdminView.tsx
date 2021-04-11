@@ -72,6 +72,11 @@ const tableColumns: Array<ITableColumns> = [
     align: "left",
   },
   {
+    label: "Gender",
+    width: 50,
+    align: "left",
+  },
+  {
     label: "Position",
     width: 50,
     align: "left",
@@ -158,166 +163,178 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
 
     return (
       <Container maxWidth="lg">
-        <Grid container spacing={3}>
-          <Grid item xs={12} container justify="flex-end" alignItems="center">
-            <Grid item>
-              <NavLink to="/admin/brgy-official/add">
-                <Button disableElevation color="primary" variant="contained">
-                  Set Brgy. Official
-                </Button>
-              </NavLink>
-            </Grid>
-          </Grid>
-          <Grid
-            xs={12}
-            item
-            container
-            spacing={1}
-            alignItems="center"
-            alignContent="center"
-          >
-            <Grid
-              item
-              xs={12}
-              md={6}
-              container
-              spacing={2}
-              justify="flex-start"
-              alignContent="center"
-              alignItems="center"
-            >
+        <div
+          style={{
+            height: "100%",
+            minHeight: 500,
+            backgroundColor: `#fff`,
+            borderRadius: 10,
+          }}
+        >
+          <Grid container spacing={3}>
+            <Grid item xs={12} container justify="flex-end" alignItems="center">
               <Grid item>
-                <TablePagination
-                  rowsPerPageOptions={[50, 100, 250]}
-                  component="div"
-                  count={tableCount}
-                  rowsPerPage={tableLimit}
-                  page={tablePage}
-                  onChangePage={handleChangePage}
-                  onChangeRowsPerPage={handleChangeRowsPerPage}
-                />
+                <NavLink to="/admin/brgy-official/add">
+                  <Button disableElevation color="primary" variant="contained">
+                    Set Brgy. Official
+                  </Button>
+                </NavLink>
               </Grid>
             </Grid>
             <Grid
-              item
               xs={12}
-              md={6}
+              item
               container
-              spacing={3}
-              alignContent="center"
+              spacing={1}
               alignItems="center"
-              justify="flex-end"
+              alignContent="center"
             >
-              <Grid item>
-                <DataTableSort
-                  handleChagenSelectedSortIndex={handleChagenSelectedSortIndex}
-                  initialTableSort={initialTableSort}
-                  selectedSortIndex={selectedSortIndex}
-                />
-              </Grid>
-
-              <Grid item>
-                <DataTableSearch
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSetTableSearch({
-                      ...tableSearch,
-                      search: searchField,
-                    });
-                  }}
-                  handleSetSearchField={handleSetSearchField}
-                  searchField={searchField}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid
-            xs={12}
-            container
-            item
-            spacing={1}
-            style={{ height: `100%`, overflowX: "auto" }}
-          >
-            <Grid item xs={12}>
-              <TableContainer
-                style={{ height: "100%", minHeight: 500, borderRadius: 10 }}
+              <Grid
+                item
+                xs={12}
+                md={6}
+                container
+                spacing={2}
+                justify="flex-start"
+                alignContent="center"
+                alignItems="center"
               >
-                <LinearLoadingProgress show={table_loading} />
-                <Table stickyHeader size="small">
-                  <TableHead>
-                    <TableRow>
-                      {tableColumns.map((col, index) => (
-                        <TableCell
-                          key={index}
-                          align={col.align}
-                          style={{ minWidth: col.width }}
-                        >
-                          {col.label}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {data_table?.length < 1 && (
-                      <TableRow>
-                        <TableCell align="center" colSpan={5}>
-                          <span className="empty-rows">
-                            No records has been added yet
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {data_table?.map((row, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <div className="table-cell-profile">
-                            <CustomAvatar
-                              className="image"
-                              variant="rounded"
-                              src={`${row.pic}`}
-                              errorMessage={`${row.first_name?.charAt(
-                                0
-                              )}${row.last_name?.charAt(0)}`}
-                            />
-                            <NavLink
-                              className="title"
-                              to={`/admin/resident/${row.resident_pk}`}
-                            >
-                              <span style={{ textTransform: "capitalize" }}>
-                                {row.first_name} {row.middle_name}{" "}
-                                {row.last_name} {row.suffix}
-                              </span>
-                            </NavLink>
-                            <div className="sub-title">
-                              {row.gender === "m" ? "Male" : "Female"}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{row.position}</TableCell>
+                <Grid item>
+                  <TablePagination
+                    rowsPerPageOptions={[50, 100, 250]}
+                    component="div"
+                    count={tableCount}
+                    rowsPerPage={tableLimit}
+                    page={tablePage}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                  />
+                </Grid>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                container
+                spacing={3}
+                alignContent="center"
+                alignItems="center"
+                justify="flex-end"
+              >
+                <Grid item>
+                  <DataTableSort
+                    handleChagenSelectedSortIndex={
+                      handleChagenSelectedSortIndex
+                    }
+                    initialTableSort={initialTableSort}
+                    selectedSortIndex={selectedSortIndex}
+                  />
+                </Grid>
 
-                        <TableCell>
-                          <Chip
-                            style={{
-                              backgroundColor: row.sts_backgroundColor,
-                              color: row.sts_color,
-                            }}
-                            label={row.sts_desc}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="datetime">
-                            {InvalidDateTimeToDefault(row.encoded_at, "-")}
-                          </div>
-                        </TableCell>
+                <Grid item>
+                  <DataTableSearch
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSetTableSearch({
+                        ...tableSearch,
+                        search: searchField,
+                      });
+                    }}
+                    handleSetSearchField={handleSetSearchField}
+                    searchField={searchField}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid
+              xs={12}
+              container
+              item
+              spacing={1}
+              style={{ height: `100%`, overflowX: "auto" }}
+            >
+              <Grid item xs={12}>
+                <TableContainer>
+                  <LinearLoadingProgress show={table_loading} />
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow>
+                        {tableColumns.map((col, index) => (
+                          <TableCell
+                            key={index}
+                            align={col.align}
+                            style={{ minWidth: col.width }}
+                          >
+                            {col.label}
+                          </TableCell>
+                        ))}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {data_table?.length < 1 && (
+                        <TableRow>
+                          <TableCell align="center" colSpan={5}>
+                            <span className="empty-rows">
+                              No records has been added yet
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {data_table?.map((row, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <div className="table-cell-profile">
+                              <CustomAvatar
+                                className="image"
+                                variant="rounded"
+                                src={`${row.pic}`}
+                                errorMessage={`${row.first_name?.charAt(
+                                  0
+                                )}${row.last_name?.charAt(0)}`}
+                              />
+                              <NavLink
+                                className="title"
+                                to={`/admin/resident/${row.resident_pk}`}
+                              >
+                                <span style={{ textTransform: "capitalize" }}>
+                                  {row.first_name} {row.middle_name}{" "}
+                                  {row.last_name} {row.suffix}
+                                </span>
+                              </NavLink>
+                              {/* <div className="sub-title">
+                              {row.gender === "m" ? "Male" : "Female"}
+                            </div> */}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {row.gender === "m" ? "Male" : "Female"}
+                          </TableCell>
+                          <TableCell>{row.position}</TableCell>
+
+                          <TableCell>
+                            <Chip
+                              style={{
+                                backgroundColor: row.sts_backgroundColor,
+                                color: row.sts_color,
+                              }}
+                              label={row.sts_desc}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="datetime">
+                              {InvalidDateTimeToDefault(row.encoded_at, "-")}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        </div>
       </Container>
     );
   }

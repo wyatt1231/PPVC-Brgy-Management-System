@@ -239,8 +239,81 @@ const getAllFamily = async (): Promise<ResponseModel> => {
   }
 };
 
+const getFamilyOfResident = async (
+  resident_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const all_family: FamilyModel = await con.QuerySingle(
+      `
+      SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
+        `,
+      {
+        resident_pk: resident_pk,
+      }
+    );
+
+    if (!all_family) {
+      con.Rollback();
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
+    all_family.ulo_pamilya_info = await con.QuerySingle(
+      `select * from resident where resident_pk=@resident_pk;`,
+      {
+        resident_pk: all_family.ulo_pamilya,
+      }
+    );
+
+    if (all_family?.ulo_pamilya_info?.pic) {
+      all_family.ulo_pamilya_info.pic = await GetUploadedImage(
+        all_family.ulo_pamilya_info.pic
+      );
+    }
+
+    all_family.fam_members = await con.Query(
+      `
+            SELECT * FROM family_member WHERE fam_pk = @fam_pk
+            `,
+      {
+        fam_pk: all_family.fam_pk,
+      }
+    );
+
+    for (const fm of all_family.fam_members) {
+      fm.resident_info = await con.QuerySingle(
+        `select * from resident where resident_pk = @resident_pk`,
+        {
+          resident_pk: fm.resident_pk,
+        }
+      );
+
+      fm.resident_info.pic = await GetUploadedImage(fm.resident_info.pic);
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: all_family,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   addFamily,
   getSingleFamily,
   getAllFamily,
+  getFamilyOfResident,
 };

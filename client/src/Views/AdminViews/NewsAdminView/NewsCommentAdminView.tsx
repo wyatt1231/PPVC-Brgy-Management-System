@@ -53,7 +53,7 @@ export const NewsCommentAdminView: FC<INewsCommentAdminView> = memo(
 
               dispatch(
                 NewsActions.toggleLike(payload, () => {
-                  dispatch(NewsActions.setNewsDataTable());
+                  // dispatch(NewsActions.setNewsDataTable());
                 })
               );
             }}
@@ -89,7 +89,7 @@ export const NewsCommentAdminView: FC<INewsCommentAdminView> = memo(
 
                   dispatch(
                     NewsActions.addNewsComment(payload, () => {
-                      dispatch(NewsActions.setNewsDataTable());
+                      // dispatch(NewsActions.setNewsDataTable());
                     })
                   );
                 }

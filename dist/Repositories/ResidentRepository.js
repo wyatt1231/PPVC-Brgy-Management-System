@@ -47,7 +47,7 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
                     return upload_result;
                 }
             }
-            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date) });
+            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date), died_date: useDateParser_1.parseInvalidDateToDefault(payload.died_date), resident_date: useDateParser_1.parseInvalidDateToDefault(payload.resident_date) });
             const sql_add_resident = yield con.Insert(`INSERT INTO resident SET
          user_pk=@user_pk,
          pic=@pic,              
@@ -71,7 +71,11 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
          house_income=@house_income,     
          house_status=@house_status,     
          voting_precinct=@voting_precinct,  
-         house_ownership=@house_ownership,  
+         house_ownership=@house_ownership,
+         kita=@kita,
+         educ=@educ,  
+         resident_date=@resident_date,  
+         died_date=@died_date,  
          sts_pk='A',
          encoder_pk=@encoder_pk;`, resident_payload);
             if (sql_add_resident.insertedId > 0) {
@@ -110,6 +114,17 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
+        const user_payload = {
+            full_name: `${payload.last_name}, ${payload.first_name}`,
+            email: payload.email,
+            encoder_pk: user_pk,
+        };
+        const update_user = yield con.Insert(`UPDATE user SET
+      email=@email,
+      password=AES_ENCRYPT(@email,@email),
+      full_name=@full_name
+      where user_pk=@encoder_pk;
+      `, user_payload);
         if (useValidator_1.isValidPicture(payload.pic)) {
             const upload_result = yield useFileUploader_1.UploadImage({
                 base_url: "./src/Storage/Files/Images/",
@@ -124,38 +139,74 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
                 return upload_result;
             }
         }
-        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk });
+        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date), died_date: useDateParser_1.parseInvalidDateToDefault(payload.died_date), resident_date: useDateParser_1.parseInvalidDateToDefault(payload.resident_date) });
         const sql_edit_resident = yield con.Modify(`UPDATE resident SET
+        user_pk=@user_pk,
+        pic=@pic,              
         first_name=@first_name,       
         middle_name=@middle_name,      
         last_name=@last_name,        
-        prefix=@prefix,           
+        suffix=@suffix,           
         gender=@gender,           
         birth_date=@birth_date,       
         nationality=@nationality,      
         religion=@religion,         
         civil_status=@civil_status,  
-        dialect=@dialect,          
-        tribe=@tribe,  
-        with_disability=@with_disability,  
-
         purok=@purok,   
         phone=@phone,    
         email=@email,  
-        voting_precinct=@voting_precinct,  
-
+        dialect=@dialect,          
+        tribe=@tribe,            
+        with_disability=@with_disability,  
         is_employed=@is_employed,      
         employment=@employment,       
         house_income=@house_income,     
         house_status=@house_status,     
-        house_ownership=@house_ownership,  
-        encoder_pk=@encoder_pk
+        voting_precinct=@voting_precinct,  
+        house_ownership=@house_ownership,
+        kita=@kita,
+        educ=@educ,  
+        resident_date=@resident_date,  
+        died_date=@died_date
         WHERE resident_pk=@resident_pk;`, resident_payload);
         if (sql_edit_resident > 0) {
             con.Commit();
             return {
                 success: true,
                 message: "The resident has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the resident",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const toggleResidentStatus = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_edit_resident = yield con.Modify(`UPDATE resident SET
+        sts_pk=if(sts_pk = 'A' , 'X', 'A') 
+        WHERE resident_pk=@resident_pk;`, {
+            resident_pk: resident_pk,
+        });
+        if (sql_edit_resident > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The resident status has been updated successfully",
             };
         }
         else {
@@ -234,6 +285,9 @@ const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, fun
             resident_pk: resident_pk,
         });
         data.pic = yield useFileUploader_1.GetUploadedImage(data.pic);
+        data.status = yield con.QuerySingle(`select * from status where sts_pk = @sts_pk;`, {
+            sts_pk: data.sts_pk,
+        });
         con.Commit();
         return {
             success: true,
@@ -279,5 +333,6 @@ exports.default = {
     getDataTableResident,
     getSingleResident,
     searchResident,
+    toggleResidentStatus,
 };
 //# sourceMappingURL=ResidentRepository.js.map
