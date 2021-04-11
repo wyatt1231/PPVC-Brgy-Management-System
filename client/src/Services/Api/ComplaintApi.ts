@@ -2,13 +2,16 @@ import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
+import { PaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/complaint/`;
 
-const getComplaintTable = async (): Promise<IServerResponse> => {
+const getComplaintTable = async (
+  payload: PaginationModel
+): Promise<IServerResponse> => {
   const response = await PostFetch(
     API_DEFAULT_ROUTE + "getComplaintTable",
-    null
+    payload
   );
   return response;
 };

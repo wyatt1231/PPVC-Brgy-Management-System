@@ -154,8 +154,6 @@ const getNewsDataTable = async (
   try {
     await con.BeginTransaction();
 
-    console.log(`payload`, payload);
-
     const news_table: Array<NewsModel> = await con.QueryPagination(
       `
       SELECT * FROM news WHERE

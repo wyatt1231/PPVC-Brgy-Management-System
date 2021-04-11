@@ -52,7 +52,8 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
     }));
     //reactions
     router.post("/getPostsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostsRepository_1.default.getPostsAdmin());
+        const payload = req.body;
+        res.json(yield PostsRepository_1.default.getPostsAdmin(payload));
     }));
     router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const posts_pk = req.body.posts_pk;

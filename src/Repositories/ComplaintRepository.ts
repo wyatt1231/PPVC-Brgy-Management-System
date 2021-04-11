@@ -1,9 +1,11 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintFilesModel, ComplaintModel } from "../Models/ComplaintModels";
+import { PaginationModel } from "../Models/PaginationModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
 const addComplaint = async (
@@ -322,14 +324,28 @@ const getSingleComplaint = async (
   }
 };
 
-const getComplaintTable = async (): Promise<ResponseModel> => {
+const getComplaintTable = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const data: Array<ComplaintModel> = await con.Query(
-      `SELECT * FROM complaint `,
-      null
+    const data: Array<ComplaintModel> = await con.QueryPagination(
+      `SELECT * FROM complaint
+       WHERE
+      title like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND reported_at >= ${sqlFilterDate(
+        payload.filters.date_from,
+        "reported_at"
+      )}
+      AND reported_at <= ${sqlFilterDate(
+        payload.filters.date_to,
+        "reported_at"
+      )}
+      `,
+      payload
     );
 
     for (const complaint of data) {
@@ -349,6 +365,13 @@ const getComplaintTable = async (): Promise<ResponseModel> => {
         }
       );
       complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+
+      complaint.status = await con.QuerySingle(
+        `Select * from status where sts_pk = @sts_pk`,
+        {
+          sts_pk: complaint.sts_pk,
+        }
+      );
     }
 
     con.Commit();

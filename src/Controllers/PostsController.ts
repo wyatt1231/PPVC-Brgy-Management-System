@@ -1,5 +1,6 @@
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
+import { PaginationModel } from "../Models/PaginationModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsModel } from "../Models/PostsModel";
@@ -84,7 +85,8 @@ const PostsController = async (app: Express): Promise<void> => {
     "/getPostsAdmin",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await PostsRepository.getPostsAdmin());
+      const payload: PaginationModel = req.body;
+      res.json(await PostsRepository.getPostsAdmin(payload));
     }
   );
 

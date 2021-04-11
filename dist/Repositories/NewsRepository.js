@@ -122,7 +122,6 @@ const getNewsDataTable = (payload) => __awaiter(void 0, void 0, void 0, function
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        console.log(`payload`, payload);
         const news_table = yield con.QueryPagination(`
       SELECT * FROM news WHERE
       title like concat('%',@search,'%')

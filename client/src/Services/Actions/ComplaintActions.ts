@@ -4,10 +4,11 @@ import ComplaintApi from "../Api/ComplaintApi";
 import IServerResponse from "../Interface/IServerResponse";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
+import { PaginationModel } from "../Models/PaginationModels";
 import { ComplaintReducerTypes } from "../Types/ComplaintTypes";
 import { PageReducerTypes } from "../Types/PageTypes";
 
-const setComplaintTable = () => async (
+const setComplaintTable = (payload: PaginationModel) => async (
   dispatch: Dispatch<ComplaintReducerTypes>
 ) => {
   try {
@@ -15,7 +16,9 @@ const setComplaintTable = () => async (
       type: "fetch_complaints_table",
       fetch_complaints_table: true,
     });
-    const response: IServerResponse = await ComplaintApi.getComplaintTable();
+    const response: IServerResponse = await ComplaintApi.getComplaintTable(
+      payload
+    );
 
     if (response.success) {
       dispatch({
