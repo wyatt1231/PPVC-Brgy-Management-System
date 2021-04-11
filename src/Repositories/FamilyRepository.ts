@@ -42,7 +42,6 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
           fam_pk: payload.fam_pk,
         }
       );
-
       for (const fam of payload.fam_members) {
         fam.encoded_by = payload.encoded_by;
         fam.fam_pk = payload.fam_pk;
