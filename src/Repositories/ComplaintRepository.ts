@@ -331,8 +331,6 @@ const getComplaintTable = async (
   try {
     await con.BeginTransaction();
 
-    console.log(`payload`, payload);
-
     const data: Array<ComplaintModel> = await con.QueryPagination(
       `SELECT * FROM complaint
        WHERE

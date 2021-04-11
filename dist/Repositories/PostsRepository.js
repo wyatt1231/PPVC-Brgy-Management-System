@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
+const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -50,11 +51,17 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
-const getPostsAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
-        const posts = yield con.Query(`
-      SELECT * FROM posts`, null);
+        const posts = yield con.QueryPagination(`
+      select * from (SELECT p.*, u.full_name FROM posts p join vw_users u on u.user_pk = p.encoder_pk) as tmp
+      WHERE
+      full_name like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "encoded_at")}
+      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "encoded_at")}
+      `, payload);
         for (const post of posts) {
             post.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
                 user_pk: post.encoder_pk,

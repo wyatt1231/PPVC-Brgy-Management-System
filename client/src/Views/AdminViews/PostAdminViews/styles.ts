@@ -8,6 +8,8 @@ export const StyledPostItem = styled.div`
   align-content: start;
   display: grid;
   grid-gap: 0.7em;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  border: 0.01em solid rgba(0, 0, 0, 0.1);
   .header {
     display: grid;
     grid-auto-columns: auto 1fr;

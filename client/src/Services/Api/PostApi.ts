@@ -1,12 +1,16 @@
 import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
+import { PaginationModel } from "../Models/PaginationModels";
 import { PostCommentModel, PostReactionModel } from "../Models/PostModels";
 
 const API_DEFAULT_ROUTE = `api/posts/`;
 
 //posts
-const getPosts = async (): Promise<IServerResponse> => {
-  const response = await PostFetch(API_DEFAULT_ROUTE + "getPostsAdmin", null);
+const getPosts = async (payload: PaginationModel): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "getPostsAdmin",
+    payload
+  );
   return response;
 };
 

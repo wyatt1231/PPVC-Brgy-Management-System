@@ -256,7 +256,6 @@ const getComplaintTable = (payload) => __awaiter(void 0, void 0, void 0, functio
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        console.log(`payload`, payload);
         const data = yield con.QueryPagination(`SELECT * FROM complaint
        WHERE
       title like concat('%',@search,'%')

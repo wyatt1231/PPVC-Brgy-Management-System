@@ -1,6 +1,8 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
+import { PaginationModel } from "../Models/PaginationModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import {
@@ -59,13 +61,24 @@ const getPosts = async (): Promise<ResponseModel> => {
   }
 };
 
-const getPostsAdmin = async (): Promise<ResponseModel> => {
+const getPostsAdmin = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
-    const posts: Array<PostsModel> = await con.Query(
+    const posts: Array<PostsModel> = await con.QueryPagination(
       `
-      SELECT * FROM posts`,
-      null
+      select * from (SELECT p.*, u.full_name FROM posts p join vw_users u on u.user_pk = p.encoder_pk) as tmp
+      WHERE
+      full_name like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.date_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(payload.filters.date_to, "encoded_at")}
+      `,
+      payload
     );
 
     for (const post of posts) {
