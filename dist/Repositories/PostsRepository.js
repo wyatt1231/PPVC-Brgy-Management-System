@@ -356,6 +356,7 @@ const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fu
 });
 //ADMIN REACTIONS
 const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(posts_pk);
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         const comments = yield con.Query(`

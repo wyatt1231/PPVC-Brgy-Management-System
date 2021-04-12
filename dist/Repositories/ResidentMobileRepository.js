@@ -73,6 +73,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
            house_ownership=@house_ownership,  
            sts_pk='A',
            encoder_pk=@encoder_pk;`, resident_payload);
+            console.log(payload.with_disability);
             if (sql_add_resident.insertedId > 0) {
                 con.Commit();
                 return {
@@ -105,11 +106,14 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         };
     }
 });
-const getresidents = () => __awaiter(void 0, void 0, void 0, function* () {
+const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
+    console.log(search);
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * FROM resident`, null);
+        const data = yield con.Query(`SELECT * FROM resident WHERE first_name LIKE concat('%',@search,'%') || last_name LIKE concat('%',@search,'%')`, {
+            search: search
+        });
         con.Commit();
         return {
             success: true,

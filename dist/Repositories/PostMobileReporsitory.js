@@ -319,6 +319,13 @@ const getSinglePostWithPhoto = (posts_pk) => __awaiter(void 0, void 0, void 0, f
         `, {
             posts_pk: posts_pk,
         });
+        for (const postsreactions of data) {
+            postsreactions.reactions = yield con.Query(`
+          select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
+          `, {
+                posts_pk: posts_pk,
+            });
+        }
         for (const file of data) {
             file.upload_files = yield con.Query(`
         select * from posts_file where posts_pk=@posts_pk

@@ -407,7 +407,16 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
             posts_pk: posts_pk,
         }
       );
-  
+      for (const postsreactions of data) {
+        postsreactions.reactions = await con.Query(
+          `
+          select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
+          `,
+          {
+            posts_pk: posts_pk,
+          }
+        );
+      }
       for (const file of data) {
         file.upload_files = await con.Query(
           `

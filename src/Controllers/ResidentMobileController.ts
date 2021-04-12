@@ -18,7 +18,8 @@ router.post(
 router.post(
     "/getresidents",
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await ResidentMobileRepository.getresidents());
+      const search: string = req.body.search;
+      res.json(await ResidentMobileRepository.getresidents(search));
     }
   );
   
