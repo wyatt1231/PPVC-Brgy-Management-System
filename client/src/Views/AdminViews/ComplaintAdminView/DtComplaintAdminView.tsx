@@ -40,7 +40,7 @@ export const DtComplaintAdminView: FC<DtComplaintAdminViewProps> = memo(() => {
       search: "",
       date_from: null,
       date_to: null,
-      sts_pk: ["P", "OP", "C"],
+      sts_pk: ["P", "D", "OP", "AK", "C"],
     },
     sort: {
       direction: "desc",
