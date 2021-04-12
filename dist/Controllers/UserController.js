@@ -27,22 +27,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const user_repo = __importStar(require("../Repositories/UserRepository"));
 const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield user_repo.loginUser(req.body));
     }));
-    router.post("/currentUser", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/currentUser", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield user_repo.currentUser(req.user_pk));
     }));
-    router.post("/userinfo", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/userinfo", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield user_repo.userinfo(req.user_pk));
     }));
     app.use("/api/user/", router);

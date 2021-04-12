@@ -12,14 +12,13 @@ const UserController = async (app: Express): Promise<void> => {
 
   router.post(
     "/currentUser",
-    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       res.json(await user_repo.currentUser(req.user_pk));
     }
   );
   router.post(
     "/userinfo",
-    Authorize("admin,resident"),
+  
     async (req: Request & UserClaims, res: Response) => {
       res.json(await user_repo.userinfo(req.user_pk));
     }
