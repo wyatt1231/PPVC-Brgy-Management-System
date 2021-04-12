@@ -38,6 +38,8 @@ if (process.env.NODE_ENV === "production") {
   };
 }
 
+//console.log(`some config`)
+
 export let DatabaseConfig = mysql.createPool(con);
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {

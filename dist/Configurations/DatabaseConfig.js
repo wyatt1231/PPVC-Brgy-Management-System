@@ -37,6 +37,7 @@ else {
         waitForConnections: true,
     };
 }
+//console.log(`some config`)
 exports.DatabaseConfig = mysql2_1.default.createPool(con);
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
