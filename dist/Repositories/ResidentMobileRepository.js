@@ -129,8 +129,41 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
         };
     }
 });
+const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        const sql_edit_resident = yield con.Modify(`UPDATE user SET
+         new_user='false'
+        WHERE user_pk=@user_pk;`, {
+            user_pk: user_pk
+        });
+        if (sql_edit_resident > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The resident has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the resident",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addMobileResident,
+    upadatenewuser,
     getresidents
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map
