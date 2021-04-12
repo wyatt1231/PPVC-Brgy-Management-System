@@ -147,8 +147,46 @@ const getresidents = async (
       };
     }
   };
+  
+const upadatenewuser = async (
+  user_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const sql_edit_resident = await con.Modify(
+      `UPDATE user SET
+         new_user='false'
+        WHERE user_pk=@user_pk;`,
+      {
+        user_pk:user_pk
+      }
+    );
+
+    if (sql_edit_resident > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The resident has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 export default {
     addMobileResident,
+    upadatenewuser,
     getresidents
 
   };

@@ -10,6 +10,7 @@ const ResidentMobileController = async (app: Express): Promise<void> => {
 
 router.post(
     "/addMobileResident",
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: AdministratorModel = req.body;
       res.json(await ResidentMobileRepository.addMobileResident(payload));
@@ -17,9 +18,18 @@ router.post(
   );
 router.post(
     "/getresidents",
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const search: string = req.body.search;
       res.json(await ResidentMobileRepository.getresidents(search));
+    }
+  );
+router.post(
+    "/upadatenewuser",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const user_pk: number = req.body.user_pk;
+      res.json(await ResidentMobileRepository.upadatenewuser(user_pk));
     }
   );
   
