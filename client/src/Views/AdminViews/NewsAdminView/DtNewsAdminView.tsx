@@ -213,15 +213,6 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                 alignItems="center"
               >
                 <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleOpenFilterDialog(true)}
-                  >
-                    Pagsala
-                  </Button>
-                </Grid>
-                <Grid item>
                   <AddNewsAdminView handleRefetchTable={handleRefetchTable} />
                 </Grid>
               </Grid>

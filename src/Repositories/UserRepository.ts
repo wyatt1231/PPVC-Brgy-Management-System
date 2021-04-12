@@ -16,14 +16,10 @@ export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
       null
     );
 
-    console.log(`zxc`, zxc);
-
     const user: UserClaims | null = await con.QuerySingle(
       `SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`,
       payload
     );
-
-    console.log(`user`, user);
 
     if (user) {
       if (user.allow_login === "n") {
@@ -112,7 +108,6 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
     };
   }
 };
-
 
 export const userinfo = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();

@@ -20,9 +20,7 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         yield con.BeginTransaction();
         const zxc = yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
       WHERE table_schema = 'sql6400894';`, null);
-        console.log(`zxc`, zxc);
         const user = yield con.QuerySingle(`SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`, payload);
-        console.log(`user`, user);
         if (user) {
             if (user.allow_login === "n") {
                 return {

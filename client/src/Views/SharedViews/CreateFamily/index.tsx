@@ -271,16 +271,16 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
 
                     <Grid item xs={12}>
                       <MultiRadioFieldHookForm
-                        name="straktura"
-                        label="Straktura sa Balay"
+                        name="okasyon_yuta"
+                        label="Okasyon sa Yuta"
                         radio_items={[
                           {
-                            label: "binuhat sa kahoy",
-                            value: "binuhat sa kahoy",
+                            label: "nanag-iya sa yuta",
+                            value: "nanag-iya sa yuta",
                           },
                           {
-                            value: "nanag-iya sa yuta",
-                            label: "nanag-iya sa yuta",
+                            value: "nang arkila sa yuya",
+                            label: "binuhat sa Semento",
                           },
                           {
                             value: "informal settler",
@@ -293,7 +293,6 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
                         ]}
                       />
                     </Grid>
-
                     <Grid item xs={8}>
                       <TextFieldHookForm
                         fullWidth
@@ -310,21 +309,22 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
 
                     <Grid item xs={12}>
                       <MultiRadioFieldHookForm
-                        name="okasyon_yuta"
-                        label="Okasyon sa Yuta"
+                        name="straktura"
+                        label="Straktura sa Balay"
                         radio_items={[
                           {
-                            label: "Nanag-iya sa yuta",
-                            value: "Nanag-iya sa Yuta",
+                            label: "binuhat sa kahoy",
+                            value: "binuhat sa kahoy",
                           },
                           {
-                            value: "binuhat sa kahoy",
-                            label: "binuhat sa Semento",
+                            value: "binuhat sa semento",
+                            label: "binuhat sa semento",
                           },
                           {
                             value: "kombinasyon sa kahoy ug semento",
                             label: "kombinasyon sa kahoy ug semento",
                           },
+
                           {
                             value: "binuhat sa mga nilabay na materyales",
                             label:

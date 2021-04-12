@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === "production") {
   con = {
     host: "localhost",
     user: "root",
-    password: "rootsa",
+    password: "root sa",
     database: "bms",
     port: 3309,
     connectionLimit: 10,
