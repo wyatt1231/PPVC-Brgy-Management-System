@@ -148,6 +148,79 @@ const getresidents = async (
     }
   };
   
+const updatepassword = async (
+  email:string,password: string,currentpassword:string
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const sql_edit_resident = await con.Modify(
+      `UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email AND password=AES_ENCRYPT(@currentpassword,@email)`,
+      {
+        email:email,
+        password:password,
+        currentpassword:currentpassword
+      }
+    );
+
+    if (sql_edit_resident > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The resident has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+  
+const forgotpassword = async (
+ email:string,password: string
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const sql_edit_resident = await con.Modify(
+      `UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`,
+      {
+        email:email,
+        password:password
+      }
+    );
+      console.log(password)
+    if (sql_edit_resident > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The resident has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+  
 const upadatenewuser = async (
   user_pk: number
 ): Promise<ResponseModel> => {
@@ -187,6 +260,8 @@ const upadatenewuser = async (
 export default {
     addMobileResident,
     upadatenewuser,
-    getresidents
+    getresidents,
+    forgotpassword,
+    updatepassword
 
   };

@@ -10,7 +10,6 @@ const ResidentMobileController = async (app: Express): Promise<void> => {
 
 router.post(
     "/addMobileResident",
-    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: AdministratorModel = req.body;
       res.json(await ResidentMobileRepository.addMobileResident(payload));
@@ -30,6 +29,24 @@ router.post(
     async (req: Request & UserClaims, res: Response) => {
       const user_pk: number = req.body.user_pk;
       res.json(await ResidentMobileRepository.upadatenewuser(user_pk));
+    }
+  );
+  router.post(
+    "/updatepassword",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const email: string = req.body.email;
+      const password: string = req.body.password;
+      const currentpassword: string = req.body.currentpassword;
+      res.json(await ResidentMobileRepository.updatepassword(email,password,currentpassword));
+    }
+  );
+  router.post(
+    "/forgotpassword",
+    async (req: Request & UserClaims, res: Response) => {
+      const email: string = req.body.email;
+      const password: string = req.body.password;
+      res.json(await ResidentMobileRepository.forgotpassword(email,password));
     }
   );
   

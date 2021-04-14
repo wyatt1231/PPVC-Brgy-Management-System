@@ -129,6 +129,70 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
         };
     }
 });
+const updatepassword = (email, password, currentpassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email AND password=AES_ENCRYPT(@currentpassword,@email)`, {
+            email: email,
+            password: password,
+            currentpassword: currentpassword
+        });
+        if (sql_edit_resident > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The resident has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the resident",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const forgotpassword = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`, {
+            email: email,
+            password: password
+        });
+        console.log(password);
+        if (sql_edit_resident > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The resident has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the resident",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -164,6 +228,8 @@ const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* 
 exports.default = {
     addMobileResident,
     upadatenewuser,
-    getresidents
+    getresidents,
+    forgotpassword,
+    updatepassword
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map
