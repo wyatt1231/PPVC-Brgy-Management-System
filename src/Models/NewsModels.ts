@@ -26,7 +26,9 @@ export interface NewsModel {
 
   user?: UserModel;
   status?: StatusMasterModel;
+ 
 }
+
 
 export interface NewsLikesModel {
   news_like_pk?: number;

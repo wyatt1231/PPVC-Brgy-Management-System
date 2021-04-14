@@ -69,6 +69,136 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
     };
   }
 };
+
+const getNewsDataPublishedLastWeek = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const news_table: Array<NewsModel> = await con.Query(
+      `
+      SELECT * FROM 
+      (
+        SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic FROM news n 
+        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+          LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
+AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.encoded_at DESC) tmp;
+      `,
+      null
+    );
+    for (const newsreaction of news_table) {
+      newsreaction.likes = await con.Query(
+        `
+        SELECT COUNT(likes) AS likes FROM news WHERE news_pk=@news_pk
+      `,
+        {
+          news_pk: newsreaction.news_pk,
+        }
+      );
+    }
+    for (const news of news_table) {
+      news.upload_files = await con.Query(
+        `
+      select * from news_file where news_pk=@news_pk
+      `,
+        {
+          news_pk: news.news_pk,
+        }
+      );
+
+      news.comments = await con.Query(
+        `
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `,
+        {
+          news_pk: news.news_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: news_table,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getNewsDataPublishedByMonth = async ( month: number): Promise<ResponseModel> => {
+ 
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const news_table: Array<NewsModel> = await con.Query(
+      `SELECT * FROM 
+  (
+    SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
+    ,u.full_name user_full_name,u.pic user_pic FROM news n 
+    LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+      LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
+    LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
+AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
+      `,
+      {
+        month:month
+      }
+    );
+    for (const newsreaction of news_table) {
+      newsreaction.likes = await con.Query(
+        `
+        SELECT COUNT(likes) AS likes FROM news WHERE news_pk=@news_pk
+      `,
+        {
+          news_pk: newsreaction.news_pk,
+        }
+      );
+    }
+    for (const news of news_table) {
+      news.upload_files = await con.Query(
+        `
+      select * from news_file where news_pk=@news_pk
+      `,
+        {
+          news_pk: news.news_pk,
+        }
+      );
+
+      news.comments = await con.Query(
+        `
+        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
+        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
+        `,
+        {
+          news_pk: news.news_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: news_table,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
@@ -349,6 +479,8 @@ const addNews = async (
 
   export default {
     getNewsDataPublished,
+    getNewsDataPublishedLastWeek,
+    getNewsDataPublishedByMonth,
     addNews,
     addNewsReaction,
     addNewsComment,
