@@ -27,7 +27,7 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(
         `
-        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk group by reaction
+        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk 
         `,
         {
           posts_pk: postsreactions.posts_pk,
@@ -37,7 +37,7 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
     for (const postcomments of data) {
       postcomments.totalcomments = await con.Query(
         `
-        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk group by body
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk 
         `,
         {
           posts_pk: postcomments.posts_pk,
