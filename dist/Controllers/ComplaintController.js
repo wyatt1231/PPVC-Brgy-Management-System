@@ -59,6 +59,9 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintRepository_1.default.getComplaintMessage(complaint_pk));
     }));
+    router.post("/getComplaintLatest", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield ComplaintRepository_1.default.getComplaintLatest());
+    }));
     app.use("/api/complaint/", router);
 });
 exports.default = ComplaintController;

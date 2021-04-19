@@ -178,21 +178,23 @@ const getSingleFamily = async (ulo_pamilya: number): Promise<ResponseModel> => {
   }
 };
 
-const getAllFamily = async (): Promise<ResponseModel> => {
+const getAllFamily = async (purok: Array<string>): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     const all_family: Array<FamilyModel> = await con.Query(
       `
-        SELECT * FROM family;
+      SELECT f.* FROM family  f LEFT JOIN resident r ON r.resident_pk = f.ulo_pamilya where r.purok in @purok order by f.encoded_at desc;
         `,
-      null
+      {
+        purok: purok,
+      }
     );
 
     for (const fam of all_family) {
       fam.ulo_pamilya_info = await con.QuerySingle(
-        `select * from resident where resident_pk=@resident_pk;`,
+        `select * from resident where resident_pk=@resident_pk `,
         {
           resident_pk: fam.ulo_pamilya,
         }

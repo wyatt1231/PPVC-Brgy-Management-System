@@ -30,3 +30,9 @@ export interface OverallPopulationModel {
   death: Array<YearlyStatsModel>;
   alive: Array<YearlyStatsModel>;
 }
+
+export interface StatsModel {
+  label: Array<string>;
+  data: Array<YearlyStatsModel>;
+  backgroundColor: Array<string>;
+}

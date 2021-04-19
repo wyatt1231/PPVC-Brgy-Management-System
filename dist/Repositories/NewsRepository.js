@@ -8,7 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
@@ -188,7 +192,6 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
         payload.pub_date = useDateParser_1.parseInvalidDateToDefault(payload.pub_date, "(NULL)");
         payload.is_prio =
             payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
-        console.log(`add payload`, payload);
         const sql_add_news = yield con.Insert(`INSERT INTO news SET
          title=@title,
          audience=@audience,
@@ -210,6 +213,16 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                     encoder_pk: user_pk,
                     news_pk: sql_add_news.insertedId,
                 };
+                const response = yield axios_1.default.post(`https://textko.com/api/v3/sms`, {
+                    to: "+639299550278",
+                    text: "Hello from API.",
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMGIzYWUzZGJkZWQ3NGNjNDRlZmE5OTM2YTMxNGMwNjUzY2YwMGFiMmUxZGEzMjA3Njk4NjFhYTgxOGYyODQ0YTRmYzI4NWIzMzgxNDJmM2EiLCJpYXQiOjE2MTg2Njk4ODgsIm5iZiI6MTYxODY2OTg4OCwiZXhwIjoxNjUwMjA1ODg4LCJzdWIiOiIxMzM0NyIsInNjb3BlcyI6W119.Crat1LuK-Y2ZUZ5x4tD2o_MNUByQv260TEihb3Uw2Hpi7GtD7RLhxgPsCUggIpu9BtKoxe69oyZaOCSmjPdT5l7d42p9bTbz-9QBCjwWJ5hzlv-47bZS1UTe9kmZOVhZWY0MJGDcrILaFJhliIRN4cocV4sonOhdgpSlqoHk27fOt0I1k5ElLkMomOGusatOEXBTKh04--Kc4f8ClX9-XW9yjlmxbrhx2Td9c4Uv-gvMiSyVEHF_jnPxtQTluXoervCfLRwhxLbPvOIGEp3Jm_M6lssgcMGzGJcex1IV0qWdF7XoUU5Qk7Hn1VrhACCDmK6vA14kvz8n1tbMKIJhhj5uiIvke_xrtYIlxUI_HQlC2pjHHnNsEcQ6OkHGD-v8Ik37Bcp4r6gYX4WUgta-zDx8Ycr8pwt04IYD7MslvOtRLlLwcWotDDQAiExqNuNIjHMScCWfhM8vn9KdwUsZx3HAJ0bRn__n8ecxOD-0OMxA929gtIXs_oNTqAfiC8w0huJ6O_73-qstoQKBL88gs8BbXPf4VAvDxdvXjsCbWXxVqARJb0gCTzdqqjive2CfDXov5_uBsYO9ctqXiHWRbnS_9ljQVao_vcUAhzheQSn0aDpb4okXMXUXr1gik_3DkOKTuhCKayTuXVzdWtcSLIR6lPjkYFvWFJN9D0W2e7w`,
+                    },
+                });
+                console.log(`response`, response);
                 const sql_add_news_file = yield con.Insert(`INSERT INTO news_file SET
              news_pk=@news_pk,
              file_path=@file_path,
@@ -564,6 +577,40 @@ const getSingleNews = (news_pk) => __awaiter(void 0, void 0, void 0, function* (
         };
     }
 });
+const getNewsLatest = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _e, _f;
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const news_table = yield con.Query(`
+      SELECT * FROM news limit 10
+      `, null);
+        for (const news of news_table) {
+            news.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
+                sts_pk: news.sts_pk,
+            });
+            news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
+                user_pk: news.encoder_pk,
+            });
+            if ((_e = news === null || news === void 0 ? void 0 : news.user) === null || _e === void 0 ? void 0 : _e.pic) {
+                news.user.pic = yield useFileUploader_1.GetUploadedImage((_f = news === null || news === void 0 ? void 0 : news.user) === null || _f === void 0 ? void 0 : _f.pic);
+            }
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: news_table,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     getNewsDataTable,
     addNews,
@@ -579,5 +626,6 @@ exports.default = {
     getNewsComments,
     toggleLike,
     getNewsFiles,
+    getNewsLatest,
 };
 //# sourceMappingURL=NewsRepository.js.map

@@ -91,6 +91,11 @@ const updateNewsReaction = async (
   return response;
 };
 
+const getNewsLatest = async (): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getNewsLatest", {});
+  return response;
+};
+
 export default {
   getNewsDataTable,
   addNews,
@@ -103,4 +108,5 @@ export default {
   updateNewsReaction,
   toggleLike,
   getNewsFiles,
+  getNewsLatest,
 };

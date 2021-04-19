@@ -348,6 +348,37 @@ const getComplaintMessage = (complaint_pk) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
+const getComplaintLatest = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`
+      SELECT * FROM complaint WHERE sts_pk NOT IN('C','X','D') LIMIT 10 
+      `, null);
+        for (const complaint of data) {
+            complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
+                user_pk: complaint.reported_by,
+            });
+            complaint.user.pic = yield useFileUploader_1.GetUploadedImage(complaint.user.pic);
+            complaint.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk`, {
+                sts_pk: complaint.sts_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     addComplaintMessage,
     getComplaintList,
@@ -358,5 +389,6 @@ exports.default = {
     getSingleComplaint,
     getComplaintTable,
     getComplaintLogTable,
+    getComplaintLatest,
 };
 //# sourceMappingURL=ComplaintRepository.js.map

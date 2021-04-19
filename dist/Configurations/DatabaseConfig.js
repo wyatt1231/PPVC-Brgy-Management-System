@@ -18,24 +18,24 @@ if (process.env.NODE_ENV === "production") {
     };
 }
 else {
-    con = {
-        host: "freedb.tech",
-        user: "freedbtech_zxcpoklcapstone",
-        password: "zxcpoklcapstone",
-        database: "freedbtech_zxcpoklcapstone",
-        port: 3306,
-        connectionLimit: 10,
-        waitForConnections: true,
-    };
     // con = {
-    //   host: "localhost",
-    //   user: "root",
-    //   password: "root sa",
-    //   database: "bms",
-    //   port: 3309,
+    //   host: "freedb.tech",
+    //   user: "freedbtech_zxcpoklcapstone",
+    //   password: "zxcpoklcapstone",
+    //   database: "freedbtech_zxcpoklcapstone",
+    //   port: 3306,
     //   connectionLimit: 10,
     //   waitForConnections: true,
     // };
+    con = {
+        host: "localhost",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
+        connectionLimit: 10,
+        waitForConnections: true,
+    };
 }
 //console.log(`some config`)
 exports.DatabaseConfig = mysql2_1.default.createPool(con);
@@ -236,21 +236,9 @@ const queryFormat = (query, values) => {
                 return str;
             }
         }
-        // if (key instanceof Array) {
-        //   console.log(`array -> array `);
-        //   if (key.length > 0) {
-        //     for (let i = 0; i < key.length; i++) {
-        //       key[i] = mysql.escape(key[i]);
-        //     }
-        //     const joined_arr = key.join(",");
-        //     return joined_arr;
-        //   } else {
-        //     console.log(`key`, key);
-        //     return "";
-        //   }
-        // }
         return str;
     });
+    // console.log(`formattedQuery`, formattedQuery);
     return formattedQuery;
 };
 //# sourceMappingURL=DatabaseConfig.js.map

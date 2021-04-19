@@ -187,6 +187,32 @@ const addComplaintMessage = (
   }
 };
 
+const getComplaintLatest = () => async (
+  dispatch: Dispatch<ComplaintReducerTypes>
+) => {
+  try {
+    dispatch({
+      type: "fetch_latest_complaint",
+      fetch_latest_complaint: true,
+    });
+    const response: IServerResponse = await ComplaintApi.getComplaintLatest();
+
+    if (response.success) {
+      dispatch({
+        type: "latest_complaint",
+        latest_complaint: response.data,
+      });
+    }
+
+    dispatch({
+      type: "fetch_latest_complaint",
+      fetch_latest_complaint: false,
+    });
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
 export default {
   setComplaintTable,
   setSingleComplaint,
@@ -194,4 +220,5 @@ export default {
   setComplaintLogTable,
   setComplaintMessage,
   addComplaintMessage,
+  getComplaintLatest,
 };

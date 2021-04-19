@@ -39,7 +39,8 @@ const FamilyController = async (app: Express): Promise<void> => {
     "/getAllFamily",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await FamilyRepository.getAllFamily());
+      const purok: Array<string> = req.body;
+      res.json(await FamilyRepository.getAllFamily(purok));
     }
   );
 

@@ -148,15 +148,17 @@ const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, funct
         };
     }
 });
-const getAllFamily = () => __awaiter(void 0, void 0, void 0, function* () {
+const getAllFamily = (purok) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.Query(`
-        SELECT * FROM family;
-        `, null);
+      SELECT f.* FROM family  f LEFT JOIN resident r ON r.resident_pk = f.ulo_pamilya where r.purok in @purok order by f.encoded_at desc;
+        `, {
+            purok: purok,
+        });
         for (const fam of all_family) {
-            fam.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk;`, {
+            fam.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk `, {
                 resident_pk: fam.ulo_pamilya,
             });
             fam.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(fam.ulo_pamilya_info.pic);

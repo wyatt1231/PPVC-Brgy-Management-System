@@ -11,7 +11,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await DashboardRepository.overallPopulation());
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.overallPopulation(purok));
       } catch (error) {
         res.json(error);
       }
@@ -22,8 +23,9 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/ageGroupStats",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
+      const purok: Array<string> = req.body;
       try {
-        res.json(await DashboardRepository.ageGroupStats());
+        res.json(await DashboardRepository.ageGroupStats(purok));
       } catch (error) {
         res.json(error);
       }
@@ -35,7 +37,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await DashboardRepository.genderStats());
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.genderStats(purok));
       } catch (error) {
         res.json(error);
       }
@@ -47,10 +50,27 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await DashboardRepository.lifeStageStats());
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.lifeStageStats(purok));
       } catch (error) {
         res.json(error);
       }
+    }
+  );
+
+  router.post(
+    "/statsComplaint",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await DashboardRepository.statsComplaint());
+    }
+  );
+
+  router.post(
+    "/statsNews",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await DashboardRepository.statsNews());
     }
   );
 

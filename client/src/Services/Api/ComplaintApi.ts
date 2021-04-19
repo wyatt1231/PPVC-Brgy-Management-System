@@ -68,6 +68,14 @@ const addComplaintMessage = async (
   return response;
 };
 
+const getComplaintLatest = async (): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "getComplaintLatest",
+    null
+  );
+  return response;
+};
+
 export default {
   getComplaintTable,
   getSingleComplaint,
@@ -75,4 +83,5 @@ export default {
   getComplaintLogTable,
   getComplaintMessage,
   addComplaintMessage,
+  getComplaintLatest,
 };

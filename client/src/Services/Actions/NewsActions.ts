@@ -60,6 +60,30 @@ const setSingleNews = (news_pk: number) => async (
   }
 };
 
+const getNewsLatest = () => async (dispatch: Dispatch<NewsReducerTypes>) => {
+  try {
+    dispatch({
+      type: "fetch_news_latest",
+      fetch_news_latest: true,
+    });
+    const response: IServerResponse = await NewsApi.getNewsLatest();
+
+    if (response.success) {
+      dispatch({
+        type: "news_latest",
+        news_latest: response.data,
+      });
+    }
+
+    dispatch({
+      type: "fetch_news_latest",
+      fetch_news_latest: false,
+    });
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
 const addNews = (
   payload: FormData,
   successCallback: (msg: string) => any
@@ -312,4 +336,5 @@ export default {
   addNewsComment,
   updateNewsReaction,
   toggleLike,
+  getNewsLatest,
 };
