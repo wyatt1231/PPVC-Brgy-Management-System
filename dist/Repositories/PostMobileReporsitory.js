@@ -25,14 +25,14 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
         `, null);
         for (const postsreactions of data) {
             postsreactions.reactions = yield con.Query(`
-        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk
+        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk group by reaction
         `, {
                 posts_pk: postsreactions.posts_pk,
             });
         }
         for (const postcomments of data) {
             postcomments.totalcomments = yield con.Query(`
-        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk group by body
         `, {
                 posts_pk: postcomments.posts_pk,
             });
