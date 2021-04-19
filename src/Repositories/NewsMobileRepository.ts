@@ -20,7 +20,7 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU"  ORDER BY n.encoded_at DESC) tmp;
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
       `,
       null
     );
@@ -139,7 +139,7 @@ const getNewsDataPublishedByMonth = async ( month: number): Promise<ResponseMode
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-
+console.log(month)
     const news_table: Array<NewsModel> = await con.Query(
       `SELECT * FROM 
   (

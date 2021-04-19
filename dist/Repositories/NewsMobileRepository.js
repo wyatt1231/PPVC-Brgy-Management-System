@@ -23,7 +23,7 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU"  ORDER BY n.encoded_at DESC) tmp;
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
       `, null);
         for (const newsreaction of news_table) {
             newsreaction.likes = yield con.Query(`
@@ -113,6 +113,7 @@ const getNewsDataPublishedByMonth = (month) => __awaiter(void 0, void 0, void 0,
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
+        console.log(month);
         const news_table = yield con.Query(`SELECT * FROM 
   (
     SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor

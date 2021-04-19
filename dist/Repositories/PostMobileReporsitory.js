@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
-const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
+const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -22,14 +22,41 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         ,u.full_name user_full_name,u.pic user_pic FROM posts p
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC)tmp;
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"   ORDER BY p.encoded_at DESC)tmp;
         `, null);
         for (const postsreactions of data) {
             postsreactions.reactions = yield con.Query(`
-        select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
+        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk
         `, {
                 posts_pk: postsreactions.posts_pk,
             });
+        }
+        for (const postcomments of data) {
+            postcomments.totalcomments = yield con.Query(`
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        `, {
+                posts_pk: postcomments.posts_pk,
+            });
+        }
+        for (const isLiked of data) {
+            isLiked.liked = yield con.Query(`
+        SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+        `, {
+                posts_pk: isLiked.posts_pk,
+                user_pk: user_pk
+            });
+        }
+        for (const comments of data) {
+            comments.comments = yield con.Query(`
+        SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk limit 5
+        `, {
+                posts_pk: comments.posts_pk,
+            });
+            for (const file of comments.comments) {
+                const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
+                file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+                console.error(`error`, file.user_pk);
+            }
         }
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
@@ -76,6 +103,21 @@ const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* ()
           select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
           `, {
                 posts_pk: postsreactions.posts_pk,
+            });
+        }
+        for (const postcomments of data) {
+            postcomments.totalcomments = yield con.Query(`
+          SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+          `, {
+                posts_pk: postcomments.posts_pk,
+            });
+        }
+        for (const isLiked of data) {
+            isLiked.liked = yield con.Query(`
+          SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+          `, {
+                posts_pk: isLiked.posts_pk,
+                user_pk: user_pk
             });
         }
         for (const file of data) {
@@ -127,7 +169,7 @@ const getPostsReaction = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
-const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const getPostsComments = (user_pk, posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -138,6 +180,14 @@ const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, functio
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
             file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
             console.error(`error`, file.user_pk);
+        }
+        for (const isLiked of data) {
+            isLiked.liked = yield con.Query(`
+          SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+          `, {
+                posts_pk: posts_pk,
+                user_pk: user_pk
+            });
         }
         con.Commit();
         return {
@@ -305,7 +355,7 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         };
     }
 });
-const getSinglePostWithPhoto = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const getSinglePostWithPhoto = (posts_pk, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -324,6 +374,21 @@ const getSinglePostWithPhoto = (posts_pk) => __awaiter(void 0, void 0, void 0, f
           select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
           `, {
                 posts_pk: posts_pk,
+            });
+        }
+        for (const postcomments of data) {
+            postcomments.totalcomments = yield con.Query(`
+          SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+          `, {
+                posts_pk: postcomments.posts_pk,
+            });
+        }
+        for (const isLiked of data) {
+            isLiked.liked = yield con.Query(`
+          SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+          `, {
+                posts_pk: isLiked.posts_pk,
+                user_pk: user_pk
             });
         }
         for (const file of data) {
