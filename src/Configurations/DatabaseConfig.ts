@@ -9,7 +9,11 @@ let con: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
   con = {
+<<<<<<< HEAD
     host: "156.67.222.35",
+=======
+   host: "156.67.222.35",
+>>>>>>> e49d5371c1fc0e6b62024988c0a39ac2be351038
     user: "u583403240_bms",
     password: "BMS@capstone2",
     database: "u583403240_bms",
