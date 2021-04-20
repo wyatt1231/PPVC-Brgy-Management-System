@@ -53,11 +53,14 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
         `, {
                 posts_pk: postcomments.posts_pk,
             });
-            for (const file of postcomments.comments) {
-                const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
-                file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
-                console.error(`error`, file.user_pk);
-            }
+            // for (const file of postcomments.comments) {
+            //   const sql_get_pic = await con.QuerySingle(
+            //     `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+            //     null
+            //   );
+            //   file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+            //   console.error(`error`, file.user_pk);
+            // }
         }
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);

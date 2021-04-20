@@ -68,14 +68,14 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
           posts_pk: postcomments.posts_pk,
         }
       );
-      for (const file of postcomments.comments) {
-        const sql_get_pic = await con.QuerySingle(
-          `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
-          null
-        );
-        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-        console.error(`error`, file.user_pk);
-      }
+      // for (const file of postcomments.comments) {
+      //   const sql_get_pic = await con.QuerySingle(
+      //     `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+      //     null
+      //   );
+      //   file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      //   console.error(`error`, file.user_pk);
+      // }
     }
 
     for (const file of data) {
