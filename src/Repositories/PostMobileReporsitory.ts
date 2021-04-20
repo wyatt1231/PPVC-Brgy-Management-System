@@ -55,27 +55,7 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
         }
       );
     }
-    for (const comments of data) {
-      comments.comments = await con.Query(
-        `
-        SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk limit 5
-        `,
-        {
-          posts_pk: comments.posts_pk,
-        }
-      );
-
-      for (const file of comments.comments) {
-        const sql_get_pic = await con.QuerySingle(
-          `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
-          null
-        );
-        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-        console.error(`error`, file.user_pk);
-      }
-
-    }
-
+ 
 
     for (const file of data) {
       const sql_get_pic = await con.QuerySingle(
