@@ -17,6 +17,14 @@ const PostsController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
+    "/getcomments",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const posts_pk: number = req.body.posts_pk;
+      res.json(await PostsMobileRepository.getcomments(posts_pk));
+    }
+  );
+  router.post(
     "/getUserPosts",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {

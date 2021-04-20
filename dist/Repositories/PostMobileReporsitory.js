@@ -45,6 +45,20 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
                 user_pk: user_pk
             });
         }
+        for (const postcomments of data) {
+            postcomments.comments = yield con.Query(`
+        SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
+        THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
+        FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  WHERE posts_pk=@posts_pk LIMIT 5
+        `, {
+                posts_pk: postcomments.posts_pk,
+            });
+            for (const file of postcomments.comments) {
+                const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
+                file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+                console.error(`error`, file.user_pk);
+            }
+        }
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
             file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
@@ -56,6 +70,33 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
         `, {
                 posts_pk: file.posts_pk,
             });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getcomments = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
+      THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
+      FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk limit 5
+        `, { posts_pk: posts_pk });
+        for (const file of data) {
+            const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
+            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            console.error(`error`, file.user_pk);
         }
         con.Commit();
         return {
@@ -349,7 +390,7 @@ const getSinglePostWithPhoto = (posts_pk, user_pk) => __awaiter(void 0, void 0, 
         const data = yield con.Query(`
         SELECT * FROM 
         (    
-    SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+          SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
           ,u.full_name user_full_name,u.pic user_pic FROM posts p
           LEFT JOIN status s ON p.sts_pk = s.sts_pk 
           LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
@@ -404,6 +445,7 @@ exports.default = {
     addPosts,
     getSinglePostWithPhoto,
     getPosts,
+    getcomments,
     getUserPosts,
     addPostReaction,
     addPostComment,

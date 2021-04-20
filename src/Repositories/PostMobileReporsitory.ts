@@ -54,8 +54,29 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
           user_pk:user_pk
         }
       );
+      
     }
  
+    for (const postcomments of data) {
+      postcomments.comments = await con.Query(
+        `
+        SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
+        THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
+        FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  WHERE posts_pk=@posts_pk LIMIT 5
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
+      for (const file of postcomments.comments) {
+        const sql_get_pic = await con.QuerySingle(
+          `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+          null
+        );
+        file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+        console.error(`error`, file.user_pk);
+      }
+    }
 
     for (const file of data) {
       const sql_get_pic = await con.QuerySingle(
@@ -76,6 +97,42 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
       );
     }
 
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getcomments = async (posts_pk:number): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+
+  try {
+    await con.BeginTransaction();
+    const data: Array<PostsModel> = await con.Query(
+      `SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
+      THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
+      FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk limit 5
+        `,{posts_pk:posts_pk}
+    );
+  
+    for (const file of data) {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
+        null
+      );
+      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
+      console.error(`error`, file.user_pk);
+    }
+
+    
     con.Commit();
     return {
       success: true,
@@ -450,7 +507,7 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
         `
         SELECT * FROM 
         (    
-    SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+          SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
           ,u.full_name user_full_name,u.pic user_pic FROM posts p
           LEFT JOIN status s ON p.sts_pk = s.sts_pk 
           LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
@@ -519,6 +576,7 @@ export default {
     addPosts,
     getSinglePostWithPhoto,
     getPosts,
+    getcomments,
     getUserPosts,
     addPostReaction,
     addPostComment,
