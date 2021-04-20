@@ -15,6 +15,15 @@ router.post(
       res.json(await ResidentMobileRepository.addMobileResident(payload));
     }
   );
+  router.post(
+    "/updateMobileResident",
+    // Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const payload: AdministratorModel = req.body;
+      const user_pk: number = req.body.user_pk;
+      res.json(await ResidentMobileRepository.updateMobileResident(payload, user_pk));
+    }
+  );
 router.post(
     "/getresidents",
     Authorize("admin,resident"),

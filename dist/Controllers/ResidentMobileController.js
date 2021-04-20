@@ -21,6 +21,13 @@ const ResidentMobileController = (app) => __awaiter(void 0, void 0, void 0, func
         const payload = req.body;
         res.json(yield ResidentMobileRepository_1.default.addMobileResident(payload));
     }));
+    router.post("/updateMobileResident", 
+    // Authorize("admin,resident"),
+    (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        const user_pk = req.body.user_pk;
+        res.json(yield ResidentMobileRepository_1.default.updateMobileResident(payload, user_pk));
+    }));
     router.post("/getresidents", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const search = req.body.search;
         res.json(yield ResidentMobileRepository_1.default.getresidents(search));

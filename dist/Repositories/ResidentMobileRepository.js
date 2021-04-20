@@ -106,6 +106,86 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         };
     }
 });
+const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const user_payload = {
+            full_name: `${payload.last_name}, ${payload.first_name}`,
+            email: payload.email,
+            encoder_pk: "0",
+        };
+        console.log(payload);
+        const update_user = yield con.Insert(`UPDATE user SET
+      email=@email,
+      password=AES_ENCRYPT(@email,@email),
+      full_name=@full_name
+      where user_pk=@encoder_pk;
+      `, user_payload);
+        if (useValidator_1.isValidPicture(payload.pic)) {
+            const upload_result = yield useFileUploader_1.UploadImage({
+                base_url: "./src/Storage/Files/Images/",
+                extension: "jpg",
+                file_name: payload.user_pk,
+                file_to_upload: payload.pic,
+            });
+            if (upload_result.success) {
+                payload.pic = upload_result.data;
+            }
+            else {
+                return upload_result;
+            }
+        }
+        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date) });
+        const sql_edit_resident = yield con.Modify(`UPDATE resident SET
+        user_pk=@user_pk,
+        pic=@pic,              
+        first_name=@first_name,       
+        middle_name=@middle_name,      
+        last_name=@last_name,        
+        suffix=@suffix,           
+        gender=@gender,           
+        birth_date=@birth_date,       
+        nationality=@nationality,      
+        religion=@religion,         
+        civil_status=@civil_status,  
+        purok=@purok,   
+        phone=@phone,    
+        email=@email,  
+        dialect=@dialect,          
+        tribe=@tribe,            
+        with_disability=@with_disability,  
+        is_employed=@is_employed,      
+        employment=@employment,       
+        house_income=@house_income,     
+        house_status=@house_status,     
+        voting_precinct=@voting_precinct,  
+        house_ownership=@house_ownership
+        WHERE resident_pk=@resident_pk;`, resident_payload);
+        if (sql_edit_resident > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The resident has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the resident",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     console.log(search);
@@ -230,6 +310,7 @@ exports.default = {
     upadatenewuser,
     getresidents,
     forgotpassword,
-    updatepassword
+    updatepassword,
+    updateMobileResident
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map

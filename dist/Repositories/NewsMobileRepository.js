@@ -69,7 +69,7 @@ const getNewsDataPublishedLastWeek = () => __awaiter(void 0, void 0, void 0, fun
       (
         SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
         LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
 AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.encoded_at DESC) tmp;
@@ -118,7 +118,7 @@ const getNewsDataPublishedByMonth = (month) => __awaiter(void 0, void 0, void 0,
   (
     SELECT n.news_pk,n.title,n.body,n.sts_pk,CASE WHEN DATE_FORMAT(n.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(n.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),n.encoded_at) >7 THEN DATE_FORMAT(n.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),n.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),n.encoded_at),'D')  ELSE DATE_FORMAT(n.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,n.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
     ,u.full_name user_full_name,u.pic user_pic FROM news n 
-    LEFT JOIN STATUS s ON n.sts_pk = s.sts_pk 
+    LEFT JOIN status s ON n.sts_pk = s.sts_pk 
       LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
     LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
 AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
