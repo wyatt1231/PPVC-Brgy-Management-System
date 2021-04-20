@@ -9,10 +9,10 @@ let con: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
   con = {
-    host: "freedb.tech",
-    user: "freedbtech_zxcpoklcapstone",
-    password: "zxcpoklcapstone",
-    database: "freedbtech_zxcpoklcapstone",
+   host: "156.67.222.35",
+    user: "u583403240_bms",
+    password: "BMS@capstone2",
+    database: "u583403240_bms",
     port: 3306,
     connectionLimit: 10,
     waitForConnections: true,
