@@ -215,6 +215,47 @@ const updateMobileResident = async (
     };
   }
 };
+const getmembers = async (
+  resident_pk:string
+ ): Promise<ResponseModel> => {
+   const con = await DatabaseConnection();
+ console.log(resident_pk)
+   try {
+     await con.BeginTransaction();
+ 
+     const data: Array<ResidentModel> = await con.Query(
+      `SELECT  fm.fam_pk,r.first_name,r.middle_name,r.last_name FROM family_member fm JOIN resident r ON fm.resident_pk=r.resident_pk WHERE fm.resident_pk=@resident_pk`,
+       
+     { 
+      resident_pk:resident_pk
+       }
+       
+     );
+     for (const members of data) {
+      members.members = await con.Query(
+        `
+        SELECT CONCAT(r.first_name,' ',r.middle_name,' ',r.last_name) fullname,fm.rel FROM family_member fm JOIN resident r ON fm.resident_pk=r.resident_pk JOIN family f ON f.fam_pk=fm.fam_pk WHERE fm.fam_pk=@fam_pk
+        `,
+        {
+          fam_pk: members.fam_pk,
+   
+        }
+      );
+    }
+     con.Commit();
+     return {
+       success: true,
+       data: data,
+     };
+   } catch (error) {
+     await con.Rollback();
+     console.error(`error`, error);
+     return {
+       success: false,
+       message: ErrorMessage(error),
+     };
+   }
+ };
 const getresidents = async (
    search:string
   ): Promise<ResponseModel> => {
@@ -356,6 +397,7 @@ const upadatenewuser = async (
   }
 };
 export default {
+  getmembers,
     addMobileResident,
     upadatenewuser,
     getresidents,

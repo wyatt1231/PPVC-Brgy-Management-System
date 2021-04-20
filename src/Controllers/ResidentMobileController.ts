@@ -33,6 +33,14 @@ router.post(
     }
   );
 router.post(
+    "/getmembers",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const resident_pk: string = req.body.resident_pk;
+      res.json(await ResidentMobileRepository.getmembers(resident_pk));
+    }
+  );
+router.post(
     "/upadatenewuser",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {

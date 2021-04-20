@@ -32,6 +32,10 @@ const ResidentMobileController = (app) => __awaiter(void 0, void 0, void 0, func
         const search = req.body.search;
         res.json(yield ResidentMobileRepository_1.default.getresidents(search));
     }));
+    router.post("/getmembers", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const resident_pk = req.body.resident_pk;
+        res.json(yield ResidentMobileRepository_1.default.getmembers(resident_pk));
+    }));
     router.post("/upadatenewuser", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user_pk = req.body.user_pk;
         res.json(yield ResidentMobileRepository_1.default.upadatenewuser(user_pk));

@@ -39,4 +39,7 @@ export interface ResidentModel {
   kita?: number;
   educ?: string;
   status?: StatusMasterModel;
-}
+
+  members?:Array<any>;
+  fam_pk?:string;
+};
