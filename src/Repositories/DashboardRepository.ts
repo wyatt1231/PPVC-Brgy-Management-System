@@ -7,6 +7,124 @@ import {
 } from "../Models/DashboardModels";
 import { ResponseModel } from "../Models/ResponseModels";
 
+const total_population = async (
+  purok: Array<string>
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is  null  and purok in @purok
+    `,
+      {
+        purok: purok,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_death = async (purok: Array<string>): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is not null   and purok in @purok
+    `,
+      {
+        purok: purok,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_pwd = async (purok: Array<string>): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is  null  and with_disability = 'y'   and purok in @purok
+    `,
+      {
+        purok: purok,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_sc = async (purok: Array<string>): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is null  and DATEDIFF(DATE(NOW()), birth_date) >= 60   and purok in @purok
+    `,
+      {
+        purok: purok,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const overallPopulation = async (
   purok: Array<string>
 ): Promise<ResponseModel> => {
@@ -276,6 +394,10 @@ const statsNews = async (): Promise<ResponseModel> => {
 };
 
 export default {
+  total_population,
+  total_death,
+  total_pwd,
+  total_sc,
   overallPopulation,
   ageGroupStats,
   genderStats,

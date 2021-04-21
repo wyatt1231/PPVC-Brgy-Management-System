@@ -15,6 +15,102 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment_1 = __importDefault(require("moment"));
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
+const total_population = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is  null  and purok in @purok
+    `, {
+            purok: purok,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const total_death = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is not null   and purok in @purok
+    `, {
+            purok: purok,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const total_pwd = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is  null  and with_disability = 'y'   and purok in @purok
+    `, {
+            purok: purok,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const total_sc = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is null  and DATEDIFF(DATE(NOW()), birth_date) >= 60   and purok in @purok
+    `, {
+            purok: purok,
+        });
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const overallPopulation = (purok) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -196,7 +292,7 @@ const statsComplaint = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield con.BeginTransaction();
         const stats_complaint = yield con.Query(`
-      SELECT  s.sts_desc as label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN STATUS s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
+      SELECT  s.sts_desc as label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
           `, null);
         con.Commit();
         return {
@@ -218,7 +314,7 @@ const statsNews = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield con.BeginTransaction();
         const stats_complaint = yield con.Query(`
-      SELECT  s.sts_desc AS label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM news c JOIN STATUS s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
+      SELECT  s.sts_desc AS label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM news c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
           `, null);
         con.Commit();
         return {
@@ -236,6 +332,10 @@ const statsNews = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.default = {
+    total_population,
+    total_death,
+    total_pwd,
+    total_sc,
     overallPopulation,
     ageGroupStats,
     genderStats,

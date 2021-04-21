@@ -74,6 +74,42 @@ const DashboardController = async (app: Express): Promise<void> => {
     }
   );
 
+  router.post(
+    "/total_population",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const purok: Array<string> = req.body;
+      res.json(await DashboardRepository.total_population(purok));
+    }
+  );
+
+  router.post(
+    "/total_death",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const purok: Array<string> = req.body;
+      res.json(await DashboardRepository.total_death(purok));
+    }
+  );
+
+  router.post(
+    "/total_pwd",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const purok: Array<string> = req.body;
+      res.json(await DashboardRepository.total_pwd(purok));
+    }
+  );
+
+  router.post(
+    "/total_sc",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const purok: Array<string> = req.body;
+      res.json(await DashboardRepository.total_sc(purok));
+    }
+  );
+
   app.use("/api/dashboard/", router);
 };
 

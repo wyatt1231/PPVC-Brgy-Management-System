@@ -59,6 +59,22 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     router.post("/statsNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield DashboardRepository_1.default.statsNews());
     }));
+    router.post("/total_population", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_population(purok));
+    }));
+    router.post("/total_death", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_death(purok));
+    }));
+    router.post("/total_pwd", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_pwd(purok));
+    }));
+    router.post("/total_sc", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_sc(purok));
+    }));
     app.use("/api/dashboard/", router);
 });
 exports.default = DashboardController;

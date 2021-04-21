@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
+const qs_1 = __importDefault(require("qs"));
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
@@ -189,6 +190,7 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
+        const pub_date = payload.pub_date;
         payload.pub_date = useDateParser_1.parseInvalidDateToDefault(payload.pub_date, "(NULL)");
         payload.is_prio =
             payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
@@ -213,16 +215,6 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                     encoder_pk: user_pk,
                     news_pk: sql_add_news.insertedId,
                 };
-                const response = yield axios_1.default.post(`https://textko.com/api/v3/sms`, {
-                    to: "+639299550278",
-                    text: "Hello from API.",
-                }, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMGIzYWUzZGJkZWQ3NGNjNDRlZmE5OTM2YTMxNGMwNjUzY2YwMGFiMmUxZGEzMjA3Njk4NjFhYTgxOGYyODQ0YTRmYzI4NWIzMzgxNDJmM2EiLCJpYXQiOjE2MTg2Njk4ODgsIm5iZiI6MTYxODY2OTg4OCwiZXhwIjoxNjUwMjA1ODg4LCJzdWIiOiIxMzM0NyIsInNjb3BlcyI6W119.Crat1LuK-Y2ZUZ5x4tD2o_MNUByQv260TEihb3Uw2Hpi7GtD7RLhxgPsCUggIpu9BtKoxe69oyZaOCSmjPdT5l7d42p9bTbz-9QBCjwWJ5hzlv-47bZS1UTe9kmZOVhZWY0MJGDcrILaFJhliIRN4cocV4sonOhdgpSlqoHk27fOt0I1k5ElLkMomOGusatOEXBTKh04--Kc4f8ClX9-XW9yjlmxbrhx2Td9c4Uv-gvMiSyVEHF_jnPxtQTluXoervCfLRwhxLbPvOIGEp3Jm_M6lssgcMGzGJcex1IV0qWdF7XoUU5Qk7Hn1VrhACCDmK6vA14kvz8n1tbMKIJhhj5uiIvke_xrtYIlxUI_HQlC2pjHHnNsEcQ6OkHGD-v8Ik37Bcp4r6gYX4WUgta-zDx8Ycr8pwt04IYD7MslvOtRLlLwcWotDDQAiExqNuNIjHMScCWfhM8vn9KdwUsZx3HAJ0bRn__n8ecxOD-0OMxA929gtIXs_oNTqAfiC8w0huJ6O_73-qstoQKBL88gs8BbXPf4VAvDxdvXjsCbWXxVqARJb0gCTzdqqjive2CfDXov5_uBsYO9ctqXiHWRbnS_9ljQVao_vcUAhzheQSn0aDpb4okXMXUXr1gik_3DkOKTuhCKayTuXVzdWtcSLIR6lPjkYFvWFJN9D0W2e7w`,
-                    },
-                });
-                console.log(`response`, response);
                 const sql_add_news_file = yield con.Insert(`INSERT INTO news_file SET
              news_pk=@news_pk,
              file_path=@file_path,
@@ -235,6 +227,37 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                         success: false,
                         message: "The process has been terminated when trying to save the file!",
                     };
+                }
+            }
+            console.log(`--------------------------------------`, payload);
+            if (payload.is_prio) {
+                let residents = [];
+                if (payload.audience === "r" || payload.audience === "all") {
+                    residents = yield con.Query(`SELECT phone FROM resident`, null);
+                }
+                else if (payload.audience === "b") {
+                    residents = yield con.Query(`SELECT phone FROM resident where resident_pk in (select resident_pk from barangay_official)`, null);
+                }
+                for (const r of residents) {
+                    if (/^(09|\+639)\d{9}$/.test(r.phone)) {
+                        const sms_response = yield axios_1.default({
+                            method: "post",
+                            url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+                            data: qs_1.default.stringify({
+                                username: "mrmontiveles@outlook.com",
+                                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                                to: r.phone,
+                                message: `Balita gikan sa Brgy. 37-D, Davao City. ${payload.title} karong ${useDateParser_1.parseInvalidDateToDefault(pub_date)}`,
+                                //https://dashboard.clicksend.com/#/sms/send-sms/main
+                            }),
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
+                            },
+                        });
+                        console.log(`sms_response 1-->`, r.phone);
+                        console.log(`sms_response 2--->`, sms_response.data);
+                    }
                 }
             }
             con.Commit();

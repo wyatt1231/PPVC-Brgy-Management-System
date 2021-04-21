@@ -56,7 +56,6 @@ const UploadFile = (base_url, file_to_upload) => {
         if (!fs_1.default.existsSync(base_url)) {
             fs_1.default.mkdirSync(base_url, { recursive: true });
         }
-        console.log(`file_to_upload.data`, file_to_upload);
         const file_name = moment_1.default(new Date()).format("x") + file_to_upload.name;
         fs_1.default.writeFile("./" + base_url + file_name, file_to_upload.data, function (err) {
             if (err) {

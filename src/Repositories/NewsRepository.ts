@@ -1,4 +1,5 @@
 import axios from "axios";
+import qs from "qs";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import {
   parseInvalidDateToDefault,
@@ -10,10 +11,8 @@ import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
-import {
-  PaginationModel,
-  ScrollPaginationModel,
-} from "../Models/PaginationModel";
+import { PaginationModel } from "../Models/PaginationModel";
+import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -245,6 +244,7 @@ const addNews = async (
     await con.BeginTransaction();
 
     payload.encoder_pk = user_pk;
+    const pub_date = payload.pub_date;
     payload.pub_date = parseInvalidDateToDefault(payload.pub_date, "(NULL)");
 
     payload.is_prio =
@@ -279,22 +279,6 @@ const addNews = async (
           news_pk: sql_add_news.insertedId,
         };
 
-        const response = await axios.post(
-          `https://textko.com/api/v3/sms`,
-          {
-            to: "+639299550278",
-            text: "Hello from API.",
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMGIzYWUzZGJkZWQ3NGNjNDRlZmE5OTM2YTMxNGMwNjUzY2YwMGFiMmUxZGEzMjA3Njk4NjFhYTgxOGYyODQ0YTRmYzI4NWIzMzgxNDJmM2EiLCJpYXQiOjE2MTg2Njk4ODgsIm5iZiI6MTYxODY2OTg4OCwiZXhwIjoxNjUwMjA1ODg4LCJzdWIiOiIxMzM0NyIsInNjb3BlcyI6W119.Crat1LuK-Y2ZUZ5x4tD2o_MNUByQv260TEihb3Uw2Hpi7GtD7RLhxgPsCUggIpu9BtKoxe69oyZaOCSmjPdT5l7d42p9bTbz-9QBCjwWJ5hzlv-47bZS1UTe9kmZOVhZWY0MJGDcrILaFJhliIRN4cocV4sonOhdgpSlqoHk27fOt0I1k5ElLkMomOGusatOEXBTKh04--Kc4f8ClX9-XW9yjlmxbrhx2Td9c4Uv-gvMiSyVEHF_jnPxtQTluXoervCfLRwhxLbPvOIGEp3Jm_M6lssgcMGzGJcex1IV0qWdF7XoUU5Qk7Hn1VrhACCDmK6vA14kvz8n1tbMKIJhhj5uiIvke_xrtYIlxUI_HQlC2pjHHnNsEcQ6OkHGD-v8Ik37Bcp4r6gYX4WUgta-zDx8Ycr8pwt04IYD7MslvOtRLlLwcWotDDQAiExqNuNIjHMScCWfhM8vn9KdwUsZx3HAJ0bRn__n8ecxOD-0OMxA929gtIXs_oNTqAfiC8w0huJ6O_73-qstoQKBL88gs8BbXPf4VAvDxdvXjsCbWXxVqARJb0gCTzdqqjive2CfDXov5_uBsYO9ctqXiHWRbnS_9ljQVao_vcUAhzheQSn0aDpb4okXMXUXr1gik_3DkOKTuhCKayTuXVzdWtcSLIR6lPjkYFvWFJN9D0W2e7w`,
-            },
-          }
-        );
-
-        console.log(`response`, response);
-
         const sql_add_news_file = await con.Insert(
           `INSERT INTO news_file SET
              news_pk=@news_pk,
@@ -313,6 +297,46 @@ const addNews = async (
             message:
               "The process has been terminated when trying to save the file!",
           };
+        }
+      }
+
+      console.log(`--------------------------------------`, payload);
+
+      if (payload.is_prio) {
+        let residents: Array<ResidentModel> = [];
+
+        if (payload.audience === "r" || payload.audience === "all") {
+          residents = await con.Query(`SELECT phone FROM resident`, null);
+        } else if (payload.audience === "b") {
+          residents = await con.Query(
+            `SELECT phone FROM resident where resident_pk in (select resident_pk from barangay_official)`,
+            null
+          );
+        }
+
+        for (const r of residents) {
+          if (/^(09|\+639)\d{9}$/.test(r.phone)) {
+            const sms_response = await axios({
+              method: "post",
+              url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+              data: qs.stringify({
+                username: "mrmontiveles@outlook.com",
+                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                to: r.phone,
+                message: `Balita gikan sa Brgy. 37-D, Davao City. ${
+                  payload.title
+                } karong ${parseInvalidDateToDefault(pub_date)}`,
+                //https://dashboard.clicksend.com/#/sms/send-sms/main
+              }),
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
+              },
+            });
+
+            console.log(`sms_response 1-->`, r.phone);
+            console.log(`sms_response 2--->`, sms_response.data);
+          }
         }
       }
 

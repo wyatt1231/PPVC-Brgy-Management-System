@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
+const qs_1 = __importDefault(require("qs"));
 const NewsRepository_1 = __importDefault(require("../Repositories/NewsRepository"));
 const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
@@ -108,15 +109,19 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(`-------------------`);
         try {
-            const response = yield axios_1.default.post(`https://www.itexmo.com/php_api/api.php`, {
-                to: "09517359838",
-                text: "Hi, i like you!",
-            }, {
+            const response = yield axios_1.default({
+                method: "post",
+                url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+                data: qs_1.default.stringify({
+                    username: "mrmontiveles@outlook.com",
+                    key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                    to: "+639299550278",
+                    message: "testing",
+                    //https://dashboard.clicksend.com/#/sms/send-sms/main
+                }),
                 headers: {
-                    "Content-Type": "application/json",
-                    Accept: `application/json`,
-                    // Accept: "application/json",
-                    Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMGIzYWUzZGJkZWQ3NGNjNDRlZmE5OTM2YTMxNGMwNjUzY2YwMGFiMmUxZGEzMjA3Njk4NjFhYTgxOGYyODQ0YTRmYzI4NWIzMzgxNDJmM2EiLCJpYXQiOjE2MTg2Njk4ODgsIm5iZiI6MTYxODY2OTg4OCwiZXhwIjoxNjUwMjA1ODg4LCJzdWIiOiIxMzM0NyIsInNjb3BlcyI6W119.Crat1LuK-Y2ZUZ5x4tD2o_MNUByQv260TEihb3Uw2Hpi7GtD7RLhxgPsCUggIpu9BtKoxe69oyZaOCSmjPdT5l7d42p9bTbz-9QBCjwWJ5hzlv-47bZS1UTe9kmZOVhZWY0MJGDcrILaFJhliIRN4cocV4sonOhdgpSlqoHk27fOt0I1k5ElLkMomOGusatOEXBTKh04--Kc4f8ClX9-XW9yjlmxbrhx2Td9c4Uv-gvMiSyVEHF_jnPxtQTluXoervCfLRwhxLbPvOIGEp3Jm_M6lssgcMGzGJcex1IV0qWdF7XoUU5Qk7Hn1VrhACCDmK6vA14kvz8n1tbMKIJhhj5uiIvke_xrtYIlxUI_HQlC2pjHHnNsEcQ6OkHGD-v8Ik37Bcp4r6gYX4WUgta-zDx8Ycr8pwt04IYD7MslvOtRLlLwcWotDDQAiExqNuNIjHMScCWfhM8vn9KdwUsZx3HAJ0bRn__n8ecxOD-0OMxA929gtIXs_oNTqAfiC8w0huJ6O_73-qstoQKBL88gs8BbXPf4VAvDxdvXjsCbWXxVqARJb0gCTzdqqjive2CfDXov5_uBsYO9ctqXiHWRbnS_9ljQVao_vcUAhzheQSn0aDpb4okXMXUXr1gik_3DkOKTuhCKayTuXVzdWtcSLIR6lPjkYFvWFJN9D0W2e7w`,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
                 },
             });
             res.json(response);
