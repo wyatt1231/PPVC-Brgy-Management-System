@@ -1,4 +1,4 @@
-import { Button, Chip, Container, Grid } from "@material-ui/core";
+import { Chip, Container, Grid } from "@material-ui/core";
 import LabelImportantRoundedIcon from "@material-ui/icons/LabelImportantRounded";
 import moment from "moment";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
@@ -16,7 +16,6 @@ import {
 import { NewsModel } from "../../../Services/Models/NewsModels";
 import { ScrollPaginationModel } from "../../../Services/Models/PaginationModels";
 import { RootStore } from "../../../Services/Store";
-import AddFilesDialog from "./AddFilesDialog";
 import AddNewsAdminView from "./AddNewsAdminView";
 import CalNewsAdminView from "./CalNewsAdminView";
 import EditNewsAdminView from "./EditNewsAdminView";
@@ -286,7 +285,13 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                         </div>
                         <div className="body">{news.body}</div>
 
-                        <NewsFilesDialog news_pk={news.news_pk} />
+                        <NewsFilesDialog
+                          news_pk={news.news_pk}
+                          selected_file_news_pk={selected_file_news_pk}
+                          handleSetSelectedFileNewsPk={() =>
+                            set_selected_file_news_pk(null)
+                          }
+                        />
                       </div>
                     </StyledNewsContainer>
                   ))
@@ -297,6 +302,10 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                     selected_news_pk={selected_news_pk}
                     handleSetSelectedNews={handleSetSelectedNews}
                     handleRefetchTable={handleRefetchTable}
+                    selected_file_news_pk={selected_file_news_pk}
+                    handleSetSelectedFileNewsPk={() =>
+                      set_selected_file_news_pk(null)
+                    }
                   />
                 )}
               </Grid>
@@ -313,14 +322,14 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
         />
       )}
 
-      {!!selected_file_news_pk && (
+      {/* {!!selected_file_news_pk && (
         <AddFilesDialog
           open_file_dialog={!!selected_file_news_pk}
           handleCloseDialog={() => set_selected_file_news_pk(null)}
           news_pk={selected_file_news_pk}
-          handleRefetchFiles={() => alert(`refetch`)}
+          handleRefetchFiles={handleRefetchTable}
         />
-      )}
+      )} */}
     </Container>
   );
 });

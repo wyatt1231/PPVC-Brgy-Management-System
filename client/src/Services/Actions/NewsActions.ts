@@ -124,6 +124,46 @@ const addNews = (
   }
 };
 
+const addNewsFiles = (
+  payload: FormData,
+  successCallback: (msg: string) => any
+) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+  try {
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        loading_message: "Loading, thank you for your patience!",
+        show: true,
+      },
+    });
+    const response: IServerResponse = await NewsApi.addNewsFiles(payload);
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        show: false,
+      },
+    });
+    if (response.success) {
+      if (typeof successCallback === "function") {
+        successCallback(response.message.toString());
+      }
+      dispatch({
+        type: "SET_PAGE_SNACKBAR",
+        page_snackbar: {
+          message: response.message.toString(),
+          options: {
+            variant: "success",
+          },
+        },
+      });
+    } else {
+      helperErrorMessage(dispatch, response);
+    }
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
 const updateNews = (
   payload: NewsModel,
   successCallback: (msg: string) => any
@@ -337,4 +377,5 @@ export default {
   updateNewsReaction,
   toggleLike,
   getNewsLatest,
+  addNewsFiles,
 };
