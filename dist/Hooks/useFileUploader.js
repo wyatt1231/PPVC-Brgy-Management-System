@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UploadFile = exports.GetUploadedImage = exports.UploadImage = void 0;
+exports.UploadFile = exports.GetUploadedImage = exports.RemoveImage = exports.UploadImage = void 0;
 const fs_1 = __importDefault(require("fs"));
 const moment_1 = __importDefault(require("moment"));
+const promises_1 = require("fs/promises");
 const UploadImage = ({ base_url, file_name, extension, file_to_upload, }) => {
     const extended_file_name = `${file_name}-${moment_1.default(new Date()).format("x")}.${extension}`;
     return new Promise((resolve, reject) => {
@@ -38,6 +39,22 @@ const UploadImage = ({ base_url, file_name, extension, file_to_upload, }) => {
     });
 };
 exports.UploadImage = UploadImage;
+const RemoveImage = (base_url) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield promises_1.unlink(base_url);
+        return {
+            success: true,
+            message: "Image has been removed",
+        };
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
+});
+exports.RemoveImage = RemoveImage;
 const GetUploadedImage = (url) => __awaiter(void 0, void 0, void 0, function* () {
     if (typeof url === "string") {
         try {

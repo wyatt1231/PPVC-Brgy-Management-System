@@ -12,6 +12,7 @@ import {
 import { UserClaims } from "../Models/UserModels";
 import NewsRepository from "../Repositories/NewsRepository";
 import { method } from "bluebird";
+import { NewsFileModel } from "../Models/NewsFileModel";
 
 const NewsController = async (app: Express): Promise<void> => {
   const router = Router();
@@ -78,6 +79,28 @@ const NewsController = async (app: Express): Promise<void> => {
 
       res.json(
         await NewsRepository.addNews(
+          payload,
+          files instanceof Array ? files : [files],
+          req.user_pk
+        )
+      );
+    }
+  );
+
+  router.post(
+    "/addNewsFiles",
+    Authorize("admin"),
+    async (req: Request & { files: any } & UserClaims, res: Response) => {
+      const payload: NewsModel = req.body;
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+
+      if (files instanceof Array) {
+      } else {
+        files = [files];
+      }
+
+      res.json(
+        await NewsRepository.addNewsFiles(
           payload,
           files instanceof Array ? files : [files],
           req.user_pk
@@ -177,32 +200,12 @@ const NewsController = async (app: Express): Promise<void> => {
     }
   );
 
-  router.get(
-    "/testSms",
-    // Authorize("admin"),
+  router.post(
+    "/deleteNewsFile",
+    Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      console.log(`-------------------`);
-      try {
-        const response = await axios({
-          method: "post",
-          url: `https://api-mapper.clicksend.com/http/v2/send.php`,
-          data: qs.stringify({
-            username: "mrmontiveles@outlook.com",
-            key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
-            to: "+639299550278",
-            message: "testing",
-            //https://dashboard.clicksend.com/#/sms/send-sms/main
-          }),
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
-          },
-        });
-        res.json(response);
-      } catch (error) {
-        console.log(`error`, error);
-        res.json(error);
-      }
+      const payload: NewsFileModel = req.body;
+      res.json(await NewsRepository.deleteNewsFile(payload));
     }
   );
 

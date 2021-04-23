@@ -229,7 +229,6 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                     };
                 }
             }
-            console.log(`--------------------------------------`, payload);
             if (payload.is_prio) {
                 let residents = [];
                 if (payload.audience === "r" || payload.audience === "all") {
@@ -255,8 +254,6 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                                 Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
                             },
                         });
-                        console.log(`sms_response 1-->`, r.phone);
-                        console.log(`sms_response 2--->`, sms_response.data);
                     }
                 }
             }
@@ -273,6 +270,53 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                 message: "No affected rows while creating the news",
             };
         }
+    }
+    catch (error) {
+        yield con.Rollback();
+        // console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const addNewsFiles = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        payload.encoder_pk = user_pk;
+        for (const file of files) {
+            const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/News/", file);
+            if (!file_res.success) {
+                con.Rollback();
+                return file_res;
+            }
+            const news_file_payload = {
+                file_path: file_res.data.path,
+                file_name: file_res.data.name,
+                mimetype: file_res.data.mimetype,
+                encoder_pk: user_pk,
+                news_pk: payload.news_pk,
+            };
+            const sql_add_news_file = yield con.Insert(`INSERT INTO news_file SET
+           news_pk=@news_pk,
+           file_path=@file_path,
+           file_name=@file_name,
+           mimetype=@mimetype,
+           encoder_pk=@encoder_pk;`, news_file_payload);
+            if (sql_add_news_file.affectedRows < 1) {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "The process has been terminated when trying to save the file!",
+                };
+            }
+        }
+        con.Commit();
+        return {
+            success: true,
+            message: "The news has been published successfully!",
+        };
     }
     catch (error) {
         yield con.Rollback();
@@ -310,6 +354,37 @@ const republishNews = (news_pk, user_pk) => __awaiter(void 0, void 0, void 0, fu
     catch (error) {
         yield con.Rollback();
         console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const deleteNewsFile = (news_file) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_delete_file = yield con.Modify(`DELETE FROM news_file WHERE news_file_pk = @news_file_pk`, {
+            news_file_pk: news_file.news_file_pk,
+        });
+        if (sql_delete_file > 0) {
+            yield useFileUploader_1.RemoveImage(news_file.file_path);
+            con.Commit();
+            return {
+                success: true,
+                message: "The file has been removed!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while trying to remove the file!",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -650,5 +725,7 @@ exports.default = {
     toggleLike,
     getNewsFiles,
     getNewsLatest,
+    deleteNewsFile,
+    addNewsFiles,
 };
 //# sourceMappingURL=NewsRepository.js.map

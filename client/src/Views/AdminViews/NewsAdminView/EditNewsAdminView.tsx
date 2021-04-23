@@ -53,15 +53,12 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
           news_pk: news_pk,
         };
 
-        console.log(`payload`, payload);
-
         dispatch(
           setGeneralPrompt({
             open: true,
             continue_callback: () =>
               dispatch(
                 NewsActions.updateNews(payload, () => {
-                  // dispatch(NewsActions.setNewsDataTable());
                   handleRefetchTable();
                   dispatch(NewsActions.setSingleNews(news_pk));
                   form_edit_news.reset();
@@ -76,7 +73,6 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
 
     useEffect(() => {
       if (single_news) {
-        console.log(`single_news ->`, single_news);
         form_edit_news.reset({
           title: single_news.title,
           body: single_news.body,
@@ -143,7 +139,6 @@ export const EditNewsAdminView: FC<EditNewsAdminProps> = memo(
                             clearable
                             disablePast={true}
                             fullWidth
-                            // inputVariant="outlined"
                             autoOk
                             defaultValue={null}
                           />

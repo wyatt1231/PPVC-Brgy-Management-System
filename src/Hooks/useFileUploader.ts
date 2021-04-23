@@ -2,7 +2,7 @@ import { resolve } from "bluebird";
 import fs from "fs";
 import moment from "moment";
 import { ResponseModel } from "../Models/ResponseModels";
-
+import { unlink } from "fs/promises";
 export interface UploadImageParam {
   base_url: string;
   file_name: string | number;
@@ -42,6 +42,21 @@ export const UploadImage = ({
       }
     );
   });
+};
+
+export const RemoveImage = async (base_url: string): Promise<ResponseModel> => {
+  try {
+    await unlink(base_url);
+    return {
+      success: true,
+      message: "Image has been removed",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
 };
 
 export const GetUploadedImage = async (url: string): Promise<string | null> => {

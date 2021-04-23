@@ -12,10 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const axios_1 = __importDefault(require("axios"));
 const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
-const qs_1 = __importDefault(require("qs"));
 const NewsRepository_1 = __importDefault(require("../Repositories/NewsRepository"));
 const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
@@ -65,6 +63,17 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
         }
         res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
+    router.post("/addNewsFiles", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _c, _d;
+        const payload = req.body;
+        let files = ((_c = req.files) === null || _c === void 0 ? void 0 : _c.uploaded_files) ? (_d = req.files) === null || _d === void 0 ? void 0 : _d.uploaded_files : [];
+        if (files instanceof Array) {
+        }
+        else {
+            files = [files];
+        }
+        res.json(yield NewsRepository_1.default.addNewsFiles(payload, files instanceof Array ? files : [files], req.user_pk));
+    }));
     router.post("/updateNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.updateNews(payload, req.user_pk));
@@ -104,32 +113,9 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     router.post("/getNewsLatest", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield NewsRepository_1.default.getNewsLatest());
     }));
-    router.get("/testSms", 
-    // Authorize("admin"),
-    (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(`-------------------`);
-        try {
-            const response = yield axios_1.default({
-                method: "post",
-                url: `https://api-mapper.clicksend.com/http/v2/send.php`,
-                data: qs_1.default.stringify({
-                    username: "mrmontiveles@outlook.com",
-                    key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
-                    to: "+639299550278",
-                    message: "testing",
-                    //https://dashboard.clicksend.com/#/sms/send-sms/main
-                }),
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
-                },
-            });
-            res.json(response);
-        }
-        catch (error) {
-            console.log(`error`, error);
-            res.json(error);
-        }
+    router.post("/deleteNewsFile", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        res.json(yield NewsRepository_1.default.deleteNewsFile(payload));
     }));
     app.use("/api/news/", router);
 });

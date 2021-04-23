@@ -114,17 +114,19 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const user_payload = {
-            full_name: `${payload.last_name}, ${payload.first_name}`,
-            email: payload.email,
-            encoder_pk: user_pk,
-        };
-        const update_user = yield con.Insert(`UPDATE user SET
-      email=@email,
-      password=AES_ENCRYPT(@email,@email),
-      full_name=@full_name
-      where user_pk=@encoder_pk;
-      `, user_payload);
+        if (user_pk !== 1) {
+            const user_payload = {
+                full_name: `${payload.last_name}, ${payload.first_name}`,
+                email: payload.email,
+                encoder_pk: payload.user_pk,
+            };
+            const update_user = yield con.Insert(`UPDATE user SET
+        email=@email,
+        password=AES_ENCRYPT(@email,@email),
+        full_name=@full_name
+        where user_pk=@encoder_pk;
+        `, user_payload);
+        }
         if (useValidator_1.isValidPicture(payload.pic)) {
             const upload_result = yield useFileUploader_1.UploadImage({
                 base_url: "./src/Storage/Files/Images/",
