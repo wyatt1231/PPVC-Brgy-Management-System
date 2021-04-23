@@ -24,17 +24,6 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
         `,null
     );
-
-    for (const postcomments of data) {
-      postcomments.totalcomments = await con.Query(
-        `
-        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk 
-        `,
-        {
-          posts_pk: postcomments.posts_pk,
-        }
-      );
-    }
     for (const isLiked of data) {
       isLiked.liked = await con.Query(
         `
@@ -46,6 +35,18 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
         }
       );
       
+    }
+    
+
+    for (const postcomments of data) {
+      postcomments.totalcomments = await con.Query(
+        `
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk 
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
     }
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(
