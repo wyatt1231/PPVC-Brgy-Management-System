@@ -63,7 +63,7 @@ const getPosts = async (user_pk:number): Promise<ResponseModel> => {
         `
         SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
         THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
-        FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  WHERE posts_pk=@posts_pk LIMIT 5
+        FROM posts_comment pw LEFT JOIN resident u ON pw.user_pk=u.user_pk  WHERE posts_pk=@posts_pk LIMIT 5
         `,
         {
           posts_pk: postcomments.posts_pk,
