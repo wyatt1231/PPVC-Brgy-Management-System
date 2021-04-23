@@ -23,13 +23,16 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  GROUP BY p.posts_pk ORDER BY p.encoded_at DESC)tmp;
         `, null);
-        for (const postsreactions of data) {
-            postsreactions.reactions = yield con.Query(`
-        select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk 
-        `, {
-                posts_pk: postsreactions.posts_pk,
-            });
-        }
+        // for (const postsreactions of data) {
+        //   postsreactions.reactions = await con.Query(
+        //     `
+        //     select count(reaction) as likes,resident_pk from posts_reaction where posts_pk=@posts_pk 
+        //     `,
+        //     {
+        //       posts_pk: postsreactions.posts_pk,
+        //     }
+        //   );
+        // }
         for (const postcomments of data) {
             postcomments.totalcomments = yield con.Query(`
         SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk 
