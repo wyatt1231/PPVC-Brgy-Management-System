@@ -233,6 +233,35 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
     }
   };
   
+  const getreactions = async (posts_pk?:number,user_pk?:number): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      const data: Array<PostsModel> = await con.Query(
+        `
+            SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+            `,
+            {
+              posts_pk: posts_pk,
+            user_pk
+            }
+      );
+  
+      con.Commit();
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
+    }
+  };
   const getPostsReaction = async (): Promise<ResponseModel> => {
     const con = await DatabaseConnection();
     try {
@@ -584,4 +613,5 @@ export default {
     addPostComment,
     getPostsReaction,
     getPostsComments,
+    getreactions
   };

@@ -24,6 +24,10 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
         const posts_pk = req.body.posts_pk;
         res.json(yield PostMobileReporsitory_1.default.getcomments(posts_pk));
     }));
+    router.post("/getreactions", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const posts_pk = req.body.posts_pk;
+        res.json(yield PostMobileReporsitory_1.default.getreactions(posts_pk, req.user_pk));
+    }));
     router.post("/getUserPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(yield PostMobileReporsitory_1.default.getUserPosts(req.user_pk));
     }));
