@@ -23,7 +23,7 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
       `, null);
         for (const newsreaction of news_table) {
             newsreaction.likes = yield con.Query(`
@@ -71,7 +71,7 @@ const getNewsDataPublishedLastWeek = () => __awaiter(void 0, void 0, void 0, fun
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
 AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.encoded_at DESC) tmp;
       `, null);
         for (const newsreaction of news_table) {
@@ -120,7 +120,7 @@ const getNewsDataPublishedByMonth = (month) => __awaiter(void 0, void 0, void 0,
     ,u.full_name user_full_name,u.pic user_pic FROM news n 
     LEFT JOIN status s ON n.sts_pk = s.sts_pk 
       LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-    LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
+    LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
 AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
       `, {
             month: month
