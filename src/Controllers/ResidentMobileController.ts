@@ -40,6 +40,18 @@ router.post(
       res.json(await ResidentMobileRepository.getmembers(resident_pk));
     }
   );
+  router.post(
+    "/getreligion",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getreligion());
+    }
+  );
+  router.post(
+    "/getnationality",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getnationality());
+    }
+  );
 router.post(
     "/upadatenewuser",
     Authorize("admin,resident"),

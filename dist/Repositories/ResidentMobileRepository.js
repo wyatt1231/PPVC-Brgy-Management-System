@@ -239,6 +239,46 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
         };
     }
 });
+const getnationality = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT * FROM nationality_list`, null);
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getreligion = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(`SELECT * FROM religion_list`, null);
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const updatepassword = (email, password, currentpassword) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -342,6 +382,8 @@ exports.default = {
     getresidents,
     forgotpassword,
     updatepassword,
-    updateMobileResident
+    updateMobileResident,
+    getreligion,
+    getnationality
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map

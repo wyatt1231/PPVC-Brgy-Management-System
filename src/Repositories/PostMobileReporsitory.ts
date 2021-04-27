@@ -161,7 +161,7 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
           ,u.full_name user_full_name,u.pic user_pic FROM posts p
           LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         
-          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk  ORDER BY p.encoded_at DESC)tmp;
+          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk GROUP BY p.posts_pk  ORDER BY p.encoded_at DESC)tmp;
           `,
         {
           user_pk,

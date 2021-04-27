@@ -287,6 +287,57 @@ const getresidents = async (
     }
   };
   
+  const getnationality = async (): Promise<ResponseModel> => {
+     const con = await DatabaseConnection();
+
+     try {
+       await con.BeginTransaction();
+   
+       const data: Array<ResidentModel> = await con.Query(
+         `SELECT * FROM nationality_list`,
+         
+      null
+         
+       );
+       con.Commit();
+       return {
+         success: true,
+         data: data,
+       };
+     } catch (error) {
+       await con.Rollback();
+       console.error(`error`, error);
+       return {
+         success: false,
+         message: ErrorMessage(error),
+       };
+     }
+   };
+  const getreligion = async (): Promise<ResponseModel> => {
+     const con = await DatabaseConnection();
+ 
+     try {
+       await con.BeginTransaction();
+   
+       const data: Array<ResidentModel> = await con.Query(
+         `SELECT * FROM religion_list`,
+      null
+         
+       );
+       con.Commit();
+       return {
+         success: true,
+         data: data,
+       };
+     } catch (error) {
+       await con.Rollback();
+       console.error(`error`, error);
+       return {
+         success: false,
+         message: ErrorMessage(error),
+       };
+     }
+   };
 const updatepassword = async (
   email:string,password: string,currentpassword:string
 ): Promise<ResponseModel> => {
@@ -403,5 +454,7 @@ export default {
     getresidents,
     forgotpassword,
     updatepassword,
-    updateMobileResident
+    updateMobileResident,
+    getreligion,
+    getnationality
   };
