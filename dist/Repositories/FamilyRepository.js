@@ -32,7 +32,22 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           straktura = @straktura,
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
           okasyon_yuta = @okasyon_yuta,
-          kaligon_balay = @kaligon_balay
+          kaligon_balay = @kaligon_balay,
+          tinubdan_tubig=@waterconnection,
+          matang_kasilyas=@hasComfortRoom,
+          pasilidad_kuryente=@hasLightConnection,
+          matang_basura=@wastemanagement,
+          kahimtang_komunidad=@kahimtang_komunidad,
+          biktima_pangabuso=@victimofabuse,
+          Skill_training=@skilltraining,
+          daycare_service=@daycareservice,
+          employment=@Employment,
+          medical_tabang=@medicalngatabang,
+          lingap=@lingap,
+          housing=@houseing,
+          4ps=@fourps,
+          livelihood=@livelihood,
+          scholarship=@scholarship
           WHERE fam_pk=@fam_pk;
           `, payload);
             const truncate_fam_members = yield con.Modify(`Delete  from family_member where fam_pk=@fam_pk;`, {
@@ -69,6 +84,22 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
           okasyon_yuta = @okasyon_yuta,
           kaligon_balay = @kaligon_balay,
+          tinubdan_tubig=@waterconnection,
+          matang_kasilyas=@hasComfortRoom,
+          pasilidad_kuryente=@hasLightConnection,
+          matang_basura=@wastemanagement,
+          kahimtang_komunidad=@kahimtang_komunidad,
+          biktima_pangabuso=@victimofabuse,
+          Skill_training=@skilltraining,
+          daycare_service=@daycareservice,
+          employment=@Employment,
+          medical_tabang=@medicalngatabang,
+          lingap=@lingap,
+          housing=@houseing,
+          financial=@financial,
+          fourps=@fourps,
+          livelihood=@livelihood,
+          scholarship=@scholarship
           encoded_by = @encoded_by;
           `, payload);
             if (sql_add_fam.insertedId > 0) {

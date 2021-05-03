@@ -185,9 +185,9 @@ const updateMobileResident = async (
         with_disability=@with_disability,  
         is_employed=@is_employed,      
         employment=@employment,       
-        house_income=@house_income,     
-        house_status=@house_status,     
-        voting_precinct=@voting_precinct,  
+        house_income=@house_income,    
+   
+        educ=@educ,
         house_ownership=@house_ownership
         WHERE resident_pk=@resident_pk;`,
       resident_payload

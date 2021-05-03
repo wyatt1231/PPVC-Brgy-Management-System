@@ -30,7 +30,22 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
           straktura = @straktura,
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
           okasyon_yuta = @okasyon_yuta,
-          kaligon_balay = @kaligon_balay
+          kaligon_balay = @kaligon_balay,
+          tinubdan_tubig=@waterconnection,
+          matang_kasilyas=@hasComfortRoom,
+          pasilidad_kuryente=@hasLightConnection,
+          matang_basura=@wastemanagement,
+          kahimtang_komunidad=@kahimtang_komunidad,
+          biktima_pangabuso=@victimofabuse,
+          Skill_training=@skilltraining,
+          daycare_service=@daycareservice,
+          employment=@Employment,
+          medical_tabang=@medicalngatabang,
+          lingap=@lingap,
+          housing=@houseing,
+          4ps=@fourps,
+          livelihood=@livelihood,
+          scholarship=@scholarship
           WHERE fam_pk=@fam_pk;
           `,
         payload
@@ -78,6 +93,22 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
           kadugayon_pagpuyo = @kadugayon_pagpuyo,
           okasyon_yuta = @okasyon_yuta,
           kaligon_balay = @kaligon_balay,
+          tinubdan_tubig=@waterconnection,
+          matang_kasilyas=@hasComfortRoom,
+          pasilidad_kuryente=@hasLightConnection,
+          matang_basura=@wastemanagement,
+          kahimtang_komunidad=@kahimtang_komunidad,
+          biktima_pangabuso=@victimofabuse,
+          Skill_training=@skilltraining,
+          daycare_service=@daycareservice,
+          employment=@Employment,
+          medical_tabang=@medicalngatabang,
+          lingap=@lingap,
+          housing=@houseing,
+          financial=@financial,
+          fourps=@fourps,
+          livelihood=@livelihood,
+          scholarship=@scholarship
           encoded_by = @encoded_by;
           `,
         payload
