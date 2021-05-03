@@ -108,7 +108,7 @@ const addFamily = async (payload: FamilyModel): Promise<ResponseModel> => {
           financial=@financial,
           fourps=@fourps,
           livelihood=@livelihood,
-          scholarship=@scholarship
+          scholarship=@scholarship,
           encoded_by = @encoded_by;
           `,
         payload

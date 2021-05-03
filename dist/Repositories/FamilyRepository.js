@@ -99,7 +99,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           financial=@financial,
           fourps=@fourps,
           livelihood=@livelihood,
-          scholarship=@scholarship
+          scholarship=@scholarship,
           encoded_by = @encoded_by;
           `, payload);
             if (sql_add_fam.insertedId > 0) {
