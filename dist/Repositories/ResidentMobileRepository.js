@@ -163,11 +163,22 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
         house_ownership=@house_ownership
         WHERE resident_pk=@resident_pk;`, resident_payload);
         if (sql_edit_resident > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The resident has been updated successfully",
-            };
+            const sql_edit_user = yield con.Modify(`UPDATE user SET full_name=CONCAT(@last_name,',',@first_name,' ',@middle_name,' ',@suffix) 
+          WHERE user_pk=@user_pk;`, resident_payload);
+            if (sql_edit_user > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                    message: "The resident has been updated successfully",
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "No affected rows while updating the resident",
+                };
+            }
         }
         else {
             con.Rollback();

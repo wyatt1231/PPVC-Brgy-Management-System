@@ -192,7 +192,7 @@ const getComplaintList = async (
       await con.BeginTransaction();
   
       const data: Array<ComplaintModel> = await con.Query(
-        `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
+        `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by ORDER BY  reported_at DESC`,
         {
           reported_by: reported_by,
         }

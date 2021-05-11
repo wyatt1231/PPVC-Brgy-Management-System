@@ -45,7 +45,7 @@ const addFamily = (payload) => __awaiter(void 0, void 0, void 0, function* () {
           medical_tabang=@medicalngatabang,
           lingap=@lingap,
           housing=@houseing,
-          4ps=@fourps,
+          fourps=@fourps,
           livelihood=@livelihood,
           scholarship=@scholarship
           WHERE fam_pk=@fam_pk;
