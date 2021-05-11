@@ -40,12 +40,14 @@ else {
 //console.log(`some config`)
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
+        let DatabaseConfig = null;
         try {
-            let DatabaseConfig = mysql2_1.default.createPool(con);
+            DatabaseConfig = mysql2_1.default.createPool(con);
             DatabaseConfig.getConnection((error, connection) => {
                 if (error) {
-                    // connection.release();
-                    // connection.destroy();
+                    connection.destroy();
+                    connection.release();
+                    // connection.end();
                     return reject(error);
                 }
                 const Query = (sql, binding) => {
@@ -53,6 +55,9 @@ const DatabaseConnection = () => {
                         const { success, message, query } = queryFormat(sql, binding);
                         if (!success) {
                             if (typeof message !== "undefined") {
+                                connection.destroy();
+                                connection.release();
+                                // connection.end();
                                 return reject(message);
                             }
                         }
@@ -67,6 +72,9 @@ const DatabaseConnection = () => {
                             });
                         }
                         catch (error) {
+                            connection.destroy();
+                            connection.release();
+                            // connection.end();
                             reject(error);
                         }
                     });
@@ -76,6 +84,9 @@ const DatabaseConnection = () => {
                         const { filters, sort, page } = pagination;
                         const { success, message, query } = queryFormat(sql, filters);
                         if (!success) {
+                            connection.destroy();
+                            connection.release();
+                            // connection.end();
                             if (typeof message !== "undefined") {
                                 return reject(message);
                             }
@@ -100,6 +111,7 @@ const DatabaseConnection = () => {
                         catch (error) {
                             connection.destroy();
                             connection.release();
+                            // connection.end();
                             return reject(error);
                         }
                     });
@@ -109,6 +121,9 @@ const DatabaseConnection = () => {
                         const { success, message, query } = queryFormat(sql, binding);
                         if (!success) {
                             if (typeof message !== "undefined") {
+                                connection.destroy();
+                                connection.release();
+                                // connection.end();
                                 return reject(message);
                             }
                         }
@@ -125,6 +140,7 @@ const DatabaseConnection = () => {
                         catch (error) {
                             connection.destroy();
                             connection.release();
+                            // connection.end();
                             return reject(error);
                         }
                     });
@@ -134,6 +150,9 @@ const DatabaseConnection = () => {
                         const { success, message, query } = queryFormat(sql, binding);
                         if (!success) {
                             if (typeof message !== "undefined") {
+                                connection.destroy();
+                                connection.release();
+                                // connection.end();
                                 return reject(message);
                             }
                         }
@@ -153,6 +172,7 @@ const DatabaseConnection = () => {
                         catch (error) {
                             connection.destroy();
                             connection.release();
+                            // connection.end();
                             reject(error);
                         }
                     });
@@ -162,6 +182,9 @@ const DatabaseConnection = () => {
                         const { success, message, query } = queryFormat(sql, binding);
                         if (!success) {
                             if (typeof message !== "undefined") {
+                                connection.destroy();
+                                connection.release();
+                                // connection.end();
                                 return reject(message);
                             }
                         }
@@ -172,7 +195,6 @@ const DatabaseConnection = () => {
                                 }
                                 else {
                                     if (result.length > 0) {
-                                        // console.log(`result[0]`, result[0]);
                                         return resolve(result[0]);
                                     }
                                     else {
@@ -184,6 +206,7 @@ const DatabaseConnection = () => {
                         catch (error) {
                             connection.destroy();
                             connection.release();
+                            // connection.end();
                             return reject(error);
                         }
                     });
@@ -193,14 +216,13 @@ const DatabaseConnection = () => {
                         try {
                             connection.beginTransaction((err) => {
                                 if (err) {
-                                    // connection.release();
-                                    // connection.destroy();
+                                    return reject(error);
                                 }
-                                resolve();
+                                return resolve();
                             });
                         }
                         catch (error) {
-                            reject(error);
+                            return reject(error);
                         }
                     });
                 };
@@ -210,13 +232,15 @@ const DatabaseConnection = () => {
                             connection.commit((err) => {
                                 connection.release();
                                 connection.destroy();
-                                resolve();
+                                // connection.end();
+                                return resolve();
                             });
                         }
                         catch (error) {
                             connection.release();
                             connection.destroy();
-                            reject(error);
+                            // connection.end();
+                            return reject(error);
                         }
                     });
                 };
@@ -226,11 +250,14 @@ const DatabaseConnection = () => {
                             connection.rollback(() => {
                                 connection.release();
                                 connection.destroy();
-                                resolve();
+                                return resolve();
                             });
                         }
                         catch (error) {
-                            reject(error);
+                            connection.release();
+                            connection.destroy();
+                            // connection.end();
+                            return reject(error);
                         }
                     });
                 };
@@ -239,10 +266,14 @@ const DatabaseConnection = () => {
                         try {
                             connection.release();
                             connection.destroy();
-                            resolve();
+                            // connection.end();
+                            return resolve();
                         }
                         catch (error) {
-                            reject(error);
+                            connection.release();
+                            connection.destroy();
+                            // connection.end();
+                            return reject(error);
                         }
                     });
                 };
@@ -260,7 +291,8 @@ const DatabaseConnection = () => {
             });
         }
         catch (error) {
-            console.log(`error ---------------------------------------`, error);
+            DatabaseConfig.destroy();
+            DatabaseConfig.end();
             reject(error);
         }
     });
@@ -300,7 +332,6 @@ const queryFormat = (query, values) => {
         }
         return str;
     });
-    // console.log(`formattedQuery`, formattedQuery);
     return formattedQuery;
 };
 //# sourceMappingURL=DatabaseConfig.js.map
