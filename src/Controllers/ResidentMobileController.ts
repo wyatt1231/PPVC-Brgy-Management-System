@@ -32,12 +32,32 @@ router.post(
       res.json(await ResidentMobileRepository.getresidents(search));
     }
   );
-router.post(
+  router.post(
     "/getmembers",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const resident_pk: string = req.body.resident_pk;
       res.json(await ResidentMobileRepository.getmembers(resident_pk));
+    }
+  );
+  router.post(
+    "/getmembers_ulosapamilya",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const fam_pk: string = req.body.fam_pk;
+      res.json(await ResidentMobileRepository.getmembers_ulosapamilya(fam_pk));
+    }
+  );
+  router.post(
+    "/getreligion",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getreligion());
+    }
+  );
+  router.post(
+    "/getnationality",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getnationality());
     }
   );
 router.post(

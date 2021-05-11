@@ -36,6 +36,16 @@ const ResidentMobileController = (app) => __awaiter(void 0, void 0, void 0, func
         const resident_pk = req.body.resident_pk;
         res.json(yield ResidentMobileRepository_1.default.getmembers(resident_pk));
     }));
+    router.post("/getmembers_ulosapamilya", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const fam_pk = req.body.fam_pk;
+        res.json(yield ResidentMobileRepository_1.default.getmembers_ulosapamilya(fam_pk));
+    }));
+    router.post("/getreligion", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield ResidentMobileRepository_1.default.getreligion());
+    }));
+    router.post("/getnationality", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield ResidentMobileRepository_1.default.getnationality());
+    }));
     router.post("/upadatenewuser", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user_pk = req.body.user_pk;
         res.json(yield ResidentMobileRepository_1.default.upadatenewuser(user_pk));
