@@ -20,7 +20,7 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND DATE(n.encoded_at)=CURDATE()  ORDER BY n.encoded_at DESC) tmp;
       `,
       null
     );
@@ -83,7 +83,7 @@ const getNewsDataPublishedLastWeek = async (): Promise<ResponseModel> => {
         ,u.full_name user_full_name,u.pic user_pic FROM news n 
         LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
+        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  n.encoded_at >= CURDATE() - INTERVAL DAYOFWEEK(CURDATE())+6 DAY
 AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.encoded_at DESC) tmp;
       `,
       null
@@ -134,13 +134,12 @@ AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.en
   }
 };
 
-const getNewsDataPublishedByMonth = async (
-  month: number
-): Promise<ResponseModel> => {
+const getNewsDataPublishedByMonth = async ( month: number): Promise<ResponseModel> => {
+ 
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-    console.log(month);
+console.log(month)
     const news_table: Array<NewsModel> = await con.Query(
       `SELECT * FROM 
   (
@@ -148,11 +147,11 @@ const getNewsDataPublishedByMonth = async (
     ,u.full_name user_full_name,u.pic user_pic FROM news n 
     LEFT JOIN status s ON n.sts_pk = s.sts_pk 
       LEFT JOIN news_reaction nr ON nr.news_pk=n.news_pk
-    LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND n.audience="r" OR n.audience="all" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
+    LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.sts_pk="PU" AND  YEAR(n.encoded_at) = YEAR(CURRENT_DATE)
 AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
       `,
       {
-        month: month,
+        month:month
       }
     );
     for (const newsreaction of news_table) {
@@ -236,69 +235,23 @@ const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
 };
 
 const addNewsComment = async (
-  payload: NewsCommentModel,
-  user_pk: number
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    payload.user_pk = user_pk;
-
-    const sql_add_news_reaction = await con.Modify(
-      `INSERT INTO news_comment SET
+    payload: NewsCommentModel,
+    user_pk: number
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      payload.user_pk = user_pk;
+  
+      const sql_add_news_reaction = await con.Modify(
+        `INSERT INTO news_comment SET
         news_pk=@news_pk,
         user_pk=@user_pk,
         body=@body;`,
-      payload
-    );
-
-    if (sql_add_news_reaction > 0) {
-      con.Commit();
-      return {
-        success: true,
-        message: "Your reaction has beed added!",
-      };
-    } else {
-      con.Rollback();
-      return {
-        success: false,
-        message:
-          "Looks like something went wrong, unable to save your reaction!",
-      };
-    }
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-
-const addNewsReaction = async (
-  payload: NewsReactionModel,
-  user_pk: number
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    payload.user_pk = user_pk;
-    const sql_check_exist = await con.Query(
-      `SELECT * FROM news_reaction WHERE news_pk=@news_pk AND resident_pk=@user_pk`,
-      payload
-    );
-    if (sql_check_exist.toString() == "") {
-      const sql_add_news_reaction = await con.Modify(
-        `INSERT INTO news_reaction SET
-        news_pk=@news_pk,
-        reaction=@reaction,
-        resident_pk=@user_pk;`,
         payload
       );
-
+  
       if (sql_add_news_reaction > 0) {
         con.Commit();
         return {
@@ -313,130 +266,178 @@ const addNewsReaction = async (
             "Looks like something went wrong, unable to save your reaction!",
         };
       }
-    } else {
-      const sql_update_news_reaction = await con.Modify(
-        `update  news_reaction SET
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
+    }
+  };
+  
+const addNewsReaction = async (
+    payload: NewsReactionModel,
+    user_pk: number
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      payload.user_pk = user_pk;
+      const sql_check_exist = await con.Query(
+        `SELECT * FROM news_reaction WHERE news_pk=@news_pk AND resident_pk=@user_pk`,
+        payload
+      );
+      if (sql_check_exist.toString() == "") {
+        const sql_add_news_reaction = await con.Modify(
+          `INSERT INTO news_reaction SET
+        news_pk=@news_pk,
+        reaction=@reaction,
+        resident_pk=@user_pk;`,
+          payload
+        );
+  
+        if (sql_add_news_reaction > 0) {
+          con.Commit();
+          return {
+            success: true,
+            message: "Your reaction has beed added!",
+          };
+        } else {
+          con.Rollback();
+          return {
+            success: false,
+            message:
+              "Looks like something went wrong, unable to save your reaction!",
+          };
+        }
+      } else {
+        const sql_update_news_reaction = await con.Modify(
+          `update  news_reaction SET
         reaction=@reaction
         where news_pk=@news_pk 
         and
         resident_pk=@user_pk;`,
-        payload
-      );
-      if (sql_update_news_reaction > 0) {
-        con.Commit();
-        return {
-          success: true,
-          message: "Your reaction has beed updated!",
-        };
-      } else {
-        con.Rollback();
-        return {
-          success: false,
-          message:
-            "2 Looks like something went wrong, unable to save your reaction!",
-        };
+          payload
+        );
+        if (sql_update_news_reaction > 0) {
+          con.Commit();
+          return {
+            success: true,
+            message: "Your reaction has beed updated!",
+          };
+        } else {
+          con.Rollback();
+          return {
+            success: false,
+            message:
+              "2 Looks like something went wrong, unable to save your reaction!",
+          };
+        }
       }
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
     }
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-
+  };
+  
+  
 const addNews = async (
-  payload: NewsModel,
-  files: Array<File>,
-  user_pk: number
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    payload.encoder_pk = user_pk;
-
-    const sql_add_news = await con.Insert(
-      `INSERT INTO news SET
+    payload: NewsModel,
+    files: Array<File>,
+    user_pk: number
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      payload.encoder_pk = user_pk;
+  
+      const sql_add_news = await con.Insert(
+        `INSERT INTO news SET
            title=@title,
            audience=@audience,
            body=@body,
            encoder_pk=@encoder_pk;`,
-      payload
-    );
-
-    if (sql_add_news.insertedId > 0) {
-      for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/News/", file);
-
-        if (!file_res.success) {
-          con.Rollback();
-
-          return file_res;
-        }
-
-        const news_file_payload: NewsFileModel = {
-          file_path: file_res.data.path,
-          file_name: file_res.data.name,
-          mimetype: file_res.data.mimetype,
-          encoder_pk: user_pk,
-          news_pk: sql_add_news.insertedId,
-        };
-
-        const sql_add_news_file = await con.Insert(
-          `INSERT INTO news_file SET
+        payload
+      );
+  
+      if (sql_add_news.insertedId > 0) {
+        for (const file of files) {
+          const file_res = await UploadFile("src/Storage/Files/News/", file);
+  
+          if (!file_res.success) {
+            con.Rollback();
+  
+            return file_res;
+          }
+  
+          const news_file_payload: NewsFileModel = {
+            file_path: file_res.data.path,
+            file_name: file_res.data.name,
+            mimetype: file_res.data.mimetype,
+            encoder_pk: user_pk,
+            news_pk: sql_add_news.insertedId,
+          };
+  
+          const sql_add_news_file = await con.Insert(
+            `INSERT INTO news_file SET
                news_pk=@news_pk,
                file_path=@file_path,
                file_name=@file_name,
                mimetype=@mimetype,
                encoder_pk=@encoder_pk;`,
-          news_file_payload
-        );
-
-        if (sql_add_news_file.affectedRows < 1) {
-          con.Rollback();
-
-          return {
-            success: false,
-            message:
-              "The process has been terminated when trying to save the file!",
-          };
+            news_file_payload
+          );
+  
+          if (sql_add_news_file.affectedRows < 1) {
+            con.Rollback();
+  
+            return {
+              success: false,
+              message:
+                "The process has been terminated when trying to save the file!",
+            };
+          }
         }
+  
+        con.Commit();
+        return {
+          success: true,
+          message: "The news has been published successfully!",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message: "No affected rows while creating the news",
+        };
       }
-
-      con.Commit();
-      return {
-        success: true,
-        message: "The news has been published successfully!",
-      };
-    } else {
-      con.Rollback();
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
       return {
         success: false,
-        message: "No affected rows while creating the news",
+        message: ErrorMessage(error),
       };
     }
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
+  };
 
-const getSingleNewsWithPhoto = async (
-  news_pk: string
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
 
-    const data: Array<NewsModel> = await con.Query(
-      `
+  const getSingleNewsWithPhoto = async (
+    news_pk: string
+  ): Promise<ResponseModel> => {
+    const con = await DatabaseConnection();
+    try {
+      await con.BeginTransaction();
+  
+      const data: Array<NewsModel> = await con.Query(
+        `
         SELECT * FROM 
         (
           SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
@@ -444,42 +445,45 @@ const getSingleNewsWithPhoto = async (
           LEFT JOIN status s ON n.sts_pk = s.sts_pk 
           LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk WHERE n.news_pk=@news_pk order by n.encoded_at desc) tmp;
         `,
-      {
-        news_pk: news_pk,
-      }
-    );
-
-    for (const file of data) {
-      file.upload_files = await con.Query(
-        `
-        select * from news_file where news_pk=@news_pk
-        `,
         {
-          news_pk: file.news_pk,
+          news_pk: news_pk,
         }
       );
+  
+      for (const file of data) {
+        file.upload_files = await con.Query(
+          `
+        select * from news_file where news_pk=@news_pk
+        `,
+          {
+            news_pk: file.news_pk,
+          }
+        );
+      }
+  
+      con.Commit();
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      await con.Rollback();
+      console.error(`error`, error);
+      return {
+        success: false,
+        message: ErrorMessage(error),
+      };
     }
+  };
 
-    con.Commit();
-    return {
-      success: true,
-      data: data,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
+
+  export default {
+    getNewsDataPublished,
+    getNewsDataPublishedLastWeek,
+    getNewsDataPublishedByMonth,
+    addNews,
+    addNewsReaction,
+    addNewsComment,
+    getSingleNewsWithPhoto,
+    getNewsComments,
   }
-};
-
-export default {
-  getNewsDataPublished,
-  addNews,
-  addNewsReaction,
-  addNewsComment,
-  getSingleNewsWithPhoto,
-  getNewsComments,
-};

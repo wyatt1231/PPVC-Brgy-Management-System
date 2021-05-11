@@ -2,7 +2,7 @@ import { resolve } from "bluebird";
 import fs from "fs";
 import moment from "moment";
 import { ResponseModel } from "../Models/ResponseModels";
-import { unlink } from "fs/promises";
+// import { unlink } from "fs/promises";
 export interface UploadImageParam {
   base_url: string;
   file_name: string | number;

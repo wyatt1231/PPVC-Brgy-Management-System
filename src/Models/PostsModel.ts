@@ -18,7 +18,9 @@ export interface PostsModel {
   user_full_name?: string;
   user_pic?: string;
   user_pk?: string;
-
+  totalcomments?: Array<any>;
+  liked?:Array<any>;
+  comments?:Array<any>;
   user?: UserModel;
   status?: StatusMasterModel;
   files?: Array<PostsFileModel>;
