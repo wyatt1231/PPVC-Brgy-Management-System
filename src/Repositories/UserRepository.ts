@@ -115,7 +115,7 @@ export const userinfo = async (user_pk: number): Promise<ResponseModel> => {
     await con.BeginTransaction();
 
     const user_data = await con.QuerySingle(
-      ` SELECT u.user_pk,u.user_type,u.full_name,u.new_user,f.ulo_pamilya,r.* FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk LEFT JOIN family f ON f.ulo_pamilya=r.resident_pk
+      ` SELECT u.user_pk,u.user_type,u.full_name,u.new_user,f.ulo_pamilya,f.fam_pk,r.* FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk LEFT JOIN family f ON f.ulo_pamilya=r.resident_pk
       WHERE u.user_pk = @user_pk
       `,
       {

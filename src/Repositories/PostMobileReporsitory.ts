@@ -477,6 +477,8 @@ const getSinglePostWithPhoto = async (
   posts_pk: string,
   user_pk:number
 ): Promise<ResponseModel> => {
+
+  console.log(posts_pk," and ",user_pk)
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -504,16 +506,6 @@ const getSinglePostWithPhoto = async (
         }
       );
     }
-    for (const postcomments of data) {
-      postcomments.totalcomments = await con.Query(
-        `
-        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
-        `,
-        {
-          posts_pk: postcomments.posts_pk,
-        }
-      );
-    }
     for (const isLiked of data) {
       isLiked.liked = await con.Query(
         `
@@ -525,6 +517,17 @@ const getSinglePostWithPhoto = async (
         }
       );
     }
+    for (const postcomments of data) {
+      postcomments.totalcomments = await con.Query(
+        `
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
+    }
+   
     for (const file of data) {
       file.upload_files = await con.Query(
         `

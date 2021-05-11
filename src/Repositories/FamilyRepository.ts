@@ -254,7 +254,6 @@ const updateFamily = async (
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
-
     payload.encoded_by = user_pk;
     const update_fam = await con.Modify(
       `UPDATE family SET
@@ -303,6 +302,7 @@ const updateFamily = async (
         `DELETE FROM family_matang_kasilyas where fam_pk=@fam_pk;`,
         { fam_pk }
       );
+
       for (const mk of payload.matang_kasilyas) {
         const sql_pangabasu = await con.Insert(
           `

@@ -13,7 +13,7 @@ const PostsController = async (app: Express): Promise<void> => {
     "/getPosts",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await PostsMobileRepository.getPosts());
+      res.json(await PostsMobileRepository.getPosts(req.user_pk));
     }
   );
   router.post(
@@ -36,7 +36,7 @@ const PostsController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const posts_pk: string = req.body.posts_pk;
-      res.json(await PostsMobileRepository.getSinglePostWithPhoto(posts_pk));
+      res.json(await PostsMobileRepository.getSinglePostWithPhoto(posts_pk,req.user_pk));
     }
   );
   router.post(

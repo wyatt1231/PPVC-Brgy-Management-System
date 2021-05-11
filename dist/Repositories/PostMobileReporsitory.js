@@ -370,6 +370,7 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
     }
 });
 const getSinglePostWithPhoto = (posts_pk, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(posts_pk, " and ", user_pk);
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -390,19 +391,19 @@ const getSinglePostWithPhoto = (posts_pk, user_pk) => __awaiter(void 0, void 0, 
                 posts_pk: posts_pk,
             });
         }
-        for (const postcomments of data) {
-            postcomments.totalcomments = yield con.Query(`
-        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
-        `, {
-                posts_pk: postcomments.posts_pk,
-            });
-        }
         for (const isLiked of data) {
             isLiked.liked = yield con.Query(`
         SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
         `, {
                 posts_pk: isLiked.posts_pk,
                 user_pk: user_pk
+            });
+        }
+        for (const postcomments of data) {
+            postcomments.totalcomments = yield con.Query(`
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        `, {
+                posts_pk: postcomments.posts_pk,
             });
         }
         for (const file of data) {

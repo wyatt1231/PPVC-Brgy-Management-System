@@ -21,6 +21,11 @@ const FamilyMobileController = (app) => __awaiter(void 0, void 0, void 0, functi
         const ulo_pamilya = req.body.ulo_pamilya;
         res.json(yield FamilyMobileRepository_1.default.getfamilyexist(ulo_pamilya));
     }));
+    router.post("/getforms", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const ulo_pamilya = req.body.ulo_pamilya;
+        const fam_pk = req.body.fam_pk;
+        res.json(yield FamilyMobileRepository_1.default.getforms(ulo_pamilya, fam_pk));
+    }));
     app.use("/api/familymobile/", router);
 });
 exports.default = FamilyMobileController;
