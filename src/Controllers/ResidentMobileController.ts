@@ -8,7 +8,7 @@ import ResidentMobileRepository from "../Repositories/ResidentMobileRepository";
 const ResidentMobileController = async (app: Express): Promise<void> => {
   const router = Router();
 
-router.post(
+  router.post(
     "/addMobileResident",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -16,7 +16,7 @@ router.post(
       res.json(await ResidentMobileRepository.addMobileResident(payload));
     }
   );
-router.post(
+  router.post(
     "/getresidents",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -24,7 +24,27 @@ router.post(
       res.json(await ResidentMobileRepository.getresidents(search));
     }
   );
-router.post(
+  router.post(
+    "/getmembers",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const resident_pk: string = req.body.resident_pk;
+      res.json(await ResidentMobileRepository.getmembers(resident_pk));
+    }
+  );
+  router.post(
+    "/getreligion",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getreligion());
+    }
+  );
+  router.post(
+    "/getnationality",
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ResidentMobileRepository.getnationality());
+    }
+  );
+  router.post(
     "/upadatenewuser",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -32,7 +52,7 @@ router.post(
       res.json(await ResidentMobileRepository.upadatenewuser(user_pk));
     }
   );
-  
+
   app.use("/api/residentmobile/", router);
 };
 
