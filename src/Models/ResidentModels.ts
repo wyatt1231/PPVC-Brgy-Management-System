@@ -35,7 +35,8 @@ export interface ResidentModel {
   encoder_pk?: number;
   encoded_at?: Date;
   ulo_pamilya?: string;
-
+  fam_pk?: string;
+  members?: Array<any>;
   kita?: number;
   educ?: string;
   status?: StatusMasterModel;

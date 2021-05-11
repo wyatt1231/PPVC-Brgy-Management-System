@@ -18,7 +18,7 @@ const PostMobileReporsitory_1 = __importDefault(require("../Repositories/PostMob
 const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/getPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostMobileReporsitory_1.default.getPosts());
+        res.json(yield PostMobileReporsitory_1.default.getPosts(req.user_pk));
     }));
     router.post("/getreactions", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const posts_pk = req.body.posts_pk;
@@ -29,7 +29,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
     }));
     router.post("/getSinglePostWithPhoto", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const posts_pk = req.body.posts_pk;
-        res.json(yield PostMobileReporsitory_1.default.getSinglePostWithPhoto(posts_pk));
+        res.json(yield PostMobileReporsitory_1.default.getSinglePostWithPhoto(posts_pk, req.user_pk));
     }));
     router.post("/getPostsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {

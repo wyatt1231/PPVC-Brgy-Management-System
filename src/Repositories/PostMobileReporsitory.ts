@@ -10,7 +10,7 @@ import {
 } from "../Models/PostsModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
-const getPosts = async (): Promise<ResponseModel> => {
+const getPosts = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
 
   try {
@@ -33,6 +33,39 @@ const getPosts = async (): Promise<ResponseModel> => {
         `,
         {
           posts_pk: postsreactions.posts_pk,
+        }
+      );
+    }
+    for (const postcomments of data) {
+      postcomments.totalcomments = await con.Query(
+        `
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk 
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
+    }
+    for (const isLiked of data) {
+      isLiked.liked = await con.Query(
+        `
+        SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+        `,
+        {
+          posts_pk: isLiked.posts_pk,
+          user_pk: user_pk,
+        }
+      );
+    }
+    for (const postcomments of data) {
+      postcomments.comments = await con.Query(
+        `
+        SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') 
+        THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  
+        FROM posts_comment pw LEFT JOIN resident u ON pw.user_pk=u.user_pk  WHERE posts_pk=@posts_pk LIMIT 5
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
         }
       );
     }
@@ -77,13 +110,13 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
 
     const data: Array<PostsModel> = await con.Query(
       `
-          SELECT * FROM 
-        (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
-          ,u.full_name user_full_name,u.pic user_pic FROM posts p
-          LEFT JOIN status s ON p.sts_pk = s.sts_pk 
-        
-          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk GROUP BY p.posts_pk  ORDER BY p.encoded_at DESC)tmp;
-          `,
+        SELECT * FROM 
+      (SELECT p.posts_pk,p.title,p.body,p.sts_pk,CASE WHEN DATE_FORMAT(p.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(p.encoded_at,'%h:%m %p')) WHEN DATEDIFF(NOW(),p.encoded_at) >7 THEN DATE_FORMAT(p.encoded_at,'%b/%d %h:%m %p') WHEN DATEDIFF(NOW(),p.encoded_at) <=7 THEN  CONCAT(DATEDIFF(NOW(),p.encoded_at),'D')  ELSE DATE_FORMAT(p.encoded_at,'%b/%d %h:%m') END AS TIMESTAMP,p.encoder_pk , s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic FROM posts p
+        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
+      
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU" AND u.user_pk=@user_pk  ORDER BY p.encoded_at DESC)tmp;
+        `,
       {
         user_pk,
       }
@@ -91,14 +124,35 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(
         `
-          select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
-          `,
+        select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
+        `,
         {
           posts_pk: postsreactions.posts_pk,
         }
       );
     }
+    for (const postcomments of data) {
+      postcomments.totalcomments = await con.Query(
+        `
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
+    }
 
+    for (const isLiked of data) {
+      isLiked.liked = await con.Query(
+        `
+        SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+        `,
+        {
+          posts_pk: isLiked.posts_pk,
+          user_pk: user_pk,
+        }
+      );
+    }
     for (const file of data) {
       const sql_get_pic = await con.QuerySingle(
         `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
@@ -110,8 +164,8 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
     for (const file of data) {
       file.upload_files = await con.Query(
         `
-          select * from posts_file where posts_pk=@posts_pk
-          `,
+        select * from posts_file where posts_pk=@posts_pk
+        `,
         {
           posts_pk: file.posts_pk,
         }
@@ -418,23 +472,24 @@ const addPostReaction = async (
     };
   }
 };
-
 const getSinglePostWithPhoto = async (
-  posts_pk: string
+  posts_pk: string,
+  user_pk: number
 ): Promise<ResponseModel> => {
+  console.log(posts_pk, " and ", user_pk);
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     const data: Array<PostsModel> = await con.Query(
       `
-        SELECT * FROM 
-        (    
-    SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
-          ,u.full_name user_full_name,u.pic user_pic FROM posts p
-          LEFT JOIN status s ON p.sts_pk = s.sts_pk 
-          LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
-        `,
+      SELECT * FROM 
+      (    
+        SELECT p.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
+        ,u.full_name user_full_name,u.pic user_pic FROM posts p
+        LEFT JOIN status s ON p.sts_pk = s.sts_pk 
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.posts_pk=@posts_pk ORDER BY p.encoded_at DESC) tmp;
+      `,
       {
         posts_pk: posts_pk,
       }
@@ -442,18 +497,40 @@ const getSinglePostWithPhoto = async (
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(
         `
-          select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
-          `,
+        select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
+        `,
         {
           posts_pk: posts_pk,
         }
       );
     }
+    for (const isLiked of data) {
+      isLiked.liked = await con.Query(
+        `
+        SELECT reaction FROM posts_reaction WHERE posts_pk=@posts_pk AND resident_pk=@user_pk
+        `,
+        {
+          posts_pk: isLiked.posts_pk,
+          user_pk: user_pk,
+        }
+      );
+    }
+    for (const postcomments of data) {
+      postcomments.totalcomments = await con.Query(
+        `
+        SELECT COUNT(body) AS comments FROM posts_comment WHERE posts_pk=@posts_pk
+        `,
+        {
+          posts_pk: postcomments.posts_pk,
+        }
+      );
+    }
+
     for (const file of data) {
       file.upload_files = await con.Query(
         `
-        select * from posts_file where posts_pk=@posts_pk
-        `,
+      select * from posts_file where posts_pk=@posts_pk
+      `,
         {
           posts_pk: file.posts_pk,
         }

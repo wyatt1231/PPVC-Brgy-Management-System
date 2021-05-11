@@ -15,6 +15,15 @@ const FamilyMobileController = async (app: Express): Promise<void> => {
       res.json(await FamilyMobileRepository.getfamilyexist(ulo_pamilya));
     }
   );
+  router.post(
+    "/getforms",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      const ulo_pamilya: string = req.body.ulo_pamilya;
+      const fam_pk: string = req.body.fam_pk;
+      res.json(await FamilyMobileRepository.getforms(ulo_pamilya,fam_pk));
+    }
+  );
   app.use("/api/familymobile/", router);
 };
 
