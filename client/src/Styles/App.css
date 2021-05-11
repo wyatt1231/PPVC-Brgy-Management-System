@@ -457,3 +457,12 @@ canvas {
   grid-area: graph;
   width: 100px;
 }
+
+.Mui-disabled {
+  color: #333 !important;
+  opacity: 1 !important;
+}
+
+.MuiTypography-root.MuiFormControlLabel-label.MuiTypography-body1 {
+  padding: 0.3em 0;
+}

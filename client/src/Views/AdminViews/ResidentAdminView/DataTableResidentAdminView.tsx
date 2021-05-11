@@ -198,6 +198,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
               </NavLink>
             </Grid>
           </Grid>
+
           <Grid
             xs={12}
             item

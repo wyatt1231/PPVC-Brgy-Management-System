@@ -10,10 +10,17 @@ export interface FamilyModel {
   kaligon_balay?: string;
   encoded_at?: Date | string;
   encoded_by?: number;
-  ulo_pamilya_info: ResidentModel;
-  fam_members: Array<FamMemberModel>;
+  ulo_pamilya_info?: ResidentModel;
+  fam_members?: Array<FamMemberModel>;
+  biktima_pangabuso?: Array<string>;
+  kahimtanang_komunidad?: Array<string>;
+  matang_basura?: Array<string>;
+  matang_kasilyas?: Array<string>;
+  pasilidad_kuryente?: Array<string>;
+  family_matang_basura?: Array<string>;
+  tinubdan_tubig?: Array<string>;
+  serbisyo_nadawat?: Array<SerbisyoNadawatModel>;
 }
-
 export interface FamMemberModel {
   resident_pk?: number;
   fam_pk?: number;
@@ -21,4 +28,9 @@ export interface FamMemberModel {
   encoded_at?: Date | string;
   encoded_by?: number;
   resident_info: ResidentModel;
+}
+
+export interface SerbisyoNadawatModel {
+  programa: string;
+  ahensya: string;
 }

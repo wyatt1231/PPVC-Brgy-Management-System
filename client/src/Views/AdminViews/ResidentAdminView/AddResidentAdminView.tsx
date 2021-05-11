@@ -22,7 +22,7 @@ import React, {
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import * as yup from "yup";
 import FormikInputField from "../../../Component/Formik/FormikInputField";
 import FormikRadio from "../../../Component/Formik/FormikRadio";
@@ -90,6 +90,10 @@ const formSchema = yup.object({
 export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const params = useParams<any>();
+
+  console.log(`params`, params);
 
   const formRef = useRef<FormikProps<ResidentModel> | null>(null);
 

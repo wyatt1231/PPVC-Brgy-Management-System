@@ -229,7 +229,6 @@ const toggleResidentStatus = (resident_pk) => __awaiter(void 0, void 0, void 0, 
     }
 });
 const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`res`);
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
