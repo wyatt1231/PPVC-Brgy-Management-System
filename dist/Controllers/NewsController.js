@@ -63,6 +63,17 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
         }
         res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
+    router.post("/addNewsFiles", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _c, _d;
+        const payload = req.body;
+        let files = ((_c = req.files) === null || _c === void 0 ? void 0 : _c.uploaded_files) ? (_d = req.files) === null || _d === void 0 ? void 0 : _d.uploaded_files : [];
+        if (files instanceof Array) {
+        }
+        else {
+            files = [files];
+        }
+        res.json(yield NewsRepository_1.default.addNewsFiles(payload, files instanceof Array ? files : [files], req.user_pk));
+    }));
     router.post("/updateNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.updateNews(payload, req.user_pk));
@@ -98,6 +109,13 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     router.post("/updateNewsReaction", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsRepository_1.default.updateNewsReaction(payload, req.user_pk));
+    }));
+    router.post("/getNewsLatest", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield NewsRepository_1.default.getNewsLatest());
+    }));
+    router.post("/deleteNewsFile", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        res.json(yield NewsRepository_1.default.deleteNewsFile(payload));
     }));
     app.use("/api/news/", router);
 });

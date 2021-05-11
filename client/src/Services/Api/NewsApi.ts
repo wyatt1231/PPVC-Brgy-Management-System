@@ -1,7 +1,7 @@
 import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
-import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
+import { NewsFileModel, NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { ScrollPaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/news/`;
@@ -18,6 +18,11 @@ const getNewsDataTable = async (
 
 const addNews = async (payload: FormData): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "addNews", payload);
+  return response;
+};
+
+const addNewsFiles = async (payload: FormData): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "addNewsFiles", payload);
   return response;
 };
 
@@ -91,6 +96,21 @@ const updateNewsReaction = async (
   return response;
 };
 
+const getNewsLatest = async (): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getNewsLatest", {});
+  return response;
+};
+
+const deleteNewsFile = async (
+  payload: NewsFileModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "deleteNewsFile",
+    payload
+  );
+  return response;
+};
+
 export default {
   getNewsDataTable,
   addNews,
@@ -103,4 +123,7 @@ export default {
   updateNewsReaction,
   toggleLike,
   getNewsFiles,
+  getNewsLatest,
+  deleteNewsFile,
+  addNewsFiles,
 };

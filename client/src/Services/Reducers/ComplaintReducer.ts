@@ -61,6 +61,19 @@ const ComplaintReducer = (
         fetch_complaint_messages: action.fetch_complaint_messages,
       };
     }
+    //
+    case "latest_complaint": {
+      return {
+        ...state,
+        latest_complaint: action.latest_complaint,
+      };
+    }
+    case "fetch_latest_complaint": {
+      return {
+        ...state,
+        fetch_latest_complaint: action.fetch_latest_complaint,
+      };
+    }
 
     default:
       return state;

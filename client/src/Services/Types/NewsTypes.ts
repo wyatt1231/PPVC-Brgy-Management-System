@@ -16,6 +16,15 @@ export type NewsReducerTypes =
   | {
       type: "fetch_single_news";
       fetch_single_news: boolean;
+    }
+  //
+  | {
+      type: "news_latest";
+      news_latest: Array<NewsModel>;
+    }
+  | {
+      type: "fetch_news_latest";
+      fetch_news_latest: boolean;
     };
 
 export interface NewsReducerModel {
@@ -23,4 +32,7 @@ export interface NewsReducerModel {
   fetch_news_table?: boolean;
   single_news?: NewsModel;
   fetch_single_news?: boolean;
+  //
+  news_latest?: Array<NewsModel>;
+  fetch_news_latest?: boolean;
 }

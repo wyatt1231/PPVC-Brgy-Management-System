@@ -60,6 +60,30 @@ const setSingleNews = (news_pk: number) => async (
   }
 };
 
+const getNewsLatest = () => async (dispatch: Dispatch<NewsReducerTypes>) => {
+  try {
+    dispatch({
+      type: "fetch_news_latest",
+      fetch_news_latest: true,
+    });
+    const response: IServerResponse = await NewsApi.getNewsLatest();
+
+    if (response.success) {
+      dispatch({
+        type: "news_latest",
+        news_latest: response.data,
+      });
+    }
+
+    dispatch({
+      type: "fetch_news_latest",
+      fetch_news_latest: false,
+    });
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
 const addNews = (
   payload: FormData,
   successCallback: (msg: string) => any
@@ -73,6 +97,46 @@ const addNews = (
       },
     });
     const response: IServerResponse = await NewsApi.addNews(payload);
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        show: false,
+      },
+    });
+    if (response.success) {
+      if (typeof successCallback === "function") {
+        successCallback(response.message.toString());
+      }
+      dispatch({
+        type: "SET_PAGE_SNACKBAR",
+        page_snackbar: {
+          message: response.message.toString(),
+          options: {
+            variant: "success",
+          },
+        },
+      });
+    } else {
+      helperErrorMessage(dispatch, response);
+    }
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
+const addNewsFiles = (
+  payload: FormData,
+  successCallback: (msg: string) => any
+) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+  try {
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        loading_message: "Loading, thank you for your patience!",
+        show: true,
+      },
+    });
+    const response: IServerResponse = await NewsApi.addNewsFiles(payload);
     dispatch({
       type: "SET_PAGE_LOADING",
       page_loading: {
@@ -312,4 +376,6 @@ export default {
   addNewsComment,
   updateNewsReaction,
   toggleLike,
+  getNewsLatest,
+  addNewsFiles,
 };

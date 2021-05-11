@@ -8,7 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
+const qs_1 = __importDefault(require("qs"));
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
@@ -185,10 +190,10 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
+        const pub_date = payload.pub_date;
         payload.pub_date = useDateParser_1.parseInvalidDateToDefault(payload.pub_date, "(NULL)");
         payload.is_prio =
             payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
-        console.log(`add payload`, payload);
         const sql_add_news = yield con.Insert(`INSERT INTO news SET
          title=@title,
          audience=@audience,
@@ -224,6 +229,34 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                     };
                 }
             }
+            if (payload.is_prio) {
+                let residents = [];
+                if (payload.audience === "r" || payload.audience === "all") {
+                    residents = yield con.Query(`SELECT phone FROM resident`, null);
+                }
+                else if (payload.audience === "b") {
+                    residents = yield con.Query(`SELECT phone FROM resident where resident_pk in (select resident_pk from barangay_official)`, null);
+                }
+                for (const r of residents) {
+                    if (/^(09|\+639)\d{9}$/.test(r.phone)) {
+                        const sms_response = yield axios_1.default({
+                            method: "post",
+                            url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+                            data: qs_1.default.stringify({
+                                username: "mrmontiveles@outlook.com",
+                                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                                to: r.phone,
+                                message: `Balita gikan sa Brgy. 37-D, Davao City. ${payload.title} karong ${useDateParser_1.parseInvalidDateToDefault(pub_date)}`,
+                                //https://dashboard.clicksend.com/#/sms/send-sms/main
+                            }),
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
+                            },
+                        });
+                    }
+                }
+            }
             con.Commit();
             return {
                 success: true,
@@ -237,6 +270,53 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                 message: "No affected rows while creating the news",
             };
         }
+    }
+    catch (error) {
+        yield con.Rollback();
+        // console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const addNewsFiles = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        payload.encoder_pk = user_pk;
+        for (const file of files) {
+            const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/News/", file);
+            if (!file_res.success) {
+                con.Rollback();
+                return file_res;
+            }
+            const news_file_payload = {
+                file_path: file_res.data.path,
+                file_name: file_res.data.name,
+                mimetype: file_res.data.mimetype,
+                encoder_pk: user_pk,
+                news_pk: payload.news_pk,
+            };
+            const sql_add_news_file = yield con.Insert(`INSERT INTO news_file SET
+           news_pk=@news_pk,
+           file_path=@file_path,
+           file_name=@file_name,
+           mimetype=@mimetype,
+           encoder_pk=@encoder_pk;`, news_file_payload);
+            if (sql_add_news_file.affectedRows < 1) {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "The process has been terminated when trying to save the file!",
+                };
+            }
+        }
+        con.Commit();
+        return {
+            success: true,
+            message: "The news has been published successfully!",
+        };
     }
     catch (error) {
         yield con.Rollback();
@@ -274,6 +354,37 @@ const republishNews = (news_pk, user_pk) => __awaiter(void 0, void 0, void 0, fu
     catch (error) {
         yield con.Rollback();
         console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const deleteNewsFile = (news_file) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_delete_file = yield con.Modify(`DELETE FROM news_file WHERE news_file_pk = @news_file_pk`, {
+            news_file_pk: news_file.news_file_pk,
+        });
+        if (sql_delete_file > 0) {
+            yield useFileUploader_1.RemoveImage(news_file.file_path);
+            con.Commit();
+            return {
+                success: true,
+                message: "The file has been removed!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while trying to remove the file!",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -564,6 +675,40 @@ const getSingleNews = (news_pk) => __awaiter(void 0, void 0, void 0, function* (
         };
     }
 });
+const getNewsLatest = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _e, _f;
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const news_table = yield con.Query(`
+      SELECT * FROM news limit 10
+      `, null);
+        for (const news of news_table) {
+            news.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
+                sts_pk: news.sts_pk,
+            });
+            news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
+                user_pk: news.encoder_pk,
+            });
+            if ((_e = news === null || news === void 0 ? void 0 : news.user) === null || _e === void 0 ? void 0 : _e.pic) {
+                news.user.pic = yield useFileUploader_1.GetUploadedImage((_f = news === null || news === void 0 ? void 0 : news.user) === null || _f === void 0 ? void 0 : _f.pic);
+            }
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: news_table,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     getNewsDataTable,
     addNews,
@@ -579,5 +724,8 @@ exports.default = {
     getNewsComments,
     toggleLike,
     getNewsFiles,
+    getNewsLatest,
+    deleteNewsFile,
+    addNewsFiles,
 };
 //# sourceMappingURL=NewsRepository.js.map

@@ -14,6 +14,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import CircularLoadingProgress from "../../../Component/CircularLoadingProgress";
 import CustomAvatar from "../../../Component/CustomAvatar";
+import CustomStepper from "../../../Component/CustomStepper/CustomStepper";
 import FormDialog from "../../../Component/FormDialog/FormDialog";
 import MultiRadioFieldHookForm from "../../../Component/HookForm/MultiRadioFieldHookForm";
 import TextFieldHookForm from "../../../Component/HookForm/TextFieldHookForm";
@@ -29,10 +30,7 @@ import {
   FamMemberModel,
 } from "../../../Services/Models/FamilyModel";
 import { ResidentModel } from "../../../Services/Models/ResidentModels";
-import PageReducer from "../../../Services/Reducers/PageReducer";
 import { RootStore } from "../../../Services/Store";
-import AddFamMemDialog from "./AddFamMemDialog";
-import ResidentInfo from "./ResidentInfo";
 
 interface ICreateFamily {}
 
@@ -78,8 +76,6 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
   }, []);
 
   const form_create_fam = useForm({
-    // resolver: yupResolver(validate_main_details),
-    // defaultValues: ,
     mode: "onBlur",
   });
 
@@ -89,8 +85,6 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
       ulo_pamilya: ulo_pamilya.resident_pk,
       fam_members: fam_members,
     };
-
-    console.log(`payload`, payload);
 
     dispatch(
       setGeneralPrompt({
@@ -151,6 +145,29 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
     }
   }, [single_fam]);
 
+  const Steps = [
+    {
+      label: "Unang Bahin",
+      View: <div>Unang Bahin</div>,
+      subtitle: "Miyembro sa pamilya",
+    },
+    {
+      label: "Ikaduhang Bahin",
+      subtitle: "Mga unang  problema  sa panimalay",
+      View: <div>Mga unang problema sa panimalay</div>,
+    },
+    {
+      label: "Ikatulong Bahin",
+      subtitle: "Kahimtang sa komunidad",
+      View: <div>Kahimtang sa komunidad</div>,
+    },
+    {
+      label: "Ika-upat Nga Bahin",
+      subtitle: "Programa o serbisyo nga nadawat sa mga ahensya",
+      View: <div>Programa o serbisyo nga nadawat sa mga ahensya</div>,
+    },
+  ];
+
   return (
     <>
       <FormDialog
@@ -176,8 +193,10 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
                   id="form-add-fam"
                   noValidate
                   onSubmit={form_create_fam.handleSubmit(submitForm)}
-                  style={{ padding: `0 5em` }}
+                  style={{ padding: `0 2em` }}
                 >
+                  <CustomStepper steps={Steps} active_step={0} />
+
                   <Grid container spacing={2}>
                     <Grid item xs={12} spacing={2} container>
                       <Grid item xs={12}>
@@ -446,17 +465,10 @@ export const CreateFamily: FC<ICreateFamily> = memo(() => {
                 </form>
               </FormProvider>
 
-              <AddFamMemDialog
-                handleSetOpenDialog={handleSetOpenDialog}
-                open={open_add_dialog}
-                handleAddFamMember={handleAddFamMember}
-                fam_members={fam_members}
-              />
-
-              <ResidentInfo
+              {/* <ResidentInfo
                 resident={selected_resident}
                 handleSetResident={handleSetResident}
-              />
+              /> */}
             </>
           )
         }

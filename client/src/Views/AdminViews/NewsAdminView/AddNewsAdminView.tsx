@@ -174,7 +174,6 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(
             data.is_prio = true;
           }
 
-          console.log(`data`, data);
           const payload = ObjectToFormDataHelper(data);
 
           data?.uploaded_files?.forEach((f) => {
@@ -199,25 +198,6 @@ export const AddNewsAdminView: FC<AddNewsAdminProps> = memo(
       },
       [active_step]
     );
-
-    // useEffect(() => {
-    //   if (active_step > 0) {
-    //     alert(`.`);
-    //     set_form_payload((prev) => {
-    //       return {
-    //         ...prev,
-    //         ...form_add_news.getValues(),
-    //       };
-    //     });
-    //   }
-    // }, [active_step]);
-
-    // useEffect(() => {
-    //   form_add_news.reset({
-    //     form_payload,
-    //     ...form_add_news.getValues(),
-    //   });
-    // }, [form_payload]);
 
     return (
       <div>

@@ -1,214 +1,268 @@
 import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
-import {
-  PaginationModel,
-  ScrollPaginationModel,
-} from "../Models/PaginationModel";
+import { PaginationModel } from "../Models/PaginationModel";
 
 let con: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
   con = {
-   host: "156.67.222.35",
+    host: "156.67.222.35",
     user: "u583403240_bms",
     password: "BMS@capstone2",
     database: "u583403240_bms",
     port: 3306,
-    connectionLimit: 10,
-    waitForConnections: true,
+    // connectionLimit: 10,
+    // waitForConnections: true,
   };
 } else {
+  con = {
+    host: "156.67.222.35",
+    user: "u583403240_bms",
+    password: "BMS@capstone2",
+    database: "u583403240_bms",
+    port: 3306,
+    // connectionLimit: 10,
+    // waitForConnections: true,
+  };
   // con = {
-  //   host: "204.2.195.101",
-  //   user: "admin",
-  //   password: "bmscaps01",
+  //   host: "localhost",
+  //   user: "root",
+  //   password: "root sa",
   //   database: "bms",
-  //   port: 26880,
+  //   port: 3309,
   //   connectionLimit: 10,
   //   waitForConnections: true,
   // };
-  con = {
-    host: "localhost",
-    user: "root",
-    password: "rootsa",
-    database: "bms",
-    port: 3309,
-    connectionLimit: 10,
-    waitForConnections: true,
-  };
 }
 
 //console.log(`some config`)
 
-export let DatabaseConfig = mysql.createPool(con);
-
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
   return new Promise((resolve, reject) => {
-    DatabaseConfig.getConnection((error, connection) => {
-      if (error) {
-        reject(error);
-      }
+    try {
+      let DatabaseConfig = mysql.createPool(con);
+      DatabaseConfig.getConnection((error, connection) => {
+        if (error) {
+          // connection.release();
+          // connection.destroy();
+          return reject(error);
+        }
 
-      const Query = (sql: string, binding: any): Promise<RowDataPacket[][]> => {
-        return new Promise((resolve, reject) => {
-          const { success, message, query } = queryFormat(sql, binding);
+        const Query = (
+          sql: string,
+          binding: any
+        ): Promise<RowDataPacket[][]> => {
+          return new Promise((resolve, reject) => {
+            const { success, message, query } = queryFormat(sql, binding);
 
-          if (!success) {
-            if (typeof message !== "undefined") {
-              return reject(message);
-            }
-          }
-
-          connection.query(query, (err, result: RowDataPacket[][]) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-      };
-
-      const QueryPagination = (
-        sql: string,
-        pagination: PaginationModel
-      ): Promise<Array<any>> => {
-        return new Promise((resolve, reject) => {
-          const { filters, sort, page } = pagination;
-          const { success, message, query } = queryFormat(sql, filters);
-
-          if (!success) {
-            if (typeof message !== "undefined") {
-              return reject(message);
-            }
-          }
-
-          const full_query =
-            `
-          ${query} 
-          ORDER BY ${sort.column} ${sort.direction}` +
-            (page
-              ? `
-        LIMIT ${mysql.escape(page.begin)}, ${mysql.escape(page.limit)} `
-              : "");
-          connection.query(full_query, (err, result: RowDataPacket[][]) => {
-            if (err) {
-              console.log(`full_query `, full_query);
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-      };
-
-      const Modify = (sql: string, binding: any): Promise<number> => {
-        return new Promise((resolve, reject) => {
-          const { success, message, query } = queryFormat(sql, binding);
-          if (!success) {
-            if (typeof message !== "undefined") {
-              return reject(message);
-            }
-          }
-          connection.query(query, (err, result: OkPacket) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(result.affectedRows);
-            }
-          });
-        });
-      };
-      const Insert = (sql: string, binding: any): Promise<InsertModel> => {
-        return new Promise((resolve, reject) => {
-          const { success, message, query } = queryFormat(sql, binding);
-          if (!success) {
-            if (typeof message !== "undefined") {
-              return reject(message);
-            }
-          }
-          connection.query(query, (err, result: OkPacket) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve({
-                affectedRows: result.affectedRows,
-                insertedId: result.insertId,
-              });
-            }
-          });
-        });
-      };
-      const QuerySingle = (sql: string, binding: any): Promise<any> => {
-        return new Promise((resolve, reject) => {
-          const { success, message, query } = queryFormat(sql, binding);
-          if (!success) {
-            if (typeof message !== "undefined") {
-              return reject(message);
-            }
-          }
-          connection.query(query, (err, result: RowDataPacket) => {
-            if (err) {
-              reject(err);
-            } else {
-              if (result.length > 0) {
-                // console.log(`result[0]`, result[0]);
-                resolve(result[0]);
-              } else {
-                resolve(null);
+            if (!success) {
+              if (typeof message !== "undefined") {
+                return reject(message);
               }
             }
-          });
-        });
-      };
-      const BeginTransaction = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          connection.beginTransaction((err) => {
-            if (err) {
-              // connection.release();
-              // connection.destroy();
+
+            try {
+              connection.query(query, (err, result: RowDataPacket[][]) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(result);
+                }
+              });
+            } catch (error) {
+              reject(error);
             }
-            resolve();
           });
-        });
-      };
-      const Commit = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          connection.commit((err) => {
-            connection.release();
-            connection.destroy();
-            resolve();
+        };
+
+        const QueryPagination = (
+          sql: string,
+          pagination: PaginationModel
+        ): Promise<Array<any>> => {
+          return new Promise((resolve, reject) => {
+            const { filters, sort, page } = pagination;
+            const { success, message, query } = queryFormat(sql, filters);
+
+            if (!success) {
+              if (typeof message !== "undefined") {
+                return reject(message);
+              }
+            }
+
+            const full_query =
+              `
+            ${query} 
+            ORDER BY ${sort.column} ${sort.direction}` +
+              (page
+                ? `
+          LIMIT ${mysql.escape(page.begin)}, ${mysql.escape(page.limit)} `
+                : "");
+
+            try {
+              connection.query(full_query, (err, result: RowDataPacket[][]) => {
+                if (err) {
+                  return reject(err);
+                } else {
+                  return resolve(result);
+                }
+              });
+            } catch (error) {
+              connection.destroy();
+              connection.release();
+              return reject(error);
+            }
           });
-        });
-      };
-      const Rollback = (): Promise<void> => {
-        return new Promise((resolve) => {
-          connection.rollback(() => {
-            connection.release();
-            connection.destroy();
-            resolve();
+        };
+
+        const Modify = (sql: string, binding: any): Promise<number> => {
+          return new Promise((resolve, reject) => {
+            const { success, message, query } = queryFormat(sql, binding);
+            if (!success) {
+              if (typeof message !== "undefined") {
+                return reject(message);
+              }
+            }
+            try {
+              connection.query(query, (err, result: OkPacket) => {
+                if (err) {
+                  return reject(err);
+                } else {
+                  return resolve(result.affectedRows);
+                }
+              });
+            } catch (error) {
+              connection.destroy();
+              connection.release();
+              return reject(error);
+            }
           });
+        };
+        const Insert = (sql: string, binding: any): Promise<InsertModel> => {
+          return new Promise((resolve, reject) => {
+            const { success, message, query } = queryFormat(sql, binding);
+            if (!success) {
+              if (typeof message !== "undefined") {
+                return reject(message);
+              }
+            }
+            try {
+              connection.query(query, (err, result: OkPacket) => {
+                if (err) {
+                  return reject(err);
+                } else {
+                  return resolve({
+                    affectedRows: result.affectedRows,
+                    insertedId: result.insertId,
+                  });
+                }
+              });
+            } catch (error) {
+              connection.destroy();
+              connection.release();
+              reject(error);
+            }
+          });
+        };
+        const QuerySingle = (sql: string, binding: any): Promise<any> => {
+          return new Promise((resolve, reject) => {
+            const { success, message, query } = queryFormat(sql, binding);
+            if (!success) {
+              if (typeof message !== "undefined") {
+                return reject(message);
+              }
+            }
+
+            try {
+              connection.query(query, (err, result: RowDataPacket) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  if (result.length > 0) {
+                    // console.log(`result[0]`, result[0]);
+                    return  resolve(result[0]);
+                  } else {
+                    return    resolve(null);
+                  }
+                }
+              });
+            } catch (error) {
+              connection.destroy();
+              connection.release();
+              return   reject(error);
+            }
+          });
+        };
+        const BeginTransaction = (): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            try {
+              connection.beginTransaction((err) => {
+                if (err) {
+                  // connection.release();
+                  // connection.destroy();
+                }
+                resolve();
+              });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        };
+        const Commit = (): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            try {
+              connection.commit((err) => {
+                connection.release();
+                connection.destroy();
+                resolve();
+              });
+            } catch (error) {
+              connection.release();
+              connection.destroy();
+              reject(error);
+            }
+          });
+        };
+        const Rollback = (): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            try {
+              connection.rollback(() => {
+                connection.release();
+                connection.destroy();
+                resolve();
+              });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        };
+        const Release = (): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            try {
+              connection.release();
+              connection.destroy();
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          });
+        };
+
+        resolve({
+          Release,
+          Commit,
+          Rollback,
+          BeginTransaction,
+          Query,
+          QuerySingle,
+          QueryPagination,
+          Modify,
+          Insert,
         });
-      };
-      const Release = (): Promise<void> => {
-        return new Promise((resolve) => {
-          connection.release();
-          connection.destroy();
-          resolve();
-        });
-      };
-      resolve({
-        Release,
-        Commit,
-        Rollback,
-        BeginTransaction,
-        Query,
-        QuerySingle,
-        QueryPagination,
-        Modify,
-        Insert,
       });
-    });
+    } catch (error) {
+      console.log(`error ---------------------------------------`, error);
+      reject(error);
+    }
   });
 };
 interface QueryFormatModel {
@@ -252,24 +306,11 @@ const queryFormat = (query: string, values: any): QueryFormatModel => {
         }
       }
 
-      // if (key instanceof Array) {
-      //   console.log(`array -> array `);
-      //   if (key.length > 0) {
-      //     for (let i = 0; i < key.length; i++) {
-      //       key[i] = mysql.escape(key[i]);
-      //     }
-      //     const joined_arr = key.join(",");
-
-      //     return joined_arr;
-      //   } else {
-      //     console.log(`key`, key);
-      //     return "";
-      //   }
-      // }
-
       return str;
     }
   );
+
+  // console.log(`formattedQuery`, formattedQuery);
 
   return formattedQuery;
 };

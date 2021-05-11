@@ -1,14 +1,18 @@
+import axios from "axios";
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
+import qs from "qs";
 import {
   PaginationModel,
   ScrollPaginationModel,
 } from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
 import NewsRepository from "../Repositories/NewsRepository";
+import { method } from "bluebird";
+import { NewsFileModel } from "../Models/NewsFileModel";
 
 const NewsController = async (app: Express): Promise<void> => {
   const router = Router();
@@ -75,6 +79,28 @@ const NewsController = async (app: Express): Promise<void> => {
 
       res.json(
         await NewsRepository.addNews(
+          payload,
+          files instanceof Array ? files : [files],
+          req.user_pk
+        )
+      );
+    }
+  );
+
+  router.post(
+    "/addNewsFiles",
+    Authorize("admin"),
+    async (req: Request & { files: any } & UserClaims, res: Response) => {
+      const payload: NewsModel = req.body;
+      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+
+      if (files instanceof Array) {
+      } else {
+        files = [files];
+      }
+
+      res.json(
+        await NewsRepository.addNewsFiles(
           payload,
           files instanceof Array ? files : [files],
           req.user_pk
@@ -163,6 +189,23 @@ const NewsController = async (app: Express): Promise<void> => {
     async (req: Request & UserClaims, res: Response) => {
       const payload: NewsReactionModel = req.body;
       res.json(await NewsRepository.updateNewsReaction(payload, req.user_pk));
+    }
+  );
+
+  router.post(
+    "/getNewsLatest",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await NewsRepository.getNewsLatest());
+    }
+  );
+
+  router.post(
+    "/deleteNewsFile",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      const payload: NewsFileModel = req.body;
+      res.json(await NewsRepository.deleteNewsFile(payload));
     }
   );
 

@@ -466,6 +466,50 @@ const getComplaintMessage = async (
   }
 };
 
+const getComplaintLatest = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<ComplaintModel> = await con.Query(
+      `
+      SELECT * FROM complaint WHERE sts_pk NOT IN('C','X','D') LIMIT 10 
+      `,
+      null
+    );
+
+    for (const complaint of data) {
+      complaint.user = await con.QuerySingle(
+        `Select * from vw_users where user_pk = @user_pk`,
+        {
+          user_pk: complaint.reported_by,
+        }
+      );
+      complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+
+      complaint.status = await con.QuerySingle(
+        `Select * from status where sts_pk = @sts_pk`,
+        {
+          sts_pk: complaint.sts_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   addComplaintMessage,
   getComplaintList,
@@ -476,4 +520,5 @@ export default {
   getSingleComplaint,
   getComplaintTable,
   getComplaintLogTable,
+  getComplaintLatest,
 };

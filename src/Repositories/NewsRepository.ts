@@ -1,18 +1,22 @@
+import axios from "axios";
+import qs from "qs";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import {
   parseInvalidDateToDefault,
   sqlFilterDate,
 } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
+import {
+  GetUploadedImage,
+  RemoveImage,
+  UploadFile,
+} from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
-import {
-  PaginationModel,
-  ScrollPaginationModel,
-} from "../Models/PaginationModel";
+import { PaginationModel } from "../Models/PaginationModel";
+import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -244,12 +248,11 @@ const addNews = async (
     await con.BeginTransaction();
 
     payload.encoder_pk = user_pk;
+    const pub_date = payload.pub_date;
     payload.pub_date = parseInvalidDateToDefault(payload.pub_date, "(NULL)");
 
     payload.is_prio =
       payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
-
-    console.log(`add payload`, payload);
 
     const sql_add_news = await con.Insert(
       `INSERT INTO news SET
@@ -301,6 +304,41 @@ const addNews = async (
         }
       }
 
+      if (payload.is_prio) {
+        let residents: Array<ResidentModel> = [];
+
+        if (payload.audience === "r" || payload.audience === "all") {
+          residents = await con.Query(`SELECT phone FROM resident`, null);
+        } else if (payload.audience === "b") {
+          residents = await con.Query(
+            `SELECT phone FROM resident where resident_pk in (select resident_pk from barangay_official)`,
+            null
+          );
+        }
+
+        for (const r of residents) {
+          if (/^(09|\+639)\d{9}$/.test(r.phone)) {
+            const sms_response = await axios({
+              method: "post",
+              url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+              data: qs.stringify({
+                username: "mrmontiveles@outlook.com",
+                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                to: r.phone,
+                message: `Balita gikan sa Brgy. 37-D, Davao City. ${
+                  payload.title
+                } karong ${parseInvalidDateToDefault(pub_date)}`,
+                //https://dashboard.clicksend.com/#/sms/send-sms/main
+              }),
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
+              },
+            });
+          }
+        }
+      }
+
       con.Commit();
       return {
         success: true,
@@ -313,6 +351,70 @@ const addNews = async (
         message: "No affected rows while creating the news",
       };
     }
+  } catch (error) {
+    await con.Rollback();
+    // console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const addNewsFiles = async (
+  payload: NewsModel,
+  files: Array<File>,
+  user_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    payload.encoder_pk = user_pk;
+
+    for (const file of files) {
+      const file_res = await UploadFile("src/Storage/Files/News/", file);
+
+      if (!file_res.success) {
+        con.Rollback();
+
+        return file_res;
+      }
+
+      const news_file_payload: NewsFileModel = {
+        file_path: file_res.data.path,
+        file_name: file_res.data.name,
+        mimetype: file_res.data.mimetype,
+        encoder_pk: user_pk,
+        news_pk: payload.news_pk,
+      };
+
+      const sql_add_news_file = await con.Insert(
+        `INSERT INTO news_file SET
+           news_pk=@news_pk,
+           file_path=@file_path,
+           file_name=@file_name,
+           mimetype=@mimetype,
+           encoder_pk=@encoder_pk;`,
+        news_file_payload
+      );
+
+      if (sql_add_news_file.affectedRows < 1) {
+        con.Rollback();
+
+        return {
+          success: false,
+          message:
+            "The process has been terminated when trying to save the file!",
+        };
+      }
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      message: "The news has been published successfully!",
+    };
   } catch (error) {
     await con.Rollback();
     // console.error(`error`, error);
@@ -356,6 +458,43 @@ const republishNews = async (
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const deleteNewsFile = async (
+  news_file: NewsFileModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_delete_file = await con.Modify(
+      `DELETE FROM news_file WHERE news_file_pk = @news_file_pk`,
+      {
+        news_file_pk: news_file.news_file_pk,
+      }
+    );
+
+    if (sql_delete_file > 0) {
+      await RemoveImage(news_file.file_path);
+      con.Commit();
+      return {
+        success: true,
+        message: "The file has been removed!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while trying to remove the file!",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -718,6 +857,53 @@ const getSingleNews = async (news_pk: string): Promise<ResponseModel> => {
   }
 };
 
+const getNewsLatest = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const news_table: Array<NewsModel> = await con.Query(
+      `
+      SELECT * FROM news limit 10
+      `,
+      null
+    );
+
+    for (const news of news_table) {
+      news.status = await con.QuerySingle(
+        `select * from status where sts_pk=@sts_pk`,
+        {
+          sts_pk: news.sts_pk,
+        }
+      );
+
+      news.user = await con.QuerySingle(
+        `select * from vw_users where user_pk=@user_pk`,
+        {
+          user_pk: news.encoder_pk,
+        }
+      );
+
+      if (news?.user?.pic) {
+        news.user.pic = await GetUploadedImage(news?.user?.pic);
+      }
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: news_table,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   getNewsDataTable,
   addNews,
@@ -733,4 +919,7 @@ export default {
   getNewsComments,
   toggleLike,
   getNewsFiles,
+  getNewsLatest,
+  deleteNewsFile,
+  addNewsFiles,
 };

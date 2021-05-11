@@ -2,7 +2,7 @@ import { resolve } from "bluebird";
 import fs from "fs";
 import moment from "moment";
 import { ResponseModel } from "../Models/ResponseModels";
-
+import { unlink } from "fs/promises";
 export interface UploadImageParam {
   base_url: string;
   file_name: string | number;
@@ -44,6 +44,21 @@ export const UploadImage = ({
   });
 };
 
+export const RemoveImage = async (base_url: string): Promise<ResponseModel> => {
+  try {
+    await unlink(base_url);
+    return {
+      success: true,
+      message: "Image has been removed",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
 export const GetUploadedImage = async (url: string): Promise<string | null> => {
   if (typeof url === "string") {
     try {
@@ -64,8 +79,6 @@ export const UploadFile = (
     if (!fs.existsSync(base_url)) {
       fs.mkdirSync(base_url, { recursive: true });
     }
-
-    console.log(`file_to_upload.data`, file_to_upload);
 
     const file_name = moment(new Date()).format("x") + file_to_upload.name;
     fs.writeFile(

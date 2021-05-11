@@ -132,21 +132,23 @@ const updateResident = async (
   try {
     await con.BeginTransaction();
 
-    const user_payload: UserModel = {
-      full_name: `${payload.last_name}, ${payload.first_name}`,
-      email: payload.email,
-      encoder_pk: user_pk,
-    };
+    if (user_pk !== 1) {
+      const user_payload: UserModel = {
+        full_name: `${payload.last_name}, ${payload.first_name}`,
+        email: payload.email,
+        encoder_pk: payload.user_pk,
+      };
 
-    const update_user = await con.Insert(
-      `UPDATE user SET
-      email=@email,
-      password=AES_ENCRYPT(@email,@email),
-      full_name=@full_name
-      where user_pk=@encoder_pk;
-      `,
-      user_payload
-    );
+      const update_user = await con.Insert(
+        `UPDATE user SET
+        email=@email,
+        password=AES_ENCRYPT(@email,@email),
+        full_name=@full_name
+        where user_pk=@encoder_pk;
+        `,
+        user_payload
+      );
+    }
 
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
@@ -269,8 +271,6 @@ const toggleResidentStatus = async (
 const getDataTableResident = async (
   payload: PaginationModel
 ): Promise<ResponseModel> => {
-  console.log(`res`);
-
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();

@@ -22,7 +22,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
             full_name: `${payload.last_name}, ${payload.first_name}`,
             email: payload.email,
             user_type: "resident",
-            encoder_pk: "0"
+            encoder_pk: "0",
         };
         const sql_insert_user = yield con.Insert(`INSERT user SET
         email=@email,
@@ -203,7 +203,7 @@ const getmembers = (resident_pk) => __awaiter(void 0, void 0, void 0, function* 
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT  fm.fam_pk,r.first_name,r.middle_name,r.last_name FROM family_member fm JOIN resident r ON fm.resident_pk=r.resident_pk WHERE fm.resident_pk=@resident_pk`, {
-            resident_pk: resident_pk
+            resident_pk: resident_pk,
         });
         for (const members of data) {
             members.members = yield con.Query(`
@@ -233,7 +233,7 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT * FROM resident WHERE first_name LIKE concat('%',@search,'%') || last_name LIKE concat('%',@search,'%')`, {
-            search: search
+            search: search,
         });
         con.Commit();
         return {
@@ -296,7 +296,7 @@ const updatepassword = (email, password, currentpassword) => __awaiter(void 0, v
         const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email AND password=AES_ENCRYPT(@currentpassword,@email)`, {
             email: email,
             password: password,
-            currentpassword: currentpassword
+            currentpassword: currentpassword,
         });
         if (sql_edit_resident > 0) {
             con.Commit();
@@ -327,7 +327,7 @@ const forgotpassword = (email, password) => __awaiter(void 0, void 0, void 0, fu
     try {
         const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`, {
             email: email,
-            password: password
+            password: password,
         });
         console.log(password);
         if (sql_edit_resident > 0) {
@@ -360,7 +360,7 @@ const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* 
         const sql_edit_resident = yield con.Modify(`UPDATE user SET
          new_user='false'
         WHERE user_pk=@user_pk;`, {
-            user_pk: user_pk
+            user_pk: user_pk,
         });
         if (sql_edit_resident > 0) {
             con.Commit();
@@ -387,14 +387,14 @@ const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.default = {
-    getmembers,
     addMobileResident,
     upadatenewuser,
     getresidents,
+    getmembers,
     forgotpassword,
     updatepassword,
     updateMobileResident,
     getreligion,
-    getnationality
+    getnationality,
 };
 //# sourceMappingURL=ResidentMobileRepository.js.map

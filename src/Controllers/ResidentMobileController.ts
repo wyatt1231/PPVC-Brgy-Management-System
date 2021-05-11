@@ -8,23 +8,15 @@ import ResidentMobileRepository from "../Repositories/ResidentMobileRepository";
 const ResidentMobileController = async (app: Express): Promise<void> => {
   const router = Router();
 
-router.post(
+  router.post(
     "/addMobileResident",
+    Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       const payload: AdministratorModel = req.body;
       res.json(await ResidentMobileRepository.addMobileResident(payload));
     }
   );
   router.post(
-    "/updateMobileResident",
-    // Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const payload: AdministratorModel = req.body;
-      const user_pk: number = req.body.user_pk;
-      res.json(await ResidentMobileRepository.updateMobileResident(payload, user_pk));
-    }
-  );
-router.post(
     "/getresidents",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -32,7 +24,7 @@ router.post(
       res.json(await ResidentMobileRepository.getresidents(search));
     }
   );
-router.post(
+  router.post(
     "/getmembers",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -52,7 +44,7 @@ router.post(
       res.json(await ResidentMobileRepository.getnationality());
     }
   );
-router.post(
+  router.post(
     "/upadatenewuser",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
@@ -60,25 +52,7 @@ router.post(
       res.json(await ResidentMobileRepository.upadatenewuser(user_pk));
     }
   );
-  router.post(
-    "/updatepassword",
-    Authorize("admin,resident"),
-    async (req: Request & UserClaims, res: Response) => {
-      const email: string = req.body.email;
-      const password: string = req.body.password;
-      const currentpassword: string = req.body.currentpassword;
-      res.json(await ResidentMobileRepository.updatepassword(email,password,currentpassword));
-    }
-  );
-  router.post(
-    "/forgotpassword",
-    async (req: Request & UserClaims, res: Response) => {
-      const email: string = req.body.email;
-      const password: string = req.body.password;
-      res.json(await ResidentMobileRepository.forgotpassword(email,password));
-    }
-  );
-  
+
   app.use("/api/residentmobile/", router);
 };
 

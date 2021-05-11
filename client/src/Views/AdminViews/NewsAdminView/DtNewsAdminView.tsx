@@ -1,4 +1,4 @@
-import { Button, Chip, Container, Grid } from "@material-ui/core";
+import { Chip, Container, Grid } from "@material-ui/core";
 import LabelImportantRoundedIcon from "@material-ui/icons/LabelImportantRounded";
 import moment from "moment";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
@@ -80,11 +80,9 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
     []
   );
 
-  const [open_filter_dialog, set_open_filter_dialog] = useState(false);
-
-  const handleOpenFilterDialog = useCallback((open: boolean) => {
-    set_open_filter_dialog(open);
-  }, []);
+  const [selected_file_news_pk, set_selected_file_news_pk] = useState<
+    number | null
+  >(null);
 
   const RenderNewsAction = useCallback(
     (news: NewsModel) => {
@@ -134,9 +132,16 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
         });
       }
 
+      actions.push({
+        text: "Add Files",
+        handleClick: () => {
+          set_selected_file_news_pk(news.news_pk);
+        },
+      });
+
       return actions;
     },
-    [dispatch]
+    [dispatch, handleRefetchTable, handleSetOpenEditDialog]
   );
 
   useEffect(() => {
@@ -280,7 +285,13 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                         </div>
                         <div className="body">{news.body}</div>
 
-                        <NewsFilesDialog news_pk={news.news_pk} />
+                        <NewsFilesDialog
+                          news_pk={news.news_pk}
+                          selected_file_news_pk={selected_file_news_pk}
+                          handleSetSelectedFileNewsPk={() =>
+                            set_selected_file_news_pk(null)
+                          }
+                        />
                       </div>
                     </StyledNewsContainer>
                   ))
@@ -291,6 +302,10 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                     selected_news_pk={selected_news_pk}
                     handleSetSelectedNews={handleSetSelectedNews}
                     handleRefetchTable={handleRefetchTable}
+                    selected_file_news_pk={selected_file_news_pk}
+                    handleSetSelectedFileNewsPk={() =>
+                      set_selected_file_news_pk(null)
+                    }
                   />
                 )}
               </Grid>
@@ -306,6 +321,15 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
           handleRefetchTable={handleRefetchTable}
         />
       )}
+
+      {/* {!!selected_file_news_pk && (
+        <AddFilesDialog
+          open_file_dialog={!!selected_file_news_pk}
+          handleCloseDialog={() => set_selected_file_news_pk(null)}
+          news_pk={selected_file_news_pk}
+          handleRefetchFiles={handleRefetchTable}
+        />
+      )} */}
     </Container>
   );
 });

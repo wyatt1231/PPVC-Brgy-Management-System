@@ -20,18 +20,36 @@ const FamilyController = (app) => __awaiter(void 0, void 0, void 0, function* ()
     router.post("/addFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         payload.encoded_by = req.user_pk;
-        res.json(yield FamilyRepository_1.default.addFamily(payload));
+        res.json(yield FamilyRepository_1.default.addFamily(payload, req.user_pk));
+    }));
+    router.post("/updateFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        payload.encoded_by = req.user_pk;
+        res.json(yield FamilyRepository_1.default.updateFamily(payload, req.user_pk));
     }));
     router.post("/getSingleFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ulo_pamilya = req.body.ulo_pamilya;
         res.json(yield FamilyRepository_1.default.getSingleFamily(ulo_pamilya));
     }));
+    router.post("/getSingleFamByFamPk", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const fam_pk = req.body.fam_pk;
+        res.json(yield FamilyRepository_1.default.getSingleFamByFamPk(fam_pk));
+    }));
     router.post("/getFamilyOfResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const resident_pk = req.body.resident_pk;
         res.json(yield FamilyRepository_1.default.getFamilyOfResident(resident_pk));
     }));
-    router.post("/getAllFamily", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield FamilyRepository_1.default.getAllFamily());
+    router.post("/getFamilyDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        res.json(yield FamilyRepository_1.default.getFamilyDataTable(payload));
+    }));
+    router.post("/searchNoFamResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const search = req.body.value;
+        res.json(yield FamilyRepository_1.default.searchNoFamResident(search));
+    }));
+    router.post("/searchFamMember", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const payload = req.body;
+        res.json(yield FamilyRepository_1.default.searchFamMember(payload));
     }));
     app.use("/api/family/", router);
 });

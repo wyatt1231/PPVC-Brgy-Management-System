@@ -100,6 +100,14 @@ const ComplaintController = async (app: Express): Promise<void> => {
     }
   );
 
+  router.post(
+    "/getComplaintLatest",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      res.json(await ComplaintRepository.getComplaintLatest());
+    }
+  );
+
   app.use("/api/complaint/", router);
 };
 

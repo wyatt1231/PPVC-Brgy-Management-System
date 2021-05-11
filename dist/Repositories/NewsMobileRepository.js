@@ -60,6 +60,8 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
         };
     }
 });
+<<<<<<< HEAD
+=======
 const getNewsDataPublishedLastWeek = () => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -160,6 +162,7 @@ AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
         };
     }
 });
+>>>>>>> 1862305218484288b15047722693d48ba484903f
 const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -376,8 +379,6 @@ const getSingleNewsWithPhoto = (news_pk) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.default = {
     getNewsDataPublished,
-    getNewsDataPublishedLastWeek,
-    getNewsDataPublishedByMonth,
     addNews,
     addNewsReaction,
     addNewsComment,

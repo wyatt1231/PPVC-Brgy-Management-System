@@ -133,7 +133,7 @@ export const DbNationality = [
 ];
 
 export const DbBrgyOfficialPositions = [
-  "kagawad",
+  "Kagawad",
   "Secretary",
   "Treasurer",
   "Punong Barangay",

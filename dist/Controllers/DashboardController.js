@@ -19,15 +19,17 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     const router = express_1.Router();
     router.post("/overallPopulation", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.overallPopulation());
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.overallPopulation(purok));
         }
         catch (error) {
             res.json(error);
         }
     }));
     router.post("/ageGroupStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
         try {
-            res.json(yield DashboardRepository_1.default.ageGroupStats());
+            res.json(yield DashboardRepository_1.default.ageGroupStats(purok));
         }
         catch (error) {
             res.json(error);
@@ -35,7 +37,8 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/genderStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.genderStats());
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.genderStats(purok));
         }
         catch (error) {
             res.json(error);
@@ -43,11 +46,34 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/lifeStageStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.lifeStageStats());
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.lifeStageStats(purok));
         }
         catch (error) {
             res.json(error);
         }
+    }));
+    router.post("/statsComplaint", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield DashboardRepository_1.default.statsComplaint());
+    }));
+    router.post("/statsNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json(yield DashboardRepository_1.default.statsNews());
+    }));
+    router.post("/total_population", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_population(purok));
+    }));
+    router.post("/total_death", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_death(purok));
+    }));
+    router.post("/total_pwd", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_pwd(purok));
+    }));
+    router.post("/total_sc", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const purok = req.body;
+        res.json(yield DashboardRepository_1.default.total_sc(purok));
     }));
     app.use("/api/dashboard/", router);
 });
