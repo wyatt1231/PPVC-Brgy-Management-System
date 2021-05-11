@@ -15,24 +15,24 @@ if (process.env.NODE_ENV === "production") {
     // waitForConnections: true,
   };
 } else {
-  con = {
-    host: "156.67.222.35",
-    user: "u583403240_bms",
-    password: "BMS@capstone2",
-    database: "u583403240_bms",
-    port: 3306,
-    // connectionLimit: 10,
-    // waitForConnections: true,
-  };
   // con = {
-  //   host: "localhost",
-  //   user: "root",
-  //   password: "root sa",
-  //   database: "bms",
-  //   port: 3309,
-  //   connectionLimit: 10,
-  //   waitForConnections: true,
+  //   host: "156.67.222.35",
+  //   user: "u583403240_bms",
+  //   password: "BMS@capstone2",
+  //   database: "u583403240_bms",
+  //   port: 3306,
+  //   // connectionLimit: 10,
+  //   // waitForConnections: true,
   // };
+  con = {
+    host: "localhost",
+    user: "root",
+    password: "rootsa",
+    database: "bms",
+    port: 3309,
+    connectionLimit: 10,
+    waitForConnections: true,
+  };
 }
 
 //console.log(`some config`)

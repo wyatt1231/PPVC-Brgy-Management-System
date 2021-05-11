@@ -457,6 +457,7 @@ export default {
   addMobileResident,
   upadatenewuser,
   getresidents,
+  getmembers,
   forgotpassword,
   updatepassword,
   updateMobileResident,
