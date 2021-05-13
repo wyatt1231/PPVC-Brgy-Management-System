@@ -127,8 +127,7 @@ const updateMobileResident = async (
       email: payload.email,
       encoder_pk: "0",
     };
-    console.log(payload);
-    const update_user = await con.Insert(
+    const update_user = await con.Modify(
       `UPDATE user SET
       email=@email,
       password=AES_ENCRYPT(@email,@email),
@@ -161,34 +160,38 @@ const updateMobileResident = async (
       // resident_date: parseInvalidDateToDefault(payload.resident_date),
     };
 
-    const sql_edit_resident = await con.Modify(
-      `UPDATE resident SET
-        user_pk=@user_pk,
-        pic=@pic,              
-        first_name=@first_name,       
-        middle_name=@middle_name,      
-        last_name=@last_name,        
-        suffix=@suffix,           
-        gender=@gender,           
-        birth_date=@birth_date,       
-        nationality=@nationality,      
-        religion=@religion,         
-        civil_status=@civil_status,  
-        purok=@purok,   
-        phone=@phone,    
-        email=@email,  
-        dialect=@dialect,          
-        tribe=@tribe,            
-        with_disability=@with_disability,  
-        is_employed=@is_employed,      
-        employment=@employment,       
-        house_income=@house_income,    
-   
-        educ=@educ,
-        house_ownership=@house_ownership
-        WHERE resident_pk=@resident_pk;`,
-      resident_payload
-    );
+if(update_user>0){
+
+  const sql_edit_resident = await con.Modify(
+    `UPDATE resident SET
+      user_pk=@user_pk,
+      pic=@pic,              
+      first_name=@first_name,       
+      middle_name=@middle_name,      
+      last_name=@last_name,        
+      suffix=@suffix,           
+      gender=@gender,           
+      birth_date=@birth_date,       
+      nationality=@nationality,      
+      religion=@religion,         
+      civil_status=@civil_status,  
+      purok=@purok,   
+      phone=@phone,    
+      email=@email,  
+      dialect=@dialect,          
+      tribe=@tribe,            
+      with_disability=@with_disability,  
+      is_employed=@is_employed,      
+      employment=@employment,       
+      house_income=@house_income,    
+ 
+      educ=@educ,
+      house_ownership=@house_ownership
+      WHERE resident_pk=@resident_pk;`,
+    resident_payload
+  );
+
+
 
     if (sql_edit_resident > 0) {
       con.Commit();
@@ -203,6 +206,7 @@ const updateMobileResident = async (
         message: "No affected rows while updating the resident",
       };
     }
+  }
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
