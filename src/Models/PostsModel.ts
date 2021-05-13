@@ -18,6 +18,7 @@ export interface PostsModel {
   user_full_name?: string;
   user_pic?: string;
   user_pk?: string;
+  offset?:number
   totalcomments?: Array<any>;
   liked?: Array<any>;
   comments?: Array<any>;

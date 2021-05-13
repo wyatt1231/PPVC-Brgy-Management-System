@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
-const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+const getPosts = (user_pk, offset) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -22,8 +22,10 @@ const getPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
         ,u.full_name user_full_name,u.pic user_pic FROM posts p
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC)tmp;
-        `, null);
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC LIMIT ${offset})tmp;
+        `, {
+            offset: offset
+        });
         for (const postsreactions of data) {
             postsreactions.reactions = yield con.Query(`
         select count(reaction) as likes from posts_reaction where posts_pk=@posts_pk
