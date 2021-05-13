@@ -23,6 +23,13 @@ const ComplaintReducer = (
       };
     }
 
+    case "has_more_complaints_table": {
+      return {
+        ...state,
+        has_more_complaints_table: action.has_more_complaints_table,
+      };
+    }
+
     case "single_complaint": {
       return {
         ...state,

@@ -62,7 +62,11 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/statsComplaint",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await DashboardRepository.statsComplaint());
+      try {
+        res.json(await DashboardRepository.statsComplaint());
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -70,7 +74,11 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/statsNews",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await DashboardRepository.statsNews());
+      try {
+        res.json(await DashboardRepository.statsNews());
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -78,8 +86,12 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/total_population",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const purok: Array<string> = req.body;
-      res.json(await DashboardRepository.total_population(purok));
+      try {
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.total_population(purok));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -87,8 +99,12 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/total_death",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const purok: Array<string> = req.body;
-      res.json(await DashboardRepository.total_death(purok));
+      try {
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.total_death(purok));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -96,8 +112,12 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/total_pwd",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const purok: Array<string> = req.body;
-      res.json(await DashboardRepository.total_pwd(purok));
+      try {
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.total_pwd(purok));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -105,8 +125,12 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/total_sc",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const purok: Array<string> = req.body;
-      res.json(await DashboardRepository.total_sc(purok));
+      try {
+        const purok: Array<string> = req.body;
+        res.json(await DashboardRepository.total_sc(purok));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 

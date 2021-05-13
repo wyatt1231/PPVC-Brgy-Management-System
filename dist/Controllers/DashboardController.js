@@ -54,26 +54,56 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
         }
     }));
     router.post("/statsComplaint", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield DashboardRepository_1.default.statsComplaint());
+        try {
+            res.json(yield DashboardRepository_1.default.statsComplaint());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/statsNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield DashboardRepository_1.default.statsNews());
+        try {
+            res.json(yield DashboardRepository_1.default.statsNews());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/total_population", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const purok = req.body;
-        res.json(yield DashboardRepository_1.default.total_population(purok));
+        try {
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.total_population(purok));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/total_death", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const purok = req.body;
-        res.json(yield DashboardRepository_1.default.total_death(purok));
+        try {
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.total_death(purok));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/total_pwd", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const purok = req.body;
-        res.json(yield DashboardRepository_1.default.total_pwd(purok));
+        try {
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.total_pwd(purok));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/total_sc", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const purok = req.body;
-        res.json(yield DashboardRepository_1.default.total_sc(purok));
+        try {
+            const purok = req.body;
+            res.json(yield DashboardRepository_1.default.total_sc(purok));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/dashboard/", router);
 });

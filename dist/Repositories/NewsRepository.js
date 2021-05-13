@@ -134,7 +134,10 @@ const getNewsDataTable = (payload) => __awaiter(void 0, void 0, void 0, function
       AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "encoded_at")}
       AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "encoded_at")}
       `, payload);
-        // console.log(`news_table`, news_table);
+        const hasMore = news_table.length > payload.page.limit;
+        if (hasMore) {
+            news_table.splice(news_table.length - 1, 1);
+        }
         for (const news of news_table) {
             news.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
                 sts_pk: news.sts_pk,
@@ -142,14 +145,22 @@ const getNewsDataTable = (payload) => __awaiter(void 0, void 0, void 0, function
             news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
                 user_pk: news.encoder_pk,
             });
-            if ((_a = news === null || news === void 0 ? void 0 : news.user) === null || _a === void 0 ? void 0 : _a.pic) {
+            if (!!((_a = news === null || news === void 0 ? void 0 : news.user) === null || _a === void 0 ? void 0 : _a.pic)) {
                 news.user.pic = yield useFileUploader_1.GetUploadedImage((_b = news === null || news === void 0 ? void 0 : news.user) === null || _b === void 0 ? void 0 : _b.pic);
             }
+            news.news_files = yield con.Query(`
+        SELECT * FROM news_file where news_pk =@news_pk; 
+        `, {
+                news_pk: news.news_pk,
+            });
         }
         con.Commit();
         return {
             success: true,
-            data: news_table,
+            data: {
+                table: news_table,
+                has_more: hasMore,
+            },
         };
     }
     catch (error) {
@@ -656,6 +667,11 @@ const getSingleNews = (news_pk) => __awaiter(void 0, void 0, void 0, function* (
         });
         news.user = yield con.QuerySingle(`select * from vw_users where user_pk=@user_pk`, {
             user_pk: news.encoder_pk,
+        });
+        news.news_files = yield con.Query(`
+      SELECT * FROM news_file where news_pk =@news_pk; 
+      `, {
+            news_pk: news.news_pk,
         });
         if ((_c = news === null || news === void 0 ? void 0 : news.user) === null || _c === void 0 ? void 0 : _c.pic) {
             news.user.pic = yield useFileUploader_1.GetUploadedImage((_d = news === null || news === void 0 ? void 0 : news.user) === null || _d === void 0 ? void 0 : _d.pic);

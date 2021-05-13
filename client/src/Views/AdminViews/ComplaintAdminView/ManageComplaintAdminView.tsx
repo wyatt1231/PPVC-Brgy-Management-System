@@ -90,10 +90,8 @@ export const ManageComplaintAdminView: FC<ManageComplaintAdminViewProps> = memo(
       set_open_log_form(open);
     }, []);
 
-    const [
-      selected_file,
-      set_selected_file,
-    ] = useState<null | ComplaintFilesModel>(null);
+    const [selected_file, set_selected_file] =
+      useState<null | ComplaintFilesModel>(null);
 
     const handleSetSelectedFile = useCallback(
       (file: ComplaintFilesModel | null) => {
@@ -399,6 +397,7 @@ export const ManageComplaintAdminView: FC<ManageComplaintAdminViewProps> = memo(
                       variant="outlined"
                       rows={3}
                       value={chat_message}
+                      disabled={single_complaint?.status?.sts_pk === "C"}
                       onChange={(e) => set_chat_message(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.keyCode === 13 && e.shiftKey === false) {

@@ -105,15 +105,15 @@ const tableColumns: Array<ITableColumns> = [
     width: 150,
     align: "left",
   },
-  {
-    label: "Aksyon",
-    width: 50,
-    align: "center",
-  },
+  // {
+  //   label: "Aksyon",
+  //   width: 50,
+  //   align: "center",
+  // },
 ];
 
-export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = memo(
-  () => {
+export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> =
+  memo(() => {
     const dispatch = useDispatch();
 
     const table_loading = useSelector(
@@ -305,7 +305,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                           <div className="table-cell-profile">
                             <CustomAvatar
                               className="image"
-                              variant="circle"
+                              variant="rounded"
                               src={`${row.pic}`}
                               errorMessage={`${row.first_name?.charAt(
                                 0
@@ -355,7 +355,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                             {InvalidDateToDefault(row.encoded_at, "-")}
                           </small>
                         </TableCell>
-                        <TableCell align="center">
+                        {/* <TableCell align="center">
                           <IconButtonPopper
                             buttons={[
                               {
@@ -374,7 +374,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
                               // },
                             ]}
                           />
-                        </TableCell>
+                        </TableCell> */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -385,7 +385,6 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> = m
         </Grid>
       </Container>
     );
-  }
-);
+  });
 
 export default DataTableResidentAdminView;

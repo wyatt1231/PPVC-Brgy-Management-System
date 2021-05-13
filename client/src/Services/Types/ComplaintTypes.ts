@@ -12,6 +12,10 @@ export type ComplaintReducerTypes =
       fetch_complaints_table: boolean;
     }
   | {
+      type: "has_more_complaints_table";
+      has_more_complaints_table: boolean;
+    }
+  | {
       type: "single_complaint";
       single_complaint: ComplaintModel;
     }
@@ -49,6 +53,7 @@ export type ComplaintReducerTypes =
 export interface ComplaintReducerModel {
   complaints_table?: Array<ComplaintModel>;
   fetch_complaints_table?: boolean;
+  has_more_complaints_table?: boolean;
   single_complaint?: ComplaintModel;
   fetch_single_complaint?: boolean;
 

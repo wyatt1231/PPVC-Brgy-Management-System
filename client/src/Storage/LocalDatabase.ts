@@ -141,3 +141,46 @@ export const DbBrgyOfficialPositions = [
   "Utility Worker",
   "Health Worker",
 ];
+
+export const DbSerbisyoNadawat = [
+  {
+    value: "scholarship",
+    label: "scholarship",
+  },
+  {
+    value: "livelihood",
+    label: "livelihood",
+  },
+  {
+    value: "4p's",
+    label: "4p's",
+  },
+  {
+    value: "housing",
+    label: "housing",
+  },
+  {
+    value: "financial",
+    label: "financial",
+  },
+  {
+    value: "lingat (burial ug medical)",
+    label: "lingat (burial ug medical)",
+  },
+  {
+    value: "medical nga tabang",
+    label: "medical nga tabang",
+  },
+  {
+    value: "day care service",
+    label: "day care service",
+  },
+  {
+    value: "skill training",
+    label: "skill training",
+  },
+  {
+    value: "employment",
+    label: "employment",
+  },
+];

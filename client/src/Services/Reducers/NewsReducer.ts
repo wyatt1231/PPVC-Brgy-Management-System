@@ -20,6 +20,13 @@ const NewsReducer = (
       };
     }
 
+    case "news_table_has_more": {
+      return {
+        ...state,
+        news_table_has_more: action.news_table_has_more,
+      };
+    }
+
     case "single_news": {
       return {
         ...state,

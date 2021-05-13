@@ -59,8 +59,8 @@ const Header: React.FC<IHeader> = memo(
           </div>
 
           <section className="tools">
-            <Notification />
-            <Message />
+            {/* <Notification />
+            <Message /> */}
             <SettingMenu />
           </section>
         </StyledHeader>

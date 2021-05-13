@@ -2,12 +2,12 @@ import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel, NewsLikesModel, NewsModel } from "../Models/NewsModels";
-import { ScrollPaginationModel } from "../Models/PaginationModels";
+import { PaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/news/`;
 
 const getNewsDataTable = async (
-  payload: ScrollPaginationModel
+  payload: PaginationModel
 ): Promise<IServerResponse> => {
   const response = await PostFetch(
     API_DEFAULT_ROUTE + "getNewsDataTable",

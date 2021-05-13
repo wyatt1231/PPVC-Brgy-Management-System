@@ -16,9 +16,10 @@ const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useJwt_1 = require("../Hooks/useJwt");
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
+    console.log(`con`, con);
     try {
         yield con.BeginTransaction();
-        const zxc = yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
+        yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
       WHERE table_schema = 'sql6400894';`, null);
         const user = yield con.QuerySingle(`SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`, payload);
         if (user) {
@@ -84,6 +85,7 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
             user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
         }
         yield con.Commit();
+        console.log(`user_data`, user_data.user_type);
         return {
             success: true,
             data: user_data,

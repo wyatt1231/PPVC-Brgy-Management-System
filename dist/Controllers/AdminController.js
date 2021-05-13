@@ -18,20 +18,50 @@ const AdminRepository_1 = __importDefault(require("../Repositories/AdminReposito
 const AdminController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/getAdminDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield AdminRepository_1.default.getAdminDataTable(payload));
+        try {
+            const payload = req.body;
+            res.json(yield AdminRepository_1.default.getAdminDataTable(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addAdmin", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield AdminRepository_1.default.addAdmin(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield AdminRepository_1.default.addAdmin(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/updateAdmin", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield AdminRepository_1.default.updateAdmin(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield AdminRepository_1.default.updateAdmin(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/changeAdminStatus", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            payload.encoder_pk = req.user_pk;
+            res.json(yield AdminRepository_1.default.changeAdminStatus(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleAdmin", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const admin_pk = req.body.admin_pk;
-        res.json(yield AdminRepository_1.default.getSingleAdmin(admin_pk));
+        try {
+            const admin_pk = req.body.admin_pk;
+            res.json(yield AdminRepository_1.default.getSingleAdmin(admin_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/admin/", router);
 });

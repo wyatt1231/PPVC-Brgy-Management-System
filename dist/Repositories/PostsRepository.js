@@ -27,8 +27,9 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         `, null);
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
-            console.error(`error`, file.user_pk);
+            if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
+                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+            }
         }
         for (const file of data) {
             file.upload_files = yield con.Query(`
@@ -52,21 +53,29 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         const posts = yield con.QueryPagination(`
       select * from (SELECT p.*, u.full_name FROM posts p join vw_users u on u.user_pk = p.encoder_pk) as tmp
       WHERE
-      full_name like concat('%',@search,'%')
+      (coalesce(full_name,'')  like concat('%',@search,'%')
+      OR coalesce(title,'') like concat('%',@search,'%'))
       AND sts_pk in @sts_pk
       AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "encoded_at")}
       AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "encoded_at")}
       `, payload);
+        const hasMore = posts.length > payload.page.limit;
+        if (hasMore) {
+            posts.splice(posts.length - 1, 1);
+        }
         for (const post of posts) {
             post.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
                 user_pk: post.encoder_pk,
             });
-            post.user.pic = yield useFileUploader_1.GetUploadedImage(post.user.pic);
+            if (!!((_a = post === null || post === void 0 ? void 0 : post.user) === null || _a === void 0 ? void 0 : _a.pic)) {
+                post.user.pic = yield useFileUploader_1.GetUploadedImage(post.user.pic);
+            }
             post.status = yield con.QuerySingle(`select * from status where sts_pk = @sts_pk;`, {
                 sts_pk: post.sts_pk,
             });
@@ -77,7 +86,10 @@ const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* (
         con.Commit();
         return {
             success: true,
-            data: posts,
+            data: {
+                table: posts,
+                has_more: hasMore,
+            },
         };
     }
     catch (error) {
@@ -105,8 +117,9 @@ const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* ()
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
-            console.error(`error`, file.user_pk);
+            if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
+                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+            }
         }
         for (const file of data) {
             file.upload_files = yield con.Query(`
@@ -161,8 +174,9 @@ const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, functio
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
-            console.error(`error`, file.user_pk);
+            if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
+                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+            }
         }
         con.Commit();
         return {
@@ -356,7 +370,7 @@ const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fu
 });
 //ADMIN REACTIONS
 const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(posts_pk);
+    var _b;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         const comments = yield con.Query(`
@@ -368,7 +382,9 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
             comment.user = yield con.QuerySingle(`select * from vw_users where user_pk = @user_pk;`, {
                 user_pk: comment.user_pk,
             });
-            comment.user.pic = yield useFileUploader_1.GetUploadedImage(comment.user.pic);
+            if (!!((_b = comment === null || comment === void 0 ? void 0 : comment.user) === null || _b === void 0 ? void 0 : _b.pic)) {
+                comment.user.pic = yield useFileUploader_1.GetUploadedImage(comment.user.pic);
+            }
         }
         con.Commit();
         return {
@@ -379,6 +395,38 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
     catch (error) {
         console.error(`error`, error);
         con.Rollback();
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const updatePostStatus = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_update_post = yield con.Modify(`UPDATE posts SET
+      sts_pk=@sts_pk
+      WHERE posts_pk=@posts_pk;
+      `, payload);
+        if (sql_update_post > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The post status has been changes successfully!",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "Looks like something went wrong, unable to save your reaction!",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
         return {
             success: false,
             message: useErrorMessage_1.ErrorMessage(error),
@@ -396,5 +444,6 @@ exports.default = {
     getPostReactionsAdmin,
     getPostCommentsAdmin,
     getPostsAdmin,
+    updatePostStatus,
 };
 //# sourceMappingURL=PostsRepository.js.map

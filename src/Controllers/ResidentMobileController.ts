@@ -1,7 +1,6 @@
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
 import { AdministratorModel } from "../Models/AdministratorModels";
-import { PaginationModel } from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
 import ResidentMobileRepository from "../Repositories/ResidentMobileRepository";
 
@@ -94,7 +93,6 @@ const ResidentMobileController = async (app: Express): Promise<void> => {
       res.json(await ResidentMobileRepository.forgotpassword(email, password));
     }
   );
-
   app.use("/api/residentmobile/", router);
 };
 

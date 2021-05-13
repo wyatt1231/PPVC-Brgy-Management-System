@@ -1,7 +1,9 @@
 import { Chip, Container, Grid } from "@material-ui/core";
 import LabelImportantRoundedIcon from "@material-ui/icons/LabelImportantRounded";
+import { Skeleton } from "@material-ui/lab";
 import moment from "moment";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroller";
 import { useDispatch, useSelector } from "react-redux";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import CustomButtonGroup from "../../../Component/CustomButtonGroup";
@@ -14,7 +16,7 @@ import {
   setPageLinks,
 } from "../../../Services/Actions/PageActions";
 import { NewsModel } from "../../../Services/Models/NewsModels";
-import { ScrollPaginationModel } from "../../../Services/Models/PaginationModels";
+import { PaginationModel } from "../../../Services/Models/PaginationModels";
 import { RootStore } from "../../../Services/Store";
 import AddNewsAdminView from "./AddNewsAdminView";
 import CalNewsAdminView from "./CalNewsAdminView";
@@ -27,9 +29,8 @@ interface DtNewsAdminViewProps {}
 export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
   const dispatch = useDispatch();
 
-  const [selected_news_pk, set_selected_news_pk] = useState<
-    number | undefined
-  >();
+  const [selected_news_pk, set_selected_news_pk] =
+    useState<number | undefined>();
 
   const handleSetSelectedNews = useCallback((news_pk: number) => {
     set_selected_news_pk(news_pk);
@@ -49,6 +50,9 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
   const news_table = useSelector(
     (store: RootStore) => store.NewsReducer.news_table
   );
+  const news_table_has_more = useSelector(
+    (store: RootStore) => store.NewsReducer.news_table_has_more
+  );
 
   const fetch_news_table = useSelector(
     (store: RootStore) => store.NewsReducer.fetch_news_table
@@ -60,7 +64,7 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
     set_view(view);
   }, []);
 
-  const [table_filter, set_table_filter] = useState<ScrollPaginationModel>({
+  const [table_filter, set_table_filter] = useState<PaginationModel>({
     filters: {
       search: "",
       date_from: null,
@@ -71,18 +75,18 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
       direction: "desc",
       column: "encoded_at",
     },
+    page: {
+      begin: 0,
+      limit: 5,
+    },
   });
 
-  const handleSetTableFilter = useCallback(
-    (table_filter: ScrollPaginationModel) => {
-      set_table_filter(table_filter);
-    },
-    []
-  );
+  const handleSetTableFilter = useCallback((tbl_filter: PaginationModel) => {
+    set_table_filter(tbl_filter);
+  }, []);
 
-  const [selected_file_news_pk, set_selected_file_news_pk] = useState<
-    number | null
-  >(null);
+  const [selected_file_news_pk, set_selected_file_news_pk] =
+    useState<number | null>(null);
 
   const RenderNewsAction = useCallback(
     (news: NewsModel) => {
@@ -164,6 +168,7 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
 
   useEffect(() => {
     if (table_filter) {
+      console.log(`table_filter`, table_filter);
       dispatch(NewsActions.setNewsDataTable(table_filter));
     }
   }, [dispatch, refetch_table]);
@@ -226,75 +231,126 @@ export const DtNewsAdminView: FC<DtNewsAdminViewProps> = memo(() => {
                 <LinearLoadingProgress show={fetch_news_table} />
 
                 {view === 0 ? (
-                  news_table?.map((news, index) => (
-                    <StyledNewsContainer key={index}>
-                      <div className="news-item">
-                        <div className="header">
-                          <div className="profile">
-                            <CustomAvatar
-                              className="img"
-                              src={news.user.pic}
-                              errorMessage={news?.user?.full_name?.charAt(0)}
-                            />
-                            <div className="name">{news?.user?.full_name}</div>
-                            <div className="time">
-                              {moment(news?.encoded_at).fromNow()}
-                            </div>
-                          </div>
-                          <div className="actions">
-                            <IconButtonPopper
-                              buttons={RenderNewsAction(news)}
-                            />
-                          </div>
-                        </div>
-
-                        <div
+                  <InfiniteScroll
+                    pageStart={5}
+                    initialLoad={false}
+                    loadMore={(p: number) => {
+                      const filter: PaginationModel = {
+                        ...table_filter,
+                        page: {
+                          ...table_filter.page,
+                          limit: p,
+                        },
+                      };
+                      handleSetTableFilter(filter);
+                      handleRefetchTable();
+                    }}
+                    hasMore={news_table_has_more}
+                    loader={
+                      <div className="loader" key={0}>
+                        <Skeleton
                           style={{
-                            justifySelf: `start`,
+                            margin: `1em`,
                           }}
-                        >
-                          <Chip
-                            label={news?.status?.sts_desc}
-                            style={{
-                              color: news?.status?.sts_color,
-                              backgroundColor:
-                                news?.status?.sts_backgroundColor,
-                            }}
-                          />
-                        </div>
-
-                        <div
-                          className="petsa"
-                          style={{
-                            fontSize: `.87em`,
-                          }}
-                        >
-                          Karong{" "}
-                          {InvalidDateToDefault(news?.pub_date, "walay petsa")}
-                        </div>
-
-                        <div className="news-title">
-                          {news?.is_prio === 1 && (
-                            <LabelImportantRoundedIcon
-                              fontSize={"small"}
-                              color="primary"
-                            />
-                          )}
-
-                          <div>{news?.title}</div>
-                        </div>
-                        <div className="body">{news.body}</div>
-
-                        <NewsFilesDialog
-                          news_pk={news.news_pk}
-                          selected_file_news_pk={selected_file_news_pk}
-                          handleSetSelectedFileNewsPk={() =>
-                            set_selected_file_news_pk(null)
-                          }
+                          variant="rect"
+                          width={`100%`}
+                          height={200}
                         />
                       </div>
-                    </StyledNewsContainer>
-                  ))
+                    }
+                  >
+                    {news_table?.map((news, index) => (
+                      <StyledNewsContainer key={index}>
+                        <div className="news-item">
+                          <div className="header">
+                            <div className="profile">
+                              <CustomAvatar
+                                className="img"
+                                src={news?.user?.pic}
+                                errorMessage={news?.user?.full_name?.charAt(0)}
+                              />
+                              <div className="name">
+                                {news?.user?.full_name}
+                              </div>
+                              <div className="time">
+                                {moment(news?.encoded_at).fromNow()}
+                              </div>
+                            </div>
+                            <div className="actions">
+                              <IconButtonPopper
+                                buttons={RenderNewsAction(news)}
+                              />
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              justifySelf: `start`,
+                            }}
+                          >
+                            <Chip
+                              label={news?.status?.sts_desc}
+                              style={{
+                                color: news?.status?.sts_color,
+                                backgroundColor:
+                                  news?.status?.sts_backgroundColor,
+                              }}
+                            />
+                          </div>
+
+                          <div
+                            className="petsa"
+                            style={{
+                              fontSize: `.87em`,
+                            }}
+                          >
+                            Karong{" "}
+                            {InvalidDateToDefault(
+                              news?.pub_date,
+                              "walay petsa"
+                            )}
+                          </div>
+
+                          <div className="news-title">
+                            {news?.is_prio === 1 && (
+                              <LabelImportantRoundedIcon
+                                fontSize={"small"}
+                                color="primary"
+                              />
+                            )}
+
+                            <div>{news?.title}</div>
+                          </div>
+                          <div className="body">{news.body}</div>
+
+                          <NewsFilesDialog
+                            news_pk={news.news_pk}
+                            files={news.news_files}
+                            selected_file_news_pk={selected_file_news_pk}
+                            handleSetSelectedFileNewsPk={() =>
+                              set_selected_file_news_pk(null)
+                            }
+                            handleRefetchTable={handleRefetchTable}
+                          />
+                        </div>
+                      </StyledNewsContainer>
+                    ))}
+
+                    {!news_table_has_more && (
+                      <div
+                        style={{
+                          display: `grid`,
+                          justifyContent: `center`,
+                          justifyItems: `center`,
+                          textAlign: `center`,
+                          padding: `1em`,
+                          color: `green`,
+                        }}
+                      >
+                        <h5>No more news to show</h5>
+                      </div>
+                    )}
+                  </InfiniteScroll>
                 ) : (
                   <CalNewsAdminView
                     open_edit_dialog={open_edit_dialog}

@@ -171,8 +171,10 @@ const getNewsDataTable = async (
       `,
       payload
     );
-
-    // console.log(`news_table`, news_table);
+    const hasMore: boolean = news_table.length > payload.page.limit;
+    if (hasMore) {
+      news_table.splice(news_table.length - 1, 1);
+    }
 
     for (const news of news_table) {
       news.status = await con.QuerySingle(
@@ -189,15 +191,27 @@ const getNewsDataTable = async (
         }
       );
 
-      if (news?.user?.pic) {
+      if (!!news?.user?.pic) {
         news.user.pic = await GetUploadedImage(news?.user?.pic);
       }
+
+      news.news_files = await con.Query(
+        `
+        SELECT * FROM news_file where news_pk =@news_pk; 
+        `,
+        {
+          news_pk: news.news_pk,
+        }
+      );
     }
 
     con.Commit();
     return {
       success: true,
-      data: news_table,
+      data: {
+        table: news_table,
+        has_more: hasMore,
+      },
     };
   } catch (error) {
     await con.Rollback();
@@ -835,6 +849,15 @@ const getSingleNews = async (news_pk: string): Promise<ResponseModel> => {
       `select * from vw_users where user_pk=@user_pk`,
       {
         user_pk: news.encoder_pk,
+      }
+    );
+
+    news.news_files = await con.Query(
+      `
+      SELECT * FROM news_file where news_pk =@news_pk; 
+      `,
+      {
+        news_pk: news.news_pk,
       }
     );
 

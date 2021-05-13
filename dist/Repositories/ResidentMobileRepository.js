@@ -29,7 +29,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         password=AES_ENCRYPT(@email,@email),
         user_type=@user_type,
         full_name=@full_name,
-        encoder_pk=@encoder_pk;
+        encoder_pk=@encoder_pk; 
         `, user_payload);
         if (sql_insert_user.insertedId > 0) {
             if (useValidator_1.isValidPicture(payload.pic)) {
@@ -176,6 +176,35 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
                 message: "No affected rows while updating the resident",
             };
         }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getmembers_ulosapamilya = (fam_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const data = yield con.Query(` SELECT  fm.fam_pk,r.first_name,r.middle_name,r.last_name FROM family_member fm JOIN family f ON fm.fam_pk=f.fam_pk JOIN resident r ON f.ulo_pamilya=r.resident_pk  WHERE fm.fam_pk=@fam_pk limit 1`, {
+            fam_pk: fam_pk,
+        });
+        for (const members of data) {
+            members.members = yield con.Query(`
+        SELECT CONCAT(r.first_name,' ',r.middle_name,' ',r.last_name) fullname,fm.rel FROM family_member fm JOIN resident r ON fm.resident_pk=r.resident_pk JOIN family f ON f.fam_pk=fm.fam_pk WHERE fm.fam_pk=@fam_pk
+        `, {
+                fam_pk: members.fam_pk,
+            });
+        }
+        con.Commit();
+        return {
+            success: true,
+            data: data,
+        };
     }
     catch (error) {
         yield con.Rollback();
@@ -379,6 +408,8 @@ exports.default = {
     addMobileResident,
     upadatenewuser,
     getresidents,
+    getmembers,
+    getmembers_ulosapamilya,
     forgotpassword,
     updatepassword,
     updateMobileResident,

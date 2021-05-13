@@ -162,6 +162,45 @@ const updateAdmin = async (
   }
 };
 
+const changeAdminStatus = async (
+  payload: AdministratorModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_edit_admin = await con.Modify(
+      `UPDATE administrator SET
+         sts_pk=@sts_pk,
+         encoder_pk=@encoder_pk
+         WHERE
+         admin_pk=@admin_pk;`,
+      payload
+    );
+
+    if (sql_edit_admin > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The administrator status has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the administrator's status",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const getAdminDataTable = async (
   payload: PaginationModel
 ): Promise<ResponseModel> => {
@@ -230,7 +269,17 @@ const getSingleAdmin = async (admin_pk: string): Promise<ResponseModel> => {
       }
     );
 
-    data.pic = data.pic = await GetUploadedImage(data.pic);
+    if (!!data?.pic) {
+      data.pic = data.pic = await GetUploadedImage(data.pic);
+    }
+
+    data.status = await con.QuerySingle(
+      `select * from status where sts_pk=@sts_pk`,
+      {
+        sts_pk: data.sts_pk,
+      }
+    );
+
     con.Commit();
     return {
       success: true,
@@ -251,4 +300,5 @@ export default {
   updateAdmin,
   getAdminDataTable,
   getSingleAdmin,
+  changeAdminStatus,
 };

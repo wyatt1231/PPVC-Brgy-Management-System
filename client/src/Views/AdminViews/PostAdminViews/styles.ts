@@ -12,20 +12,28 @@ export const StyledPostItem = styled.div`
   border-bottom: 0.1em solid rgba(0, 0, 0, 0.3);
   .header {
     display: grid;
-    grid-auto-columns: auto 1fr;
-    grid-template-areas: "img name" "img time";
-    align-items: start;
-    .img {
-      grid-area: img;
-      margin-right: 1em;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr auto;
+
+    .profile {
+      display: grid;
+      grid-auto-columns: auto 1fr;
+      grid-template-areas: "img name" "img time";
+      align-items: start;
+      .img {
+        grid-area: img;
+        margin-right: 1em;
+      }
+      .name {
+        grid-area: name;
+        font-weight: 600;
+      }
+      .time {
+        grid-area: time;
+        font-size: 0.87em;
+      }
     }
-    .name {
-      grid-area: name;
-      font-weight: 600;
-    }
-    .time {
-      grid-area: time;
-      font-size: 0.87em;
+    .actions {
     }
   }
 

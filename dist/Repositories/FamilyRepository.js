@@ -501,6 +501,7 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -517,15 +518,28 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
       order by ${payload.sort.column} ${payload.sort.direction}
       limit ${payload.page.begin},${payload.page.limit + 1};
       `, payload.filters);
+        const hasMore = all_family.length > payload.page.limit;
+        if (hasMore) {
+            all_family.splice(all_family.length - 1, 1);
+        }
         for (const fam of all_family) {
             fam.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk `, {
                 resident_pk: fam.ulo_pamilya,
             });
-            fam.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(fam.ulo_pamilya_info.pic);
-        }
-        const hasMore = all_family.length > payload.page.limit;
-        if (hasMore) {
-            all_family.splice(all_family.length - 1, 1);
+            if (!!((_a = fam === null || fam === void 0 ? void 0 : fam.ulo_pamilya_info) === null || _a === void 0 ? void 0 : _a.pic)) {
+                fam.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(fam.ulo_pamilya_info.pic);
+            }
+            fam.fam_members = yield con.Query(`select * from family_member where fam_pk=@fam_pk `, {
+                fam_pk: fam.fam_pk,
+            });
+            for (const fm of fam.fam_members) {
+                fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk `, {
+                    resident_pk: fm.resident_pk,
+                });
+                if (!!((_b = fm === null || fm === void 0 ? void 0 : fm.resident_info) === null || _b === void 0 ? void 0 : _b.pic)) {
+                    fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+                }
+            }
         }
         const count = hasMore
             ? -1
@@ -551,7 +565,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _c;
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
@@ -570,7 +584,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
         all_family.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk;`, {
             resident_pk: all_family.ulo_pamilya,
         });
-        if ((_a = all_family === null || all_family === void 0 ? void 0 : all_family.ulo_pamilya_info) === null || _a === void 0 ? void 0 : _a.pic) {
+        if ((_c = all_family === null || all_family === void 0 ? void 0 : all_family.ulo_pamilya_info) === null || _c === void 0 ? void 0 : _c.pic) {
             all_family.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(all_family.ulo_pamilya_info.pic);
         }
         all_family.fam_members = yield con.Query(`

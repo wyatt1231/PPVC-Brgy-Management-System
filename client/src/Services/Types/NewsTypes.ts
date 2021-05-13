@@ -10,6 +10,10 @@ export type NewsReducerTypes =
       fetch_news_table: boolean;
     }
   | {
+      type: "news_table_has_more";
+      news_table_has_more: boolean;
+    }
+  | {
       type: "single_news";
       single_news: NewsModel;
     }
@@ -29,6 +33,7 @@ export type NewsReducerTypes =
 
 export interface NewsReducerModel {
   news_table?: Array<NewsModel>;
+  news_table_has_more?: boolean;
   fetch_news_table?: boolean;
   single_news?: NewsModel;
   fetch_single_news?: boolean;

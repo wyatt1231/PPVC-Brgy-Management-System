@@ -19,47 +19,97 @@ const ComplaintController = (app) => __awaiter(void 0, void 0, void 0, function*
     const router = express_1.Router();
     router.post("/addComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
-        const payload = req.body;
-        payload.reported_by = req.user_pk;
-        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        res.json(yield ComplaintRepository_1.default.addComplaint(payload, files instanceof Array ? files : [files]));
+        try {
+            const payload = req.body;
+            payload.reported_by = req.user_pk;
+            let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+            res.json(yield ComplaintRepository_1.default.addComplaint(payload, files instanceof Array ? files : [files]));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/updateComplaint", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield ComplaintRepository_1.default.updateComplaint(payload));
+        try {
+            const payload = req.body;
+            res.json(yield ComplaintRepository_1.default.updateComplaint(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const complaint_pk = req.body.complaint_pk;
-        res.json(yield ComplaintRepository_1.default.getSingleComplaint(complaint_pk));
+        try {
+            const complaint_pk = req.body.complaint_pk;
+            res.json(yield ComplaintRepository_1.default.getSingleComplaint(complaint_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getComplaintTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield ComplaintRepository_1.default.getComplaintTable(payload));
+        try {
+            const payload = req.body;
+            res.json(yield ComplaintRepository_1.default.getComplaintTable(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getComplaintList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const reported_by = req.body.reported_by;
-        res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
+        try {
+            const reported_by = req.body.reported_by;
+            res.json(yield ComplaintRepository_1.default.getComplaintList(reported_by));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     // LOGS
     router.post("/addComplaintLog", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield ComplaintRepository_1.default.addComplaintLog(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield ComplaintRepository_1.default.addComplaintLog(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getComplaintLogTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const complaint_pk = req.body.complaint_pk;
-        res.json(yield ComplaintRepository_1.default.getComplaintLogTable(complaint_pk));
+        try {
+            const complaint_pk = req.body.complaint_pk;
+            res.json(yield ComplaintRepository_1.default.getComplaintLogTable(complaint_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     //MESSAGES
     router.post("/addComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        payload.sent_by = req.user_pk;
-        res.json(yield ComplaintRepository_1.default.addComplaintMessage(payload));
+        try {
+            const payload = req.body;
+            payload.sent_by = req.user_pk;
+            res.json(yield ComplaintRepository_1.default.addComplaintMessage(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+        }
+        catch (error) {
+            res.json(500);
+        }
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintRepository_1.default.getComplaintMessage(complaint_pk));
     }));
     router.post("/getComplaintLatest", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+        }
+        catch (error) {
+            res.json(500);
+        }
         res.json(yield ComplaintRepository_1.default.getComplaintLatest());
     }));
     app.use("/api/complaint/", router);

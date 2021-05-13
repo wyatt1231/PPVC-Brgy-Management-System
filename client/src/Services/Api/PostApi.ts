@@ -1,7 +1,11 @@
 import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { PaginationModel } from "../Models/PaginationModels";
-import { PostCommentModel, PostReactionModel } from "../Models/PostModels";
+import {
+  PostCommentModel,
+  PostReactionModel,
+  PostsModel,
+} from "../Models/PostModels";
 
 const API_DEFAULT_ROUTE = `api/posts/`;
 
@@ -16,6 +20,16 @@ const getPosts = async (payload: PaginationModel): Promise<IServerResponse> => {
 
 const addPosts = async (payload: FormData): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "addPosts", payload);
+  return response;
+};
+
+const updatePostStatus = async (
+  payload: PostsModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "updatePostStatus",
+    payload
+  );
   return response;
 };
 
@@ -70,4 +84,5 @@ export default {
   addPostReaction,
   getPostCommentsAdmin,
   addPostComment,
+  updatePostStatus,
 };

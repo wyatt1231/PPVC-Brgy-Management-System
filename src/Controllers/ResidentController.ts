@@ -12,8 +12,12 @@ const ResidentController = async (app: Express): Promise<void> => {
     "/getDataTableResident",
     Authorize("admin,resident"),
     async (req: Request, res: Response) => {
-      const payload: PaginationModel = req.body;
-      res.json(await ResidentRepository.getDataTableResident(payload));
+      try {
+        const payload: PaginationModel = req.body;
+        res.json(await ResidentRepository.getDataTableResident(payload));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -21,8 +25,12 @@ const ResidentController = async (app: Express): Promise<void> => {
     "/addResident",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: AdministratorModel = req.body;
-      res.json(await ResidentRepository.addResident(payload, req.user_pk));
+      try {
+        const payload: AdministratorModel = req.body;
+        res.json(await ResidentRepository.addResident(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -30,16 +38,24 @@ const ResidentController = async (app: Express): Promise<void> => {
     "/updateResident",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: AdministratorModel = req.body;
-      res.json(await ResidentRepository.updateResident(payload, req.user_pk));
+      try {
+        const payload: AdministratorModel = req.body;
+        res.json(await ResidentRepository.updateResident(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
   router.post(
     "/toggleResidentStatus",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const resident_pk: number = req.body.resident_pk;
-      res.json(await ResidentRepository.toggleResidentStatus(resident_pk));
+      try {
+        const resident_pk: number = req.body.resident_pk;
+        res.json(await ResidentRepository.toggleResidentStatus(resident_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -47,8 +63,12 @@ const ResidentController = async (app: Express): Promise<void> => {
     "/getSingleResident",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const resident_pk: string = req.body.resident_pk;
-      res.json(await ResidentRepository.getSingleResident(resident_pk));
+      try {
+        const resident_pk: string = req.body.resident_pk;
+        res.json(await ResidentRepository.getSingleResident(resident_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -56,8 +76,12 @@ const ResidentController = async (app: Express): Promise<void> => {
     "/searchResident",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const search: string = req.body.value;
-      res.json(await ResidentRepository.searchResident(search));
+      try {
+        const search: string = req.body.value;
+        res.json(await ResidentRepository.searchResident(search));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 

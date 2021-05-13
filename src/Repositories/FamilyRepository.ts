@@ -699,6 +699,12 @@ const getFamilyDataTable = async (
       payload.filters
     );
 
+    const hasMore: boolean = all_family.length > payload.page.limit;
+
+    if (hasMore) {
+      all_family.splice(all_family.length - 1, 1);
+    }
+
     for (const fam of all_family) {
       fam.ulo_pamilya_info = await con.QuerySingle(
         `select * from resident where resident_pk=@resident_pk `,
@@ -707,15 +713,31 @@ const getFamilyDataTable = async (
         }
       );
 
-      fam.ulo_pamilya_info.pic = await GetUploadedImage(
-        fam.ulo_pamilya_info.pic
+      if (!!fam?.ulo_pamilya_info?.pic) {
+        fam.ulo_pamilya_info.pic = await GetUploadedImage(
+          fam.ulo_pamilya_info.pic
+        );
+      }
+
+      fam.fam_members = await con.Query(
+        `select * from family_member where fam_pk=@fam_pk `,
+        {
+          fam_pk: fam.fam_pk,
+        }
       );
-    }
 
-    const hasMore: boolean = all_family.length > payload.page.limit;
+      for (const fm of fam.fam_members) {
+        fm.resident_info = await con.QuerySingle(
+          `select * from resident where resident_pk=@resident_pk `,
+          {
+            resident_pk: fm.resident_pk,
+          }
+        );
 
-    if (hasMore) {
-      all_family.splice(all_family.length - 1, 1);
+        if (!!fm?.resident_info?.pic) {
+          fm.resident_info.pic = await GetUploadedImage(fm.resident_info.pic);
+        }
+      }
     }
 
     const count: number = hasMore

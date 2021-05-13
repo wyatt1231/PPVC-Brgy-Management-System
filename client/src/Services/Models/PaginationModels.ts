@@ -20,4 +20,6 @@ export interface PaginationModel {
 export interface ScrollPaginationModel {
   sort: SqlSort;
   filters: any;
+  page?: number;
+  has_more?: boolean;
 }

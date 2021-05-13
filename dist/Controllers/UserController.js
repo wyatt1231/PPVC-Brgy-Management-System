@@ -37,13 +37,28 @@ const user_repo = __importStar(require("../Repositories/UserRepository"));
 const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield user_repo.loginUser(req.body));
+        try {
+            res.json(yield user_repo.loginUser(req.body));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/currentUser", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield user_repo.currentUser(req.user_pk));
+        try {
+            res.json(yield user_repo.currentUser(req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/userinfo", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield user_repo.userinfo(req.user_pk));
+        try {
+            res.json(yield user_repo.userinfo(req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/user/", router);
 });

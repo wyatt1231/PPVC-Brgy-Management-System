@@ -18,10 +18,20 @@ const PostsRepository_1 = __importDefault(require("../Repositories/PostsReposito
 const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/getPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostsRepository_1.default.getPosts());
+        try {
+            res.json(yield PostsRepository_1.default.getPosts());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getUserPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostsRepository_1.default.getUserPosts(req.user_pk));
+        try {
+            res.json(yield PostsRepository_1.default.getUserPosts(req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getPostsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -34,35 +44,80 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
     }));
     router.post("/addPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
-        const payload = req.body;
-        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
+        try {
+            const payload = req.body;
+            let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+            res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getPostsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield PostsRepository_1.default.getPostsReaction());
+        try {
+            res.json(yield PostsRepository_1.default.getPostsReaction());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addPostComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield PostsRepository_1.default.addPostComment(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield PostsRepository_1.default.addPostComment(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addPostReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        console.log(`sdasd payload`, payload);
-        res.json(yield PostsRepository_1.default.addPostReaction(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            console.log(`sdasd payload`, payload);
+            res.json(yield PostsRepository_1.default.addPostReaction(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     //reactions
     router.post("/getPostsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield PostsRepository_1.default.getPostsAdmin(payload));
+        try {
+            const payload = req.body;
+            res.json(yield PostsRepository_1.default.getPostsAdmin(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
+        try {
+            const posts_pk = req.body.posts_pk;
+            res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     //comments
     router.post("/getPostCommentsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
+        try {
+            const posts_pk = req.body.posts_pk;
+            res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/updatePostStatus", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            payload.encoder_pk = req.user_pk;
+            res.json(yield PostsRepository_1.default.updatePostStatus(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/posts/", router);
 });

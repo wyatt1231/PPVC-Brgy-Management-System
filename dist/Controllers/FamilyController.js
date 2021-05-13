@@ -18,36 +18,76 @@ const FamilyRepository_1 = __importDefault(require("../Repositories/FamilyReposi
 const FamilyController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/addFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        payload.encoded_by = req.user_pk;
-        res.json(yield FamilyRepository_1.default.addFamily(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            payload.encoded_by = req.user_pk;
+            res.json(yield FamilyRepository_1.default.addFamily(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/updateFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        payload.encoded_by = req.user_pk;
-        res.json(yield FamilyRepository_1.default.updateFamily(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            payload.encoded_by = req.user_pk;
+            res.json(yield FamilyRepository_1.default.updateFamily(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleFamily", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const ulo_pamilya = req.body.ulo_pamilya;
-        res.json(yield FamilyRepository_1.default.getSingleFamily(ulo_pamilya));
+        try {
+            const ulo_pamilya = req.body.ulo_pamilya;
+            res.json(yield FamilyRepository_1.default.getSingleFamily(ulo_pamilya));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleFamByFamPk", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const fam_pk = req.body.fam_pk;
-        res.json(yield FamilyRepository_1.default.getSingleFamByFamPk(fam_pk));
+        try {
+            const fam_pk = req.body.fam_pk;
+            res.json(yield FamilyRepository_1.default.getSingleFamByFamPk(fam_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getFamilyOfResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const resident_pk = req.body.resident_pk;
-        res.json(yield FamilyRepository_1.default.getFamilyOfResident(resident_pk));
+        try {
+            const resident_pk = req.body.resident_pk;
+            res.json(yield FamilyRepository_1.default.getFamilyOfResident(resident_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getFamilyDataTable", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield FamilyRepository_1.default.getFamilyDataTable(payload));
+        try {
+            const payload = req.body;
+            res.json(yield FamilyRepository_1.default.getFamilyDataTable(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/searchNoFamResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+        }
+        catch (error) {
+            res.json(500);
+        }
         const search = req.body.value;
         res.json(yield FamilyRepository_1.default.searchNoFamResident(search));
     }));
     router.post("/searchFamMember", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+        }
+        catch (error) {
+            res.json(500);
+        }
         const payload = req.body;
         res.json(yield FamilyRepository_1.default.searchFamMember(payload));
     }));

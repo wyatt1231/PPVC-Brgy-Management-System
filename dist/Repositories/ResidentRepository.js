@@ -281,7 +281,9 @@ const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, fun
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        const data = yield con.QuerySingle(`SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc  FROM resident r 
+        const data = yield con.QuerySingle(`SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc
+      ,(SELECT position FROM barangay_official WHERE official_pk=r.resident_pk) brgy_official_pos
+      FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk where r.resident_pk =@resident_pk`, {
             resident_pk: resident_pk,
         });

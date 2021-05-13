@@ -128,6 +128,7 @@ const addComplaintMessage = async (
     };
   }
 };
+
 const updateComplaint = async (
   payload: ComplaintModel
 ): Promise<ResponseModel> => {
@@ -348,6 +349,11 @@ const getComplaintTable = async (
       payload
     );
 
+    const hasMore: boolean = data.length > payload.page.limit;
+    if (hasMore) {
+      data.splice(data.length - 1, 1);
+    }
+
     for (const complaint of data) {
       complaint.complaint_file = await con.Query(
         `
@@ -364,7 +370,10 @@ const getComplaintTable = async (
           user_pk: complaint.reported_by,
         }
       );
-      complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+
+      if (!!complaint.user.pic) {
+        complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+      }
 
       complaint.status = await con.QuerySingle(
         `Select * from status where sts_pk = @sts_pk`,
@@ -377,7 +386,10 @@ const getComplaintTable = async (
     con.Commit();
     return {
       success: true,
-      data: data,
+      data: {
+        table: data,
+        has_more: hasMore,
+      },
     };
   } catch (error) {
     await con.Rollback();

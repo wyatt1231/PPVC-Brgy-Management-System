@@ -12,19 +12,25 @@ const BrgyOfficialController = async (app: Express): Promise<void> => {
     "/getBrgyOfficialDataTable",
     Authorize("admin,resident"),
     async (req: Request, res: Response) => {
-      const payload: PaginationModel = req.body;
-      res.json(
-        await BarangayOfficialRepository.getBrgyOfficialDataTable(payload)
-      );
+      try {
+        const payload: PaginationModel = req.body;
+        res.json(
+          await BarangayOfficialRepository.getBrgyOfficialDataTable(payload)
+        );
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
   router.post(
     "/getBrgyOfficialList",
     Authorize("admin,resident"),
     async (req: Request, res: Response) => {
-      res.json(
-        await BarangayOfficialRepository.getBrgyOfficialList()
-      );
+      try {
+        res.json(await BarangayOfficialRepository.getBrgyOfficialList());
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -32,13 +38,17 @@ const BrgyOfficialController = async (app: Express): Promise<void> => {
     "/addBarangayOfficial",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: BarangayOfficialModel = req.body;
-      res.json(
-        await BarangayOfficialRepository.addBarangayOfficial(
-          payload,
-          req.user_pk
-        )
-      );
+      try {
+        const payload: BarangayOfficialModel = req.body;
+        res.json(
+          await BarangayOfficialRepository.addBarangayOfficial(
+            payload,
+            req.user_pk
+          )
+        );
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 

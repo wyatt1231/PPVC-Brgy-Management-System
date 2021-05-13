@@ -3,51 +3,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DatabaseConnection = void 0;
+exports.DatabaseConnection = exports.connection_string = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
-let con = null;
+exports.connection_string = null;
 if (process.env.NODE_ENV === "production") {
-    con = {
+    exports.connection_string = {
         host: "156.67.222.35",
         user: "u583403240_bms",
         password: "BMS@capstone2",
         database: "u583403240_bms",
         port: 3306,
-        // connectionLimit: 10,
-        // waitForConnections: true,
+        connectionLimit: 10,
+        waitForConnections: true,
+        queueLimit: 10,
     };
 }
 else {
-    con = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
-        port: 3306,
-        // connectionLimit: 10,
-        // waitForConnections: true,
-    };
-    // con = {
-    //   host: "localhost",
+    // connection_string = {
+    //   host: "127.0.0.1",
     //   user: "root",
     //   password: "root sa",
     //   database: "bms",
     //   port: 3309,
     //   connectionLimit: 10,
     //   waitForConnections: true,
+    //   queueLimit: 10,
     // };
+    exports.connection_string = {
+        host: "156.67.222.35",
+        user: "u583403240_bms",
+        password: "BMS@capstone2",
+        database: "u583403240_bms",
+        port: 3306,
+        connectionLimit: 10,
+        waitForConnections: true,
+        queueLimit: 10,
+    };
 }
-//console.log(`some config`)
+const DatabaseConfig = mysql2_1.default.createPool(exports.connection_string);
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {
-        let DatabaseConfig = null;
         try {
-            DatabaseConfig = mysql2_1.default.createPool(con);
             DatabaseConfig.getConnection((error, connection) => {
                 if (error) {
-                    connection.destroy();
-                    connection.release();
+                    // connection.destroy();
+                    // connection.release();
                     // connection.end();
+                    console.log(error);
                     return reject(error);
                 }
                 const Query = (sql, binding) => {
@@ -57,7 +59,6 @@ const DatabaseConnection = () => {
                             if (typeof message !== "undefined") {
                                 connection.destroy();
                                 connection.release();
-                                // connection.end();
                                 return reject(message);
                             }
                         }
@@ -96,7 +97,7 @@ const DatabaseConnection = () => {
             ORDER BY ${sort.column} ${sort.direction}` +
                             (page
                                 ? `
-          LIMIT ${mysql2_1.default.escape(page.begin)}, ${mysql2_1.default.escape(page.limit)} `
+          LIMIT ${mysql2_1.default.escape(page.begin)}, ${mysql2_1.default.escape(page.limit + 1)} `
                                 : "");
                         try {
                             connection.query(full_query, (err, result) => {
@@ -130,6 +131,9 @@ const DatabaseConnection = () => {
                         try {
                             connection.query(query, (err, result) => {
                                 if (err) {
+                                    connection.destroy();
+                                    connection.release();
+                                    // connection.end();
                                     return reject(err);
                                 }
                                 else {
@@ -159,6 +163,9 @@ const DatabaseConnection = () => {
                         try {
                             connection.query(query, (err, result) => {
                                 if (err) {
+                                    connection.destroy();
+                                    connection.release();
+                                    // connection.end();
                                     return reject(err);
                                 }
                                 else {
@@ -191,6 +198,9 @@ const DatabaseConnection = () => {
                         try {
                             connection.query(query, (err, result) => {
                                 if (err) {
+                                    connection.destroy();
+                                    connection.release();
+                                    // connection.end();
                                     reject(err);
                                 }
                                 else {
@@ -216,12 +226,18 @@ const DatabaseConnection = () => {
                         try {
                             connection.beginTransaction((err) => {
                                 if (err) {
+                                    connection.destroy();
+                                    connection.release();
+                                    // connection.end();
                                     return reject(error);
                                 }
                                 return resolve();
                             });
                         }
                         catch (error) {
+                            connection.destroy();
+                            connection.release();
+                            // connection.end();
                             return reject(error);
                         }
                     });
@@ -248,8 +264,9 @@ const DatabaseConnection = () => {
                     return new Promise((resolve, reject) => {
                         try {
                             connection.rollback(() => {
-                                connection.release();
                                 connection.destroy();
+                                connection.release();
+                                // connection.end();
                                 return resolve();
                             });
                         }

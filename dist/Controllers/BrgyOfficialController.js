@@ -18,15 +18,30 @@ const BarangayOfficialRepository_1 = __importDefault(require("../Repositories/Ba
 const BrgyOfficialController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     const router = express_1.Router();
     router.post("/getBrgyOfficialDataTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialDataTable(payload));
+        try {
+            const payload = req.body;
+            res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialDataTable(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getBrgyOfficialList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialList());
+        try {
+            res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialList());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addBarangayOfficial", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield BarangayOfficialRepository_1.default.addBarangayOfficial(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield BarangayOfficialRepository_1.default.addBarangayOfficial(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/official/", router);
 });

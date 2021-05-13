@@ -1,10 +1,8 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { parseInvalidDateToDefault } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
-import { GenerateSearch } from "../Hooks/useSearch";
+import { UploadImage } from "../Hooks/useFileUploader";
 import { isValidPicture } from "../Hooks/useValidator";
-import { PaginationModel } from "../Models/PaginationModel";
 import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
@@ -29,7 +27,7 @@ const addMobileResident = async (
         password=AES_ENCRYPT(@email,@email),
         user_type=@user_type,
         full_name=@full_name,
-        encoder_pk=@encoder_pk;
+        encoder_pk=@encoder_pk; 
         `,
       user_payload
     );
@@ -205,6 +203,45 @@ const updateMobileResident = async (
         message: "No affected rows while updating the resident",
       };
     }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+const getmembers_ulosapamilya = async (
+  fam_pk: string
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<ResidentModel> = await con.Query(
+      ` SELECT  fm.fam_pk,r.first_name,r.middle_name,r.last_name FROM family_member fm JOIN family f ON fm.fam_pk=f.fam_pk JOIN resident r ON f.ulo_pamilya=r.resident_pk  WHERE fm.fam_pk=@fam_pk limit 1`,
+
+      {
+        fam_pk: fam_pk,
+      }
+    );
+    for (const members of data) {
+      members.members = await con.Query(
+        `
+        SELECT CONCAT(r.first_name,' ',r.middle_name,' ',r.last_name) fullname,fm.rel FROM family_member fm JOIN resident r ON fm.resident_pk=r.resident_pk JOIN family f ON f.fam_pk=fm.fam_pk WHERE fm.fam_pk=@fam_pk
+        `,
+        {
+          fam_pk: members.fam_pk,
+        }
+      );
+    }
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
@@ -442,6 +479,8 @@ export default {
   addMobileResident,
   upadatenewuser,
   getresidents,
+  getmembers,
+  getmembers_ulosapamilya,
   forgotpassword,
   updatepassword,
   updateMobileResident,

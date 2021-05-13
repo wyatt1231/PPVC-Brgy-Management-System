@@ -20,6 +20,8 @@ export interface PaginationModel {
 export interface ScrollPaginationModel {
   sort: SqlSort;
   filters: any;
+  page?: SqlPage;
+  has_more?: boolean;
 }
 
 export interface DataTableResult {

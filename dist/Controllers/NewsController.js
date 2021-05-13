@@ -54,68 +54,133 @@ const NewsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     }));
     router.post("/addNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
-        const payload = req.body;
-        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        if (files instanceof Array) {
+        try {
+            const payload = req.body;
+            let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+            if (files instanceof Array) {
+            }
+            else {
+                files = [files];
+            }
+            res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
         }
-        else {
-            files = [files];
+        catch (error) {
+            res.json(500);
         }
-        res.json(yield NewsRepository_1.default.addNews(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
     router.post("/addNewsFiles", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _c, _d;
-        const payload = req.body;
-        let files = ((_c = req.files) === null || _c === void 0 ? void 0 : _c.uploaded_files) ? (_d = req.files) === null || _d === void 0 ? void 0 : _d.uploaded_files : [];
-        if (files instanceof Array) {
+        try {
+            const payload = req.body;
+            let files = ((_c = req.files) === null || _c === void 0 ? void 0 : _c.uploaded_files) ? (_d = req.files) === null || _d === void 0 ? void 0 : _d.uploaded_files : [];
+            if (files instanceof Array) {
+            }
+            else {
+                files = [files];
+            }
+            res.json(yield NewsRepository_1.default.addNewsFiles(payload, files instanceof Array ? files : [files], req.user_pk));
         }
-        else {
-            files = [files];
+        catch (error) {
+            res.json(500);
         }
-        res.json(yield NewsRepository_1.default.addNewsFiles(payload, files instanceof Array ? files : [files], req.user_pk));
     }));
     router.post("/updateNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield NewsRepository_1.default.updateNews(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.updateNews(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/republishNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const news_pk = req.body.news_pk;
-        res.json(yield NewsRepository_1.default.republishNews(news_pk, req.user_pk));
+        try {
+            const news_pk = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.republishNews(news_pk, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/unpublishNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const news_pk = req.body.news_pk;
-        res.json(yield NewsRepository_1.default.unpublishNews(news_pk, req.user_pk));
+        try {
+            const news_pk = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.unpublishNews(news_pk, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const news_pk = req.body.news_pk;
-        res.json(yield NewsRepository_1.default.getSingleNews(news_pk));
+        try {
+            const news_pk = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.getSingleNews(news_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getSingleNewsWithPhoto", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const news_pk = req.body.news_pk;
-        res.json(yield NewsRepository_1.default.getSingleNewsWithPhoto(news_pk));
+        try {
+            const news_pk = req.body.news_pk;
+            res.json(yield NewsRepository_1.default.getSingleNewsWithPhoto(news_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addNewsComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield NewsRepository_1.default.addNewsComment(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.addNewsComment(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/addNewsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield NewsRepository_1.default.addNewsReaction(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.addNewsReaction(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/toggleLike", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = Object.assign(Object.assign({}, req.body), { liked_by: req.user_pk });
-        res.json(yield NewsRepository_1.default.toggleLike(payload));
+        try {
+            const payload = Object.assign(Object.assign({}, req.body), { liked_by: req.user_pk });
+            res.json(yield NewsRepository_1.default.toggleLike(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/updateNewsReaction", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield NewsRepository_1.default.updateNewsReaction(payload, req.user_pk));
+        try {
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.updateNewsReaction(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/getNewsLatest", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield NewsRepository_1.default.getNewsLatest());
+        try {
+            res.json(yield NewsRepository_1.default.getNewsLatest());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     router.post("/deleteNewsFile", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield NewsRepository_1.default.deleteNewsFile(payload));
+        try {
+            const payload = req.body;
+            res.json(yield NewsRepository_1.default.deleteNewsFile(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/news/", router);
 });

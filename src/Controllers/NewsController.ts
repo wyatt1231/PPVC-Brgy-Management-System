@@ -1,18 +1,15 @@
-import axios from "axios";
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
+import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
-import qs from "qs";
 import {
   PaginationModel,
   ScrollPaginationModel,
 } from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
 import NewsRepository from "../Repositories/NewsRepository";
-import { method } from "bluebird";
-import { NewsFileModel } from "../Models/NewsFileModel";
 
 const NewsController = async (app: Express): Promise<void> => {
   const router = Router();
@@ -69,21 +66,25 @@ const NewsController = async (app: Express): Promise<void> => {
     "/addNews",
     Authorize("admin"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
-      const payload: NewsModel = req.body;
-      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      try {
+        const payload: NewsModel = req.body;
+        let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      if (files instanceof Array) {
-      } else {
-        files = [files];
+        if (files instanceof Array) {
+        } else {
+          files = [files];
+        }
+
+        res.json(
+          await NewsRepository.addNews(
+            payload,
+            files instanceof Array ? files : [files],
+            req.user_pk
+          )
+        );
+      } catch (error) {
+        res.json(500);
       }
-
-      res.json(
-        await NewsRepository.addNews(
-          payload,
-          files instanceof Array ? files : [files],
-          req.user_pk
-        )
-      );
     }
   );
 
@@ -91,21 +92,25 @@ const NewsController = async (app: Express): Promise<void> => {
     "/addNewsFiles",
     Authorize("admin"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
-      const payload: NewsModel = req.body;
-      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      try {
+        const payload: NewsModel = req.body;
+        let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      if (files instanceof Array) {
-      } else {
-        files = [files];
+        if (files instanceof Array) {
+        } else {
+          files = [files];
+        }
+
+        res.json(
+          await NewsRepository.addNewsFiles(
+            payload,
+            files instanceof Array ? files : [files],
+            req.user_pk
+          )
+        );
+      } catch (error) {
+        res.json(500);
       }
-
-      res.json(
-        await NewsRepository.addNewsFiles(
-          payload,
-          files instanceof Array ? files : [files],
-          req.user_pk
-        )
-      );
     }
   );
 
@@ -113,8 +118,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/updateNews",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsModel = req.body;
-      res.json(await NewsRepository.updateNews(payload, req.user_pk));
+      try {
+        const payload: NewsModel = req.body;
+        res.json(await NewsRepository.updateNews(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -122,8 +131,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/republishNews",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const news_pk: number = req.body.news_pk;
-      res.json(await NewsRepository.republishNews(news_pk, req.user_pk));
+      try {
+        const news_pk: number = req.body.news_pk;
+        res.json(await NewsRepository.republishNews(news_pk, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -131,8 +144,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/unpublishNews",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const news_pk: number = req.body.news_pk;
-      res.json(await NewsRepository.unpublishNews(news_pk, req.user_pk));
+      try {
+        const news_pk: number = req.body.news_pk;
+        res.json(await NewsRepository.unpublishNews(news_pk, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -140,16 +157,24 @@ const NewsController = async (app: Express): Promise<void> => {
     "/getSingleNews",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const news_pk: string = req.body.news_pk;
-      res.json(await NewsRepository.getSingleNews(news_pk));
+      try {
+        const news_pk: string = req.body.news_pk;
+        res.json(await NewsRepository.getSingleNews(news_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
   router.post(
     "/getSingleNewsWithPhoto",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const news_pk: string = req.body.news_pk;
-      res.json(await NewsRepository.getSingleNewsWithPhoto(news_pk));
+      try {
+        const news_pk: string = req.body.news_pk;
+        res.json(await NewsRepository.getSingleNewsWithPhoto(news_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -157,8 +182,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/addNewsComment",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsCommentModel = req.body;
-      res.json(await NewsRepository.addNewsComment(payload, req.user_pk));
+      try {
+        const payload: NewsCommentModel = req.body;
+        res.json(await NewsRepository.addNewsComment(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -166,8 +195,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/addNewsReaction",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsReactionModel = req.body;
-      res.json(await NewsRepository.addNewsReaction(payload, req.user_pk));
+      try {
+        const payload: NewsReactionModel = req.body;
+        res.json(await NewsRepository.addNewsReaction(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -175,11 +208,15 @@ const NewsController = async (app: Express): Promise<void> => {
     "/toggleLike",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsLikesModel = {
-        ...req.body,
-        liked_by: req.user_pk,
-      };
-      res.json(await NewsRepository.toggleLike(payload));
+      try {
+        const payload: NewsLikesModel = {
+          ...req.body,
+          liked_by: req.user_pk,
+        };
+        res.json(await NewsRepository.toggleLike(payload));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -187,8 +224,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/updateNewsReaction",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsReactionModel = req.body;
-      res.json(await NewsRepository.updateNewsReaction(payload, req.user_pk));
+      try {
+        const payload: NewsReactionModel = req.body;
+        res.json(await NewsRepository.updateNewsReaction(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -196,7 +237,11 @@ const NewsController = async (app: Express): Promise<void> => {
     "/getNewsLatest",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      res.json(await NewsRepository.getNewsLatest());
+      try {
+        res.json(await NewsRepository.getNewsLatest());
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -204,8 +249,12 @@ const NewsController = async (app: Express): Promise<void> => {
     "/deleteNewsFile",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: NewsFileModel = req.body;
-      res.json(await NewsRepository.deleteNewsFile(payload));
+      try {
+        const payload: NewsFileModel = req.body;
+        res.json(await NewsRepository.deleteNewsFile(payload));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 

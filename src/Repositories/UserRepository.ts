@@ -7,10 +7,12 @@ import { UserClaims, UserLogin } from "../Models/UserModels";
 
 export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
+  console.log(`con`, con);
   try {
     await con.BeginTransaction();
 
-    const zxc = await con.QuerySingle(
+    await con.QuerySingle(
       `SELECT table_name FROM information_schema.tables
       WHERE table_schema = 'sql6400894';`,
       null
@@ -68,6 +70,7 @@ export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
 
 export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
 
@@ -95,6 +98,8 @@ export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
     }
 
     await con.Commit();
+
+    console.log(`user_data`, user_data.user_type);
     return {
       success: true,
       data: user_data,

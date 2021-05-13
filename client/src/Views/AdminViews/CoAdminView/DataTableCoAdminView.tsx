@@ -300,19 +300,19 @@ export const DataTableCoAdminView: FC<DataTableCoAdminViewInterface> = memo(
                                   0
                                 )}${row.lastname?.charAt(0)}`}
                               />
-                              {/* <NavLink
+                              <NavLink
                                 className="title"
                                 to={`/admin/administrator/${row.admin_pk}`}
                               >
                                 <span style={{ textTransform: "capitalize" }}>
                                   {row.firstname} {row.lastname}
                                 </span>
-                              </NavLink> */}
-                              <div className="title">
+                              </NavLink>
+                              {/* <div className="title">
                                 <span style={{ textTransform: "capitalize" }}>
                                   {row.firstname} {row.lastname}
                                 </span>
-                              </div>
+                              </div> */}
                             </div>
                           </TableCell>
                           <TableCell>

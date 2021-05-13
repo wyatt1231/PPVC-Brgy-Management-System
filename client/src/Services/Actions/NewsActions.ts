@@ -4,61 +4,68 @@ import NewsApi from "../Api/NewsApi";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
-import { ScrollPaginationModel } from "../Models/PaginationModels";
+import {
+  PaginationModel,
+  ScrollPaginationModel,
+} from "../Models/PaginationModels";
 import { NewsReducerTypes } from "../Types/NewsTypes";
 import { PageReducerTypes } from "../Types/PageTypes";
 
-const setNewsDataTable = (payload: ScrollPaginationModel) => async (
-  dispatch: Dispatch<NewsReducerTypes>
-) => {
-  try {
-    dispatch({
-      type: "fetch_news_table",
-      fetch_news_table: true,
-    });
-    const response: IServerResponse = await NewsApi.getNewsDataTable(payload);
-
-    if (response.success) {
+const setNewsDataTable =
+  (payload: PaginationModel) =>
+  async (dispatch: Dispatch<NewsReducerTypes>) => {
+    try {
       dispatch({
-        type: "news_table",
-        news_table: response.data,
+        type: "fetch_news_table",
+        fetch_news_table: true,
       });
-    }
+      const response: IServerResponse = await NewsApi.getNewsDataTable(payload);
 
-    dispatch({
-      type: "fetch_news_table",
-      fetch_news_table: false,
-    });
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
+      if (response.success) {
+        dispatch({
+          type: "news_table",
+          news_table: response.data.table,
+        });
 
-const setSingleNews = (news_pk: number) => async (
-  dispatch: Dispatch<NewsReducerTypes>
-) => {
-  try {
-    dispatch({
-      type: "fetch_single_news",
-      fetch_single_news: true,
-    });
-    const response: IServerResponse = await NewsApi.getSingleNews(news_pk);
+        dispatch({
+          type: "news_table_has_more",
+          news_table_has_more: response.data.has_more,
+        });
+      }
 
-    if (response.success) {
       dispatch({
-        type: "single_news",
-        single_news: response.data,
+        type: "fetch_news_table",
+        fetch_news_table: false,
       });
+    } catch (error) {
+      console.error(`action error`, error);
     }
+  };
 
-    dispatch({
-      type: "fetch_single_news",
-      fetch_single_news: false,
-    });
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
+const setSingleNews =
+  (news_pk: number) => async (dispatch: Dispatch<NewsReducerTypes>) => {
+    try {
+      dispatch({
+        type: "fetch_single_news",
+        fetch_single_news: true,
+      });
+      const response: IServerResponse = await NewsApi.getSingleNews(news_pk);
+
+      if (response.success) {
+        dispatch({
+          type: "single_news",
+          single_news: response.data,
+        });
+      }
+
+      dispatch({
+        type: "fetch_single_news",
+        fetch_single_news: false,
+      });
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
 
 const getNewsLatest = () => async (dispatch: Dispatch<NewsReducerTypes>) => {
   try {
@@ -84,287 +91,281 @@ const getNewsLatest = () => async (dispatch: Dispatch<NewsReducerTypes>) => {
   }
 };
 
-const addNews = (
-  payload: FormData,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.addNews(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
-      }
+const addNews =
+  (payload: FormData, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
       dispatch({
-        type: "SET_PAGE_SNACKBAR",
-        page_snackbar: {
-          message: response.message.toString(),
-          options: {
-            variant: "success",
-          },
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
         },
       });
-    } else {
-      helperErrorMessage(dispatch, response);
-    }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
-
-const addNewsFiles = (
-  payload: FormData,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.addNewsFiles(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
-      }
+      const response: IServerResponse = await NewsApi.addNews(payload);
       dispatch({
-        type: "SET_PAGE_SNACKBAR",
-        page_snackbar: {
-          message: response.message.toString(),
-          options: {
-            variant: "success",
-          },
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
         },
       });
-    } else {
-      helperErrorMessage(dispatch, response);
-    }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
-
-const updateNews = (
-  payload: NewsModel,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.updateNews(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
-      }
-      dispatch({
-        type: "SET_PAGE_SNACKBAR",
-        page_snackbar: {
-          message: response.message.toString(),
-          options: {
-            variant: "success",
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+        dispatch({
+          type: "SET_PAGE_SNACKBAR",
+          page_snackbar: {
+            message: response.message.toString(),
+            options: {
+              variant: "success",
+            },
           },
+        });
+      } else {
+        helperErrorMessage(dispatch, response);
+      }
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
+
+const addNewsFiles =
+  (payload: FormData, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
         },
       });
-    } else {
-      helperErrorMessage(dispatch, response);
-    }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
-
-const republishNews = (
-  news_pk: number,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.republishNews(news_pk);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
-      }
-
+      const response: IServerResponse = await NewsApi.addNewsFiles(payload);
       dispatch({
-        type: "SET_PAGE_SNACKBAR",
-        page_snackbar: {
-          message: response.message.toString(),
-          options: {
-            variant: "success",
-          },
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
         },
       });
-    } else {
-      helperErrorMessage(dispatch, response);
-    }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
-
-const unpublishNews = (
-  news_pk: number,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.unpublishNews(news_pk);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
-      }
-      dispatch({
-        type: "SET_PAGE_SNACKBAR",
-        page_snackbar: {
-          message: response.message.toString(),
-          options: {
-            variant: "success",
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+        dispatch({
+          type: "SET_PAGE_SNACKBAR",
+          page_snackbar: {
+            message: response.message.toString(),
+            options: {
+              variant: "success",
+            },
           },
+        });
+      } else {
+        helperErrorMessage(dispatch, response);
+      }
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
+
+const updateNews =
+  (payload: NewsModel, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
         },
       });
-    } else {
-      helperErrorMessage(dispatch, response);
-    }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
-
-const addNewsComment = (
-  payload: NewsCommentModel,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.addNewsComment(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
+      const response: IServerResponse = await NewsApi.updateNews(payload);
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
+        },
+      });
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+        dispatch({
+          type: "SET_PAGE_SNACKBAR",
+          page_snackbar: {
+            message: response.message.toString(),
+            options: {
+              variant: "success",
+            },
+          },
+        });
+      } else {
+        helperErrorMessage(dispatch, response);
       }
-    } else {
-      helperErrorMessage(dispatch, response);
+    } catch (error) {
+      console.error(`action error`, error);
     }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
+  };
 
-const toggleLike = (
-  payload: NewsLikesModel,
-  successCallback: () => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    const response: IServerResponse = await NewsApi.toggleLike(payload);
+const republishNews =
+  (news_pk: number, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
+        },
+      });
+      const response: IServerResponse = await NewsApi.republishNews(news_pk);
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
+        },
+      });
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
 
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback();
+        dispatch({
+          type: "SET_PAGE_SNACKBAR",
+          page_snackbar: {
+            message: response.message.toString(),
+            options: {
+              variant: "success",
+            },
+          },
+        });
+      } else {
+        helperErrorMessage(dispatch, response);
       }
-    } else {
-      helperErrorMessage(dispatch, response);
+    } catch (error) {
+      console.error(`action error`, error);
     }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
+  };
 
-const updateNewsReaction = (
-  payload: NewsCommentModel,
-  successCallback: (msg: string) => any
-) => async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
-  try {
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        loading_message: "Loading, thank you for your patience!",
-        show: true,
-      },
-    });
-    const response: IServerResponse = await NewsApi.updateNewsReaction(payload);
-    dispatch({
-      type: "SET_PAGE_LOADING",
-      page_loading: {
-        show: false,
-      },
-    });
-    if (response.success) {
-      if (typeof successCallback === "function") {
-        successCallback(response.message.toString());
+const unpublishNews =
+  (news_pk: number, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
+        },
+      });
+      const response: IServerResponse = await NewsApi.unpublishNews(news_pk);
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
+        },
+      });
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+        dispatch({
+          type: "SET_PAGE_SNACKBAR",
+          page_snackbar: {
+            message: response.message.toString(),
+            options: {
+              variant: "success",
+            },
+          },
+        });
+      } else {
+        helperErrorMessage(dispatch, response);
       }
-    } else {
-      helperErrorMessage(dispatch, response);
+    } catch (error) {
+      console.error(`action error`, error);
     }
-  } catch (error) {
-    console.error(`action error`, error);
-  }
-};
+  };
+
+const addNewsComment =
+  (payload: NewsCommentModel, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
+        },
+      });
+      const response: IServerResponse = await NewsApi.addNewsComment(payload);
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
+        },
+      });
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+      } else {
+        helperErrorMessage(dispatch, response);
+      }
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
+
+const toggleLike =
+  (payload: NewsLikesModel, successCallback: () => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      const response: IServerResponse = await NewsApi.toggleLike(payload);
+
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback();
+        }
+      } else {
+        helperErrorMessage(dispatch, response);
+      }
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
+
+const updateNewsReaction =
+  (payload: NewsCommentModel, successCallback: (msg: string) => any) =>
+  async (dispatch: Dispatch<NewsReducerTypes | PageReducerTypes>) => {
+    try {
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          loading_message: "Loading, thank you for your patience!",
+          show: true,
+        },
+      });
+      const response: IServerResponse = await NewsApi.updateNewsReaction(
+        payload
+      );
+      dispatch({
+        type: "SET_PAGE_LOADING",
+        page_loading: {
+          show: false,
+        },
+      });
+      if (response.success) {
+        if (typeof successCallback === "function") {
+          successCallback(response.message.toString());
+        }
+      } else {
+        helperErrorMessage(dispatch, response);
+      }
+    } catch (error) {
+      console.error(`action error`, error);
+    }
+  };
 
 export default {
   setNewsDataTable,

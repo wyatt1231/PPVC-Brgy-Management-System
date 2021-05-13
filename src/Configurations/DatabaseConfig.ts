@@ -1,53 +1,58 @@
 import mysql, { OkPacket, RowDataPacket } from "mysql2";
 import { DatabaseConnectionModel, InsertModel } from "../Models/DatabaseModel";
-import { PaginationModel } from "../Models/PaginationModel";
+import {
+  PaginationModel,
+  ScrollPaginationModel,
+} from "../Models/PaginationModel";
 
-let con: mysql.PoolOptions | null = null;
+export let connection_string: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
-  con = {
+  connection_string = {
     host: "156.67.222.35",
     user: "u583403240_bms",
     password: "BMS@capstone2",
     database: "u583403240_bms",
     port: 3306,
-    // connectionLimit: 10,
-    // waitForConnections: true,
+    connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 10,
   };
 } else {
-  con = {
-    host: "156.67.222.35",
-    user: "u583403240_bms",
-    password: "BMS@capstone2",
-    database: "u583403240_bms",
-    port: 3306,
-    // connectionLimit: 10,
-    // waitForConnections: true,
-  };
-  // con = {
-  //   host: "localhost",
+  // connection_string = {
+  //   host: "127.0.0.1",
   //   user: "root",
   //   password: "root sa",
   //   database: "bms",
   //   port: 3309,
   //   connectionLimit: 10,
   //   waitForConnections: true,
+  //   queueLimit: 10,
   // };
+
+  connection_string = {
+    host: "156.67.222.35",
+    user: "u583403240_bms",
+    password: "BMS@capstone2",
+    database: "u583403240_bms",
+    port: 3306,
+    connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 10,
+  };
 }
 
-//console.log(`some config`)
+const DatabaseConfig: mysql.Pool = mysql.createPool(connection_string);
 
 export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
   return new Promise((resolve, reject) => {
-    let DatabaseConfig: null | mysql.Pool = null;
     try {
-      DatabaseConfig = mysql.createPool(con);
-
       DatabaseConfig.getConnection((error, connection) => {
         if (error) {
-          connection.destroy();
-          connection.release();
+          // connection.destroy();
+          // connection.release();
           // connection.end();
+          console.log(error);
           return reject(error);
         }
 
@@ -62,7 +67,6 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
               if (typeof message !== "undefined") {
                 connection.destroy();
                 connection.release();
-                // connection.end();
                 return reject(message);
               }
             }
@@ -107,7 +111,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
             ORDER BY ${sort.column} ${sort.direction}` +
               (page
                 ? `
-          LIMIT ${mysql.escape(page.begin)}, ${mysql.escape(page.limit)} `
+          LIMIT ${mysql.escape(page.begin)}, ${mysql.escape(page.limit + 1)} `
                 : "");
 
             try {
@@ -141,6 +145,9 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
             try {
               connection.query(query, (err, result: OkPacket) => {
                 if (err) {
+                  connection.destroy();
+                  connection.release();
+                  // connection.end();
                   return reject(err);
                 } else {
                   return resolve(result.affectedRows);
@@ -168,6 +175,9 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
             try {
               connection.query(query, (err, result: OkPacket) => {
                 if (err) {
+                  connection.destroy();
+                  connection.release();
+                  // connection.end();
                   return reject(err);
                 } else {
                   return resolve({
@@ -199,6 +209,9 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
             try {
               connection.query(query, (err, result: RowDataPacket) => {
                 if (err) {
+                  connection.destroy();
+                  connection.release();
+                  // connection.end();
                   reject(err);
                 } else {
                   if (result.length > 0) {
@@ -221,11 +234,17 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
             try {
               connection.beginTransaction((err) => {
                 if (err) {
+                  connection.destroy();
+                  connection.release();
+                  // connection.end();
                   return reject(error);
                 }
                 return resolve();
               });
             } catch (error) {
+              connection.destroy();
+              connection.release();
+              // connection.end();
               return reject(error);
             }
           });
@@ -251,8 +270,9 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
           return new Promise((resolve, reject) => {
             try {
               connection.rollback(() => {
-                connection.release();
                 connection.destroy();
+                connection.release();
+                // connection.end();
                 return resolve();
               });
             } catch (error) {

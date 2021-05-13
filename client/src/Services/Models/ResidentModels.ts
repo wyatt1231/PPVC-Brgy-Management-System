@@ -38,4 +38,8 @@ export interface ResidentModel {
   kita?: number;
   educ?: string;
   status?: StatusMasterModel;
+
+  //ext
+
+  brgy_official_pos?: string;
 }

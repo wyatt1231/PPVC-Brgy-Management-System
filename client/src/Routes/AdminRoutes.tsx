@@ -16,6 +16,7 @@ import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/Da
 import ManageResidentAdminView from "../Views/AdminViews/ResidentAdminView/ManageResidentAdminView";
 import CreateFamily from "../Views/SharedViews/CreateFamily";
 import ManageFamilyAdminView from "../Views/AdminViews/FamilyAdminView/ManageFamilyAdminView/ManageFamilyAdminView";
+import ManageCoAdminView from "../Views/AdminViews/CoAdminView/ManageCoAdminView";
 // import DataTableResidentAdminView from "../Views/AdminView";
 
 const SysAdminRoutes = () => {
@@ -32,6 +33,9 @@ const SysAdminRoutes = () => {
         </Route>
         <Route path="/admin/administrator/add" exact>
           <AddCoAdminView />
+        </Route>
+        <Route path="/admin/administrator/:admin_pk" exact>
+          <ManageCoAdminView />
         </Route>
 
         <Route path="/admin/resident" exact>

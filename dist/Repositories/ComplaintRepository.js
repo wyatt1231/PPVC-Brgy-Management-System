@@ -263,6 +263,10 @@ const getComplaintTable = (payload) => __awaiter(void 0, void 0, void 0, functio
       AND reported_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "reported_at")}
       AND reported_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "reported_at")}
       `, payload);
+        const hasMore = data.length > payload.page.limit;
+        if (hasMore) {
+            data.splice(data.length - 1, 1);
+        }
         for (const complaint of data) {
             complaint.complaint_file = yield con.Query(`
         select * from complaint_file where complaint_pk=@complaint_pk
@@ -272,7 +276,9 @@ const getComplaintTable = (payload) => __awaiter(void 0, void 0, void 0, functio
             complaint.user = yield con.QuerySingle(`Select * from vw_users where user_pk = @user_pk`, {
                 user_pk: complaint.reported_by,
             });
-            complaint.user.pic = yield useFileUploader_1.GetUploadedImage(complaint.user.pic);
+            if (!!complaint.user.pic) {
+                complaint.user.pic = yield useFileUploader_1.GetUploadedImage(complaint.user.pic);
+            }
             complaint.status = yield con.QuerySingle(`Select * from status where sts_pk = @sts_pk`, {
                 sts_pk: complaint.sts_pk,
             });
@@ -280,7 +286,10 @@ const getComplaintTable = (payload) => __awaiter(void 0, void 0, void 0, functio
         con.Commit();
         return {
             success: true,
-            data: data,
+            data: {
+                table: data,
+                has_more: hasMore,
+            },
         };
     }
     catch (error) {

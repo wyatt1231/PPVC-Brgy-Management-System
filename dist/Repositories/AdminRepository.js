@@ -139,6 +139,39 @@ const updateAdmin = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
         };
     }
 });
+const changeAdminStatus = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const sql_edit_admin = yield con.Modify(`UPDATE administrator SET
+         sts_pk=@sts_pk,
+         encoder_pk=@encoder_pk
+         WHERE
+         admin_pk=@admin_pk;`, payload);
+        if (sql_edit_admin > 0) {
+            con.Commit();
+            return {
+                success: true,
+                message: "The administrator status has been updated successfully",
+            };
+        }
+        else {
+            con.Rollback();
+            return {
+                success: false,
+                message: "No affected rows while updating the administrator's status",
+            };
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const getAdminDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -191,7 +224,12 @@ const getSingleAdmin = (admin_pk) => __awaiter(void 0, void 0, void 0, function*
         const data = yield con.QuerySingle(`select * from administrator where admin_pk = @admin_pk`, {
             admin_pk,
         });
-        data.pic = data.pic = yield useFileUploader_1.GetUploadedImage(data.pic);
+        if (!!(data === null || data === void 0 ? void 0 : data.pic)) {
+            data.pic = data.pic = yield useFileUploader_1.GetUploadedImage(data.pic);
+        }
+        data.status = yield con.QuerySingle(`select * from status where sts_pk=@sts_pk`, {
+            sts_pk: data.sts_pk,
+        });
         con.Commit();
         return {
             success: true,
@@ -212,5 +250,6 @@ exports.default = {
     updateAdmin,
     getAdminDataTable,
     getSingleAdmin,
+    changeAdminStatus,
 };
 //# sourceMappingURL=AdminRepository.js.map

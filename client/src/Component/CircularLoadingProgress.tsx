@@ -3,10 +3,11 @@ import React, { memo } from "react";
 
 interface ILinearLoadingProgress {
   style?: React.CSSProperties;
+  size?: string | number;
 }
 
 const CircularLoadingProgress: React.FC<ILinearLoadingProgress> = memo(
-  ({ style }) => {
+  ({ style, size }) => {
     return (
       <div
         style={{
@@ -19,7 +20,7 @@ const CircularLoadingProgress: React.FC<ILinearLoadingProgress> = memo(
           ...style,
         }}
       >
-        <CircularProgress />
+        <CircularProgress size={size} />
       </div>
     );
   }
