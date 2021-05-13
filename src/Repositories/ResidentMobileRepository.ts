@@ -160,7 +160,6 @@ const updateMobileResident = async (
       // resident_date: parseInvalidDateToDefault(payload.resident_date),
     };
 
-if(update_user>0){
 
   const sql_edit_resident = await con.Modify(
     `UPDATE resident SET
@@ -194,11 +193,18 @@ if(update_user>0){
 
 
     if (sql_edit_resident > 0) {
+      const sql_edit_user = await con.Modify(
+        `UPDATE user SET full_name=CONCAT(@last_name,',',@first_name,' ',@middle_name,' ',@suffix) 
+          WHERE user_pk=@user_pk;`,
+        resident_payload
+      );   
+      if(sql_edit_user >0){
       con.Commit();
       return {
         success: true,
         message: "The resident has been updated successfully",
       };
+    }
     } else {
       con.Rollback();
       return {
@@ -206,7 +212,7 @@ if(update_user>0){
         message: "No affected rows while updating the resident",
       };
     }
-  }
+  
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
