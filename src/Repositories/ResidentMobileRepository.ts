@@ -204,6 +204,12 @@ const updateMobileResident = async (
         success: true,
         message: "The resident has been updated successfully",
       };
+    }else{
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
     }
     } else {
       con.Rollback();
