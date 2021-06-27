@@ -310,6 +310,7 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
       `, payload);
         const browser = yield puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
             headless: true,
         });
         const page = yield browser.newPage();
