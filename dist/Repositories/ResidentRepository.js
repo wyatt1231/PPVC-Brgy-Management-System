@@ -241,7 +241,7 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
       SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
       YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
       FROM resident r 
-      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
       (first_name LIKE concat('%',@name,'%')
       OR last_name LIKE concat('%',@name,'%')
@@ -296,7 +296,7 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
       YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
       FROM resident r 
-      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
       (first_name LIKE concat('%',@name,'%')
       OR last_name LIKE concat('%',@name,'%')

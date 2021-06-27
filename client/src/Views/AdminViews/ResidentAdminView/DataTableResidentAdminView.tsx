@@ -105,7 +105,7 @@ const tableColumns: Array<ITableColumns> = [
     align: "left",
   },
   {
-    label: "Endad",
+    label: "Edad",
     width: 40,
     align: "left",
   },
