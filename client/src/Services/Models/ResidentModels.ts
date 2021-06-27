@@ -40,6 +40,7 @@ export interface ResidentModel {
   status?: StatusMasterModel;
 
   //ext
+  age?: number;
 
   brgy_official_pos?: string;
 }

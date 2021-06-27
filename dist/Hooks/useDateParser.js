@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseInvalidTimeToDefault = exports.sqlFilterDate = exports.parseInvalidDateToDefault = void 0;
+exports.InvalidDateToDefault = exports.parseInvalidTimeToDefault = exports.sqlFilterNumber = exports.sqlFilterDate = exports.parseInvalidDateToDefault = void 0;
 const moment_1 = __importDefault(require("moment"));
 const parseInvalidDateToDefault = (date, defaultString) => {
     const d = moment_1.default(date);
@@ -22,13 +22,33 @@ const parseInvalidDateToDefault = (date, defaultString) => {
 };
 exports.parseInvalidDateToDefault = parseInvalidDateToDefault;
 const sqlFilterDate = (date, column) => {
-    const d = moment_1.default(date);
-    if (d.isValid()) {
-        return `'${d.format("YYYY-MM-DD")}'`;
+    if (!!date) {
+        const d = moment_1.default(date);
+        if (d.isValid()) {
+            return `'${d.format("YYYY-MM-DD")}'`;
+        }
     }
     return column;
 };
 exports.sqlFilterDate = sqlFilterDate;
+const sqlFilterNumber = (num, column) => {
+    try {
+        if (!!num) {
+            let parse_num = null;
+            if (typeof num === "string") {
+                parse_num = parseInt(num);
+            }
+            if (!isNaN(parse_num)) {
+                return `'${parse_num}'`;
+            }
+        }
+        return column;
+    }
+    catch (error) {
+        return column;
+    }
+};
+exports.sqlFilterNumber = sqlFilterNumber;
 const parseInvalidTimeToDefault = (date, defaultString) => {
     const d = moment_1.default(date, "hh:mm A");
     if (d.isValid()) {
@@ -45,4 +65,15 @@ const parseInvalidTimeToDefault = (date, defaultString) => {
     return null;
 };
 exports.parseInvalidTimeToDefault = parseInvalidTimeToDefault;
+const InvalidDateToDefault = (date, defaultString) => {
+    if (!date) {
+        return defaultString;
+    }
+    const d = moment_1.default(date).format("MMM DD, YYYY");
+    if (d.toLowerCase() === "invalid date") {
+        return defaultString;
+    }
+    return d;
+};
+exports.InvalidDateToDefault = InvalidDateToDefault;
 //# sourceMappingURL=useDateParser.js.map

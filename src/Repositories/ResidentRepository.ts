@@ -1,5 +1,9 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
-import { parseInvalidDateToDefault } from "../Hooks/useDateParser";
+import {
+  parseInvalidDateToDefault,
+  sqlFilterDate,
+  sqlFilterNumber,
+} from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
 import { GenerateSearch } from "../Hooks/useSearch";
@@ -8,7 +12,8 @@ import { PaginationModel } from "../Models/PaginationModel";
 import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
-
+import ResidentReport from "../PdfTemplates/ResidentReport";
+const puppeteer = require("puppeteer");
 const addResident = async (
   payload: ResidentModel,
   user_pk: number
@@ -277,19 +282,27 @@ const getDataTableResident = async (
 
     const data: Array<ResidentModel> = await con.QueryPagination(
       `
-      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
-      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
+      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name like concat('%',@search,'%')
-      OR last_name like concat('%',@search,'%')
-      OR fullname like concat('%',@search,'%')
-      OR civil_status like concat('%',@search,'%')
-      OR religion like concat('%',@search,'%')
-      OR nationality like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%')
-      OR ulo_pamilya like concat('%',@search,'%')
+      (first_name LIKE concat('%',@name,'%')
+      OR last_name LIKE concat('%',@name,'%')
+      OR fullname LIKE concat('%',@name,'%'))
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
       `,
       payload
     );
@@ -317,6 +330,83 @@ const getDataTableResident = async (
         count: count,
         limit: payload.page.limit,
       },
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getDataTableResidentPdf = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const brand_info: any = await con.QuerySingle(
+      `
+        SELECT logo FROM brand_logo LIMIT 1
+      `,
+      {}
+    );
+
+    var base64data = brand_info?.logo.toString("base64");
+
+    const resident_data: Array<ResidentModel> = await con.QueryPagination(
+      `
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
+      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
+      WHERE 
+      (first_name LIKE concat('%',@name,'%')
+      OR last_name LIKE concat('%',@name,'%')
+      OR fullname LIKE concat('%',@name,'%'))
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
+      `,
+      payload
+    );
+
+    const browser = await puppeteer.launch({
+      headless: true,
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(`${ResidentReport.Content(resident_data, payload)}`);
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      displayHeaderFooter: true,
+      headerTemplate: ResidentReport.Header(base64data),
+      footerTemplate: ResidentReport.Footer(),
+      margin: {
+        top: "160px",
+        bottom: "40px",
+      },
+    });
+
+    await browser.close();
+    con.Commit();
+    return {
+      success: true,
+      data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
     };
   } catch (error) {
     await con.Rollback();
@@ -405,4 +495,5 @@ export default {
   getSingleResident,
   searchResident,
   toggleResidentStatus,
+  getDataTableResidentPdf,
 };

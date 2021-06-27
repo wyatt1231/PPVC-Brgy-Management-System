@@ -19,26 +19,26 @@ if (process.env.NODE_ENV === "production") {
     };
 }
 else {
-    // connection_string = {
-    //   host: "127.0.0.1",
-    //   user: "root",
-    //   password: "root sa",
-    //   database: "bms",
-    //   port: 3309,
-    //   connectionLimit: 10,
-    //   waitForConnections: true,
-    //   queueLimit: 10,
-    // };
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
-        port: 3306,
+        host: "127.0.0.1",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
         connectionLimit: 10,
         waitForConnections: true,
         queueLimit: 10,
     };
+    // connection_string = {
+    //   host: "156.67.222.35",
+    //   user: "u583403240_bms",
+    //   password: "BMS@capstone2",
+    //   database: "u583403240_bms",
+    //   port: 3306,
+    //   connectionLimit: 10,
+    //   waitForConnections: true,
+    //   queueLimit: 10,
+    // };
 }
 const DatabaseConfig = mysql2_1.default.createPool(exports.connection_string);
 const DatabaseConnection = () => {
@@ -84,6 +84,7 @@ const DatabaseConnection = () => {
                     return new Promise((resolve, reject) => {
                         const { filters, sort, page } = pagination;
                         const { success, message, query } = queryFormat(sql, filters);
+                        // console.log(`QueryPagination`, query);
                         if (!success) {
                             connection.destroy();
                             connection.release();

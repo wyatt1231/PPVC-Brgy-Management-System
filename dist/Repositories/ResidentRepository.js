@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useDateParser_1 = require("../Hooks/useDateParser");
@@ -15,6 +18,8 @@ const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useSearch_1 = require("../Hooks/useSearch");
 const useValidator_1 = require("../Hooks/useValidator");
+const ResidentReport_1 = __importDefault(require("../PdfTemplates/ResidentReport"));
+const puppeteer = require("puppeteer");
 const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -233,19 +238,21 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
     try {
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
-      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
-      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
+      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name like concat('%',@search,'%')
-      OR last_name like concat('%',@search,'%')
-      OR fullname like concat('%',@search,'%')
-      OR civil_status like concat('%',@search,'%')
-      OR religion like concat('%',@search,'%')
-      OR nationality like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%')
-      OR ulo_pamilya like concat('%',@search,'%')
+      (first_name LIKE concat('%',@name,'%')
+      OR last_name LIKE concat('%',@name,'%')
+      OR fullname LIKE concat('%',@name,'%'))
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_from, "encoded_at")}
+      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
       `, payload);
         const hasMore = data.length > payload.page.limit;
         if (hasMore) {
@@ -266,6 +273,62 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
                 count: count,
                 limit: payload.page.limit,
             },
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const brand_info = yield con.QuerySingle(`
+        SELECT logo FROM brand_logo LIMIT 1
+      `, {});
+        var base64data = brand_info === null || brand_info === void 0 ? void 0 : brand_info.logo.toString("base64");
+        const resident_data = yield con.QueryPagination(`
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
+      LEFT JOIN STATUS s ON s.sts_pk = r.sts_pk) tmp
+      WHERE 
+      (first_name LIKE concat('%',@name,'%')
+      OR last_name LIKE concat('%',@name,'%')
+      OR fullname LIKE concat('%',@name,'%'))
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_from, "encoded_at")}
+      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
+      `, payload);
+        const browser = yield puppeteer.launch({
+            headless: true,
+        });
+        const page = yield browser.newPage();
+        yield page.setContent(`${ResidentReport_1.default.Content(resident_data, payload)}`);
+        const pdfBuffer = yield page.pdf({
+            format: "A4",
+            displayHeaderFooter: true,
+            headerTemplate: ResidentReport_1.default.Header(base64data),
+            footerTemplate: ResidentReport_1.default.Footer(),
+            margin: {
+                top: "160px",
+                bottom: "40px",
+            },
+        });
+        yield browser.close();
+        con.Commit();
+        return {
+            success: true,
+            data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
         };
     }
     catch (error) {
@@ -337,5 +400,6 @@ exports.default = {
     getSingleResident,
     searchResident,
     toggleResidentStatus,
+    getDataTableResidentPdf,
 };
 //# sourceMappingURL=ResidentRepository.js.map
