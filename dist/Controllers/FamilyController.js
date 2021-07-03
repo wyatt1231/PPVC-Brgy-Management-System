@@ -73,6 +73,15 @@ const FamilyController = (app) => __awaiter(void 0, void 0, void 0, function* ()
             res.json(500);
         }
     }));
+    router.post("/getFamilyDataTablePdf", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            res.json(yield FamilyRepository_1.default.getFamilyDataTablePdf(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
     router.post("/searchNoFamResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
         }

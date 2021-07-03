@@ -331,6 +331,116 @@ const statsNews = () => __awaiter(void 0, void 0, void 0, function* () {
         };
     }
 });
+const StatsBiktikmaPangabuso = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const stats_complaint = yield con.Query(`
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_biktima_pangabuso AS label GROUP BY descrip
+      `, null);
+        con.Commit();
+        return {
+            success: true,
+            data: stats_complaint,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const StatsKahimtangKomunidad = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const stats_complaint = yield con.Query(`
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_kahimtanang_komunidad AS label GROUP BY descrip
+      `, null);
+        con.Commit();
+        return {
+            success: true,
+            data: stats_complaint,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const StatsMatangBasura = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const stats_complaint = yield con.Query(`
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_basura AS label GROUP BY descrip
+      `, null);
+        con.Commit();
+        return {
+            success: true,
+            data: stats_complaint,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const StatsMatangKasilyas = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const stats_complaint = yield con.Query(`
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_kasilyas AS label GROUP BY descrip
+      `, null);
+        con.Commit();
+        return {
+            success: true,
+            data: stats_complaint,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
+const StatsPasilidadKuryente = () => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const stats_complaint = yield con.Query(`
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_pasilidad_kuryente AS label GROUP BY descrip
+      `, null);
+        con.Commit();
+        return {
+            success: true,
+            data: stats_complaint,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 exports.default = {
     total_population,
     total_death,
@@ -342,5 +452,10 @@ exports.default = {
     lifeStageStats,
     statsComplaint,
     statsNews,
+    StatsPasilidadKuryente,
+    StatsBiktikmaPangabuso,
+    StatsKahimtangKomunidad,
+    StatsMatangBasura,
+    StatsMatangKasilyas,
 };
 //# sourceMappingURL=DashboardRepository.js.map

@@ -1,4 +1,5 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
 import { isValidPicture } from "../Hooks/useValidator";
@@ -213,12 +214,19 @@ const getAdminDataTable = async (
       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a 
       LEFT JOIN status s ON s.sts_pk = a.sts_pk) tmp
       WHERE 
-      (firstname like concat('%',@search,'%')
-      OR lastname like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%'))
+      firstname like concat('%',@firstname,'%')
+      AND lastname like concat('%',@lastname,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
       AND admin_pk != 1
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
       `,
       payload
     );

@@ -12,6 +12,8 @@ import {
   TablePagination,
   TableRow,
 } from "@material-ui/core";
+import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded";
+import PrintRoundedIcon from "@material-ui/icons/PrintRounded";
 import { Form, Formik } from "formik";
 import React, { FC, memo, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,19 +24,13 @@ import DataTableSort from "../../../Component/DataTableSort";
 import FormikCheckbox from "../../../Component/Formik/FormikCheckbox";
 import FormikDateField from "../../../Component/Formik/FormikDateField";
 import FormikInputField from "../../../Component/Formik/FormikInputField";
-import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import LoadingButton from "../../../Component/LoadingButton";
 import PreviewPDF from "../../../Component/PreviewPDF";
 import { InvalidDateToDefault } from "../../../Hooks/UseDateParser";
 import useFilter from "../../../Hooks/useFilter";
-import {
-  setPageLinks,
-  setSelectedHeadFam,
-} from "../../../Services/Actions/PageActions";
-import GetAppRoundedIcon from "@material-ui/icons/GetAppRounded";
-import PictureAsPdfRoundedIcon from "@material-ui/icons/PictureAsPdfRounded";
-import PrintRoundedIcon from "@material-ui/icons/PrintRounded";
+import UsePdf from "../../../Hooks/UsePdf";
+import { setPageLinks } from "../../../Services/Actions/PageActions";
 import { setResidentDataTableAction } from "../../../Services/Actions/ResidentActions";
 import ResidentApi from "../../../Services/Api/ResidentApi";
 import ITableColumns from "../../../Services/Interface/ITableColumns";
@@ -42,16 +38,12 @@ import ITableInitialSort from "../../../Services/Interface/ITableInitialSort";
 import { PaginationModel } from "../../../Services/Models/PaginationModels";
 import { ResidentModel } from "../../../Services/Models/ResidentModels";
 import { RootStore } from "../../../Services/Store";
-import UsePdf from "../../../Hooks/UsePdf";
 
 interface DataTableResidentAdminInterface {}
 
-// const initialSearch = {
-//   search: "",
-// };
-
 const initialSearch = {
-  name: "",
+  first_name: "",
+  last_name: "",
   min_age: "",
   max_age: "",
   gender: ["m", "f"],
@@ -232,8 +224,9 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> =
         sort: activeSort,
         filters: tableSearch,
       };
+
       const response = await ResidentApi.getDataTableResidentPdf(filters);
-      console.log(`response`, response);
+
       if (response.success) {
         set_soa(response.data);
       }
@@ -322,15 +315,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> =
                   searchField={searchField}
                 /> */}
                 <DataTableSearch
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSetTableSearch({
-                      ...tableSearch,
-                      search: searchField,
-                    });
-                  }}
-                  handleSetSearchField={handleSetSearchField}
-                  searchField={searchField}
+                  width={450}
                   FilterComponent={
                     <Formik
                       initialValues={tableSearch}
@@ -339,19 +324,27 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> =
                         const filter_payload = {
                           ...form_values,
                         };
-
-                        console.log(`filter_payload`, filter_payload);
-
                         handleSetTableSearch(filter_payload);
                       }}
                     >
                       {() => (
                         <Form className="form">
                           <Grid container spacing={3}>
-                            <Grid item xs={12}>
+                            <Grid item xs={6}>
                               <FormikInputField
-                                name="name"
-                                label="Full Name"
+                                name="first_name"
+                                label="First Name"
+                                type="text"
+                                fullWidth={true}
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <FormikInputField
+                                name="last_name"
+                                label="Last Name"
                                 type="text"
                                 fullWidth={true}
                                 InputLabelProps={{

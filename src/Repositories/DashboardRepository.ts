@@ -393,6 +393,141 @@ const statsNews = async (): Promise<ResponseModel> => {
   }
 };
 
+const StatsBiktikmaPangabuso = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_biktima_pangabuso AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsKahimtangKomunidad = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_kahimtanang_komunidad AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsMatangBasura = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_basura AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsMatangKasilyas = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_kasilyas AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsPasilidadKuryente = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_pasilidad_kuryente AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 export default {
   total_population,
   total_death,
@@ -404,4 +539,9 @@ export default {
   lifeStageStats,
   statsComplaint,
   statsNews,
+  StatsPasilidadKuryente,
+  StatsBiktikmaPangabuso,
+  StatsKahimtangKomunidad,
+  StatsMatangBasura,
+  StatsMatangKasilyas,
 };

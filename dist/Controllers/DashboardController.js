@@ -105,6 +105,46 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
             res.json(500);
         }
     }));
+    router.post("/StatsPasilidadKuryente", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsPasilidadKuryente());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsBiktikmaPangabuso", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsBiktikmaPangabuso());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsKahimtangKomunidad", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsKahimtangKomunidad());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsMatangBasura", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsMatangBasura());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsMatangKasilyas", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsMatangKasilyas());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
     app.use("/api/dashboard/", router);
 });
 exports.default = DashboardController;

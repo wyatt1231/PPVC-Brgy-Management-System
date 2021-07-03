@@ -11,16 +11,18 @@ import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import FilterListRoundedIcon from "@material-ui/icons/FilterListRounded";
 import styled from "styled-components";
 interface IDataTableSearch {
-  onSubmit: (values: any) => void;
-  handleSetSearchField: (value: string) => void;
-  searchField: string;
+  // onSubmit: (values: any) => void;
+  // handleSetSearchField: (value: string) => void;
+  // searchField: string;
   FilterComponent?: any;
+  width?: number;
 }
 
 export const DataTableSearch: FC<IDataTableSearch> = memo(
-  ({ onSubmit, searchField, handleSetSearchField, FilterComponent }) => {
-    const [anchorEl, setAnchorEl] =
-      React.useState<HTMLButtonElement | null>(null);
+  ({ FilterComponent, width }) => {
+    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+      null
+    );
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       setAnchorEl(event.currentTarget);
@@ -35,46 +37,11 @@ export const DataTableSearch: FC<IDataTableSearch> = memo(
 
     return (
       <div>
-        {/* <form onSubmit={onSubmit}>
-          <FormControl fullWidth variant="outlined">
-            <OutlinedInput
-              style={{ borderRadius: 30 }}
-              id="outlined-adornment-amount"
-              placeholder="Enter the keywords to search"
-              endAdornment={
-                <InputAdornment position="start">
-                  <IconButton type="submit">
-                    <SearchRoundedIcon color="primary" />
-                  </IconButton>
-                  {!!FilterComponent && (
-                    <IconButton
-                      type="button"
-                      aria-describedby={id}
-                      onClick={handleClick}
-                    >
-                      <FilterListRoundedIcon color="primary" />
-                    </IconButton>
-                  )}
-                </InputAdornment>
-              }
-              autoFocus
-              value={searchField}
-              onChange={(e) => {
-                handleSetSearchField(e.target.value);
-              }}
-            />
-          </FormControl>
-        </form> */}
-
-          {!!FilterComponent && (
-                    <IconButton
-                      type="button"
-                      aria-describedby={id}
-                      onClick={handleClick}
-                    >
-                      <FilterListRoundedIcon color="primary" />
-                    </IconButton>
-                  )}
+        {!!FilterComponent && (
+          <IconButton type="button" aria-describedby={id} onClick={handleClick}>
+            <FilterListRoundedIcon color="primary" />
+          </IconButton>
+        )}
         <Popover
           id={id}
           open={open}
@@ -89,7 +56,12 @@ export const DataTableSearch: FC<IDataTableSearch> = memo(
             horizontal: "right",
           }}
         >
-          <PopperContent>
+          <PopperContent
+            style={{
+              minWidth: !!width ? width : 500,
+              maxWidth: !!width ? width : 500,
+            }}
+          >
             <div className="popper-content">
               <div className="title">Filter Records</div>
               <div className="content">{FilterComponent}</div>
@@ -107,8 +79,6 @@ const PopperContent = styled(Paper)`
   padding: 1em 0.5em;
   display: grid;
   grid-gap: 0.5em;
-  min-width: 650px;
-  max-width: 650px;
 
   .popper-content {
     padding: 0.5em;

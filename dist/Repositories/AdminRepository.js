@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
+const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useValidator_1 = require("../Hooks/useValidator");
@@ -180,12 +181,13 @@ const getAdminDataTable = (payload) => __awaiter(void 0, void 0, void 0, functio
       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a 
       LEFT JOIN status s ON s.sts_pk = a.sts_pk) tmp
       WHERE 
-      (firstname like concat('%',@search,'%')
-      OR lastname like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%'))
+      firstname like concat('%',@firstname,'%')
+      AND lastname like concat('%',@lastname,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
       AND admin_pk != 1
+      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_from, "encoded_at")}
+      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
       `, payload);
         const hasMore = data.length > payload.page.limit;
         if (hasMore) {

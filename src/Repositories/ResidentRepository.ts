@@ -287,9 +287,8 @@ const getDataTableResident = async (
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      (first_name LIKE concat('%',@name,'%')
-      OR last_name LIKE concat('%',@name,'%')
-      OR fullname LIKE concat('%',@name,'%'))
+      first_name LIKE concat('%',@first_name,'%')
+      AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
       AND purok IN @purok
@@ -357,16 +356,18 @@ const getDataTableResidentPdf = async (
 
     var base64data = brand_info?.logo.toString("base64");
 
-    const resident_data: Array<ResidentModel> = await con.QueryPagination(
+    console.log(`payload`, payload);
+
+    const resident_data: Array<ResidentModel> = await con.Query(
       `
-      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      SELECT * FROM
+      (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
       YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      (first_name LIKE concat('%',@name,'%')
-      OR last_name LIKE concat('%',@name,'%')
-      OR fullname LIKE concat('%',@name,'%'))
+      first_name LIKE concat('%',@first_name,'%')
+      AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
       AND purok IN @purok
@@ -380,8 +381,9 @@ const getDataTableResidentPdf = async (
         payload.filters.encoded_to,
         "encoded_at"
       )}
+      ORDER BY ${payload.sort.column} ${payload.sort.direction}
       `,
-      payload
+      payload.filters
     );
 
     const browser = await puppeteer.launch({

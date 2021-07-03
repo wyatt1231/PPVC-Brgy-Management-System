@@ -1,9 +1,8 @@
-import { InvalidDateToDefault } from "../Hooks/useDateParser";
-import { PaginationModel } from "../Models/PaginationModel";
-import { ResidentModel } from "../Models/ResidentModels";
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const useDateParser_1 = require("../Hooks/useDateParser");
 const CSS = () => {
-  return `
+    return `
     <style>
       body {
         flex-direction: column;
@@ -189,9 +188,8 @@ const CSS = () => {
     </style>
   `;
 };
-
-const Header = (logo: string) => {
-  return `${CSS()} <header class="header" style="font-size: 9pt;">
+const Header = (logo) => {
+    return `${CSS()} <header class="header" style="font-size: 9pt;">
   <img src='data:image/png;base64, ${logo}' alt="" class="brand-logo" />
   <div class="document-title">Resident Population Report</div>
   <div class="header-info-group">
@@ -200,12 +198,9 @@ const Header = (logo: string) => {
   </div>
 </header>`;
 };
-
-const Content = (
-  resident_data: Array<ResidentModel>,
-  filters: PaginationModel
-) => {
-  return `
+const Content = (resident_data, filters) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    return `
         <html>
           <head>
             ${CSS()}
@@ -219,7 +214,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">First Name:</div>
-                    <div class="value">${filters?.filters?.first_name}</div>
+                    <div class="value">${(_a = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _a === void 0 ? void 0 : _a.first_name}</div>
                   </div>
                 </div>
               </div>
@@ -227,7 +222,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Last Name:</div>
-                    <div class="value">${filters?.filters?.last_name}</div>
+                    <div class="value">${(_b = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _b === void 0 ? void 0 : _b.last_name}</div>
                   </div>
                 </div>
               </div>
@@ -235,9 +230,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Edad:</div>
-                    <div class="value">${filters?.filters?.min_age}-${
-    filters?.filters?.max_age
-  }</div>
+                    <div class="value">${(_c = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _c === void 0 ? void 0 : _c.min_age}-${(_d = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _d === void 0 ? void 0 : _d.max_age}</div>
                   </div>
                 </div>
               </div>
@@ -245,9 +238,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Sekso:</div>
-                    <div class="value">${filters?.filters?.gender?.map((g) =>
-                      g === "m" ? "Lalaki" : "Babae"
-                    )}</div>
+                    <div class="value">${(_f = (_e = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _e === void 0 ? void 0 : _e.gender) === null || _f === void 0 ? void 0 : _f.map((g) => g === "m" ? "Lalaki" : "Babae")}</div>
                   </div>
                 </div>
               </div>
@@ -255,9 +246,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Mga Purok:</div>
-                    <div class="value">${filters?.filters?.purok?.map(
-                      (g) => g
-                    )}</div>
+                    <div class="value">${(_h = (_g = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _g === void 0 ? void 0 : _g.purok) === null || _h === void 0 ? void 0 : _h.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -266,9 +255,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Status</div>
-                    <div class="value">${filters?.filters?.sts_pk?.map((s) =>
-                      s === "A" ? "Active" : "Not Active"
-                    )}</div>
+                    <div class="value">${(_k = (_j = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _j === void 0 ? void 0 : _j.sts_pk) === null || _k === void 0 ? void 0 : _k.map((s) => s === "A" ? "Active" : "Not Active")}</div>
                   </div>
                 </div>
               </div>
@@ -276,13 +263,7 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Encoded At</div>
-                    <div class="value">${InvalidDateToDefault(
-                      filters?.filters?.encoded_from,
-                      "All prev. dates"
-                    )} -  ${InvalidDateToDefault(
-    filters?.filters?.encoded_at,
-    "All future dates"
-  )}</div>
+                    <div class="value">${useDateParser_1.InvalidDateToDefault((_l = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _l === void 0 ? void 0 : _l.encoded_from, "All prev. dates")} -  ${useDateParser_1.InvalidDateToDefault((_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.encoded_at, "All future dates")}</div>
                   </div>
                 </div>
               </div>
@@ -312,38 +293,34 @@ const Content = (
         </html>
     `;
 };
-
-const GenerateResidentTable = (resident_data: Array<ResidentModel>) => {
-  let table = ``;
-
-  for (const r of resident_data) {
-    table =
-      table +
-      `<tr>
+const GenerateResidentTable = (resident_data) => {
+    let table = ``;
+    for (const r of resident_data) {
+        table =
+            table +
+                `<tr>
       <td>${r.first_name} ${r.middle_name} ${r.last_name} ${r.suffix}</td>
       <td>${r.gender === "m" ? "Lalaki" : "Babae"}</td>
       <td>${r.age}</td>
       <td>Purok ${r.purok}</td>
       <td>${r.sts_pk === "A" ? "active" : "not active"}</td>
-      <td>${InvalidDateToDefault(r.encoded_at, "-")}</td>
+      <td>${useDateParser_1.InvalidDateToDefault(r.encoded_at, "-")}</td>
     </tr>`;
-  }
-
-  return table;
+    }
+    return table;
 };
-
 const Footer = () => {
-  return `${CSS()} <footer>
+    return `${CSS()} <footer>
   <div class="footer-info-group">
   <span class="label">Page </span>
   <span class="value pageNumber"></span>
   </div>
 </footer>`;
 };
-
-export default {
-  Header,
-  Content,
-  CSS,
-  Footer,
+exports.default = {
+    Header,
+    Content,
+    CSS,
+    Footer,
 };
+//# sourceMappingURL=ResidentReport%20copy.js.map

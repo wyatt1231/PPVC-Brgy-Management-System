@@ -8,11 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useSearch_1 = require("../Hooks/useSearch");
+const FamilyReport_1 = __importDefault(require("../PdfTemplates/FamilyReport"));
+const puppeteer = require("puppeteer");
 const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
@@ -505,19 +510,36 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        console.log(`filters`, payload.filters);
-        const all_family = yield con.Query(`
+        const all_family = yield con.QueryPagination(`
       SELECT * FROM 
-      (
-        SELECT f.*,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok FROM family f JOIN
-        resident fu ON f.ulo_pamilya = fu.resident_pk
-      ) AS tmp
-      WHERE
-      coalesce(ulo_fam_member,'') LIKE concat('%',@search,'%')
-     # AND coalesce(ulo_fam_purok,'') LIKE concat('%',@search,'%')
-      order by ${payload.sort.column} ${payload.sort.direction}
-      limit ${payload.page.begin},${payload.page.limit + 1};
-      `, payload.filters);
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        ) tmp2
+        group by fam_pk
+
+      `, payload);
         const hasMore = all_family.length > payload.page.limit;
         if (hasMore) {
             all_family.splice(all_family.length - 1, 1);
@@ -564,6 +586,84 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
         };
     }
 });
+const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield DatabaseConfig_1.DatabaseConnection();
+    try {
+        yield con.BeginTransaction();
+        const brand_info = yield con.QuerySingle(`
+        SELECT logo FROM brand_logo LIMIT 1
+      `, {});
+        var base64data = brand_info === null || brand_info === void 0 ? void 0 : brand_info.logo.toString("base64");
+        const all_family = yield con.Query(`
+      SELECT * FROM 
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        ) tmp2
+        group by fam_pk
+        ORDER BY ${payload.sort.column} ${payload.sort.direction}
+      `, payload.filters);
+        for (const fam of all_family) {
+            fam.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk `, {
+                resident_pk: fam.ulo_pamilya,
+            });
+            fam.fam_members = yield con.Query(`select * from family_member where fam_pk=@fam_pk `, {
+                fam_pk: fam.fam_pk,
+            });
+        }
+        const browser = yield puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            headless: true,
+        });
+        const page = yield browser.newPage();
+        yield page.setContent(`${FamilyReport_1.default.Content(all_family, payload)}`);
+        const pdfBuffer = yield page.pdf({
+            format: "A4",
+            displayHeaderFooter: true,
+            headerTemplate: FamilyReport_1.default.Header(base64data),
+            footerTemplate: FamilyReport_1.default.Footer(),
+            margin: {
+                top: "160px",
+                bottom: "40px",
+            },
+        });
+        yield browser.close();
+        con.Commit();
+        return {
+            success: true,
+            data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: useErrorMessage_1.ErrorMessage(error),
+        };
+    }
+});
 const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
     var _c;
     const con = yield DatabaseConfig_1.DatabaseConnection();
@@ -571,7 +671,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
         yield con.BeginTransaction();
         const all_family = yield con.QuerySingle(`
       SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
-        `, {
+      `, {
             resident_pk: resident_pk,
         });
         if (!all_family) {
@@ -654,7 +754,6 @@ const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function*
     const con = yield DatabaseConfig_1.DatabaseConnection();
     try {
         yield con.BeginTransaction();
-        console.log(`payload`, payload);
         const search_data_set = yield con.Query(`
       SELECT * FROM 
                 (
@@ -700,5 +799,6 @@ exports.default = {
     searchNoFamResident,
     searchFamMember,
     getSingleFamByFamPk,
+    getFamilyDataTablePdf,
 };
 //# sourceMappingURL=FamilyRepository.js.map

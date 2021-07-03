@@ -1,4 +1,5 @@
 import { InvalidDateToDefault } from "../Hooks/useDateParser";
+import { FamilyModel } from "../Models/FamilyModel";
 import { PaginationModel } from "../Models/PaginationModel";
 import { ResidentModel } from "../Models/ResidentModels";
 
@@ -193,7 +194,7 @@ const CSS = () => {
 const Header = (logo: string) => {
   return `${CSS()} <header class="header" style="font-size: 9pt;">
   <img src='data:image/png;base64, ${logo}' alt="" class="brand-logo" />
-  <div class="document-title">Resident Population Report</div>
+  <div class="document-title">Family Report</div>
   <div class="header-info-group">
     <div class="label">Barangay</div>
     <div class="value">37-D, Davao City</div>
@@ -202,7 +203,7 @@ const Header = (logo: string) => {
 };
 
 const Content = (
-  resident_data: Array<ResidentModel>,
+  resident_data: Array<FamilyModel>,
   filters: PaginationModel
 ) => {
   return `
@@ -218,36 +219,20 @@ const Content = (
               <div class="col-6">
                 <div>
                   <div class="info-group">
-                    <div class="label">First Name:</div>
-                    <div class="value">${filters?.filters?.first_name}</div>
+                    <div class="label">Pangalan sa Ulo sa Pamilya:</div>
+                    <div class="value">${
+                      filters?.filters?.ulo_pamilya_first_name
+                    }</div>
                   </div>
                 </div>
               </div>
               <div class="col-6">
                 <div>
                   <div class="info-group">
-                    <div class="label">Last Name:</div>
-                    <div class="value">${filters?.filters?.last_name}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div>
-                  <div class="info-group">
-                    <div class="label">Edad:</div>
-                    <div class="value">${filters?.filters?.min_age}-${
-    filters?.filters?.max_age
-  }</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div>
-                  <div class="info-group">
-                    <div class="label">Sekso:</div>
-                    <div class="value">${filters?.filters?.gender?.map((g) =>
-                      g === "m" ? "Lalaki" : "Babae"
-                    )}</div>
+                    <div class="label">Apilyedo sa Ulo sa Pamilya:</div>
+                    <div class="value">${
+                      filters?.filters?.ulo_pamilya_last_name
+                    }</div>
                   </div>
                 </div>
               </div>
@@ -255,34 +240,69 @@ const Content = (
                 <div>
                   <div class="info-group">
                     <div class="label">Mga Purok:</div>
-                    <div class="value">${filters?.filters?.purok?.map(
+                    <div class="value">
+                    ${filters?.filters?.ulo_fam_purok?.map((g) => g)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Tinubdan Sa Tubig:</div>
+                    <div class="value">
+                    ${filters?.filters?.tinubdan_tubig?.map((g) => g)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Matang sa Kasilyas:</div>
+                    <div class="value">
+                    ${filters?.filters?.matang_kasilyas?.map((g) => g)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Pasilidad sa Kuryente:</div>
+                    <div class="value">${filters?.filters?.pasilidad_kuryente?.map(
                       (g) => g
                     )}</div>
                   </div>
                 </div>
               </div>
-        
-              <div class="col-6">
+              <div class="col-12">
                 <div>
                   <div class="info-group">
-                    <div class="label">Status</div>
-                    <div class="value">${filters?.filters?.sts_pk?.map((s) =>
-                      s === "A" ? "Active" : "Not Active"
+                    <div class="label">Matang sa Basura:</div>
+                    <div class="value">${filters?.filters?.matang_basura?.map(
+                      (g) => g
                     )}</div>
                   </div>
                 </div>
               </div>
-              <div class="col-6">
+              <div class="col-12">
                 <div>
                   <div class="info-group">
-                    <div class="label">Encoded At</div>
-                    <div class="value">${InvalidDateToDefault(
-                      filters?.filters?.encoded_from,
-                      "All prev. dates"
-                    )} -  ${InvalidDateToDefault(
-    filters?.filters?.encoded_at,
-    "All future dates"
-  )}</div>
+                    <div class="label">Tinubdan sa Tubig:</div>
+                    <div class="value">${filters?.filters?.tinubdan_tubig?.map(
+                      (g) => g
+                    )}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Biktikma sa Pang-abuso:</div>
+                    <div class="value">${filters?.filters?.biktima_pangabuso?.map(
+                      (g) => g
+                    )}</div>
                   </div>
                 </div>
               </div>
@@ -292,18 +312,13 @@ const Content = (
             <table>
               <thead>
                 <tr>
-                  <td >Full Name</td>
-                  <td >Sekso</td>
-                  <td >Edad</td>
-                  <td >Purok</td>
-                  <td >Ulo sa Pamilya</td>
-                  <td >Encoded At</td>
+                  <td>Ulo sa Pamilya</td>
+                  <td>Purok</td>
+                  <td>Sakop sa Pamilya</td>
                 </tr>
               </thead>
               <tbody>
                 ${GenerateResidentTable(resident_data)}
-                
-              
               </tbody>
             </table>
         
@@ -313,19 +328,16 @@ const Content = (
     `;
 };
 
-const GenerateResidentTable = (resident_data: Array<ResidentModel>) => {
+const GenerateResidentTable = (resident_data: Array<FamilyModel>) => {
   let table = ``;
 
   for (const r of resident_data) {
     table =
       table +
       `<tr>
-      <td>${r.first_name} ${r.middle_name} ${r.last_name} ${r.suffix}</td>
-      <td>${r.gender === "m" ? "Lalaki" : "Babae"}</td>
-      <td>${r.age}</td>
-      <td>Purok ${r.purok}</td>
-      <td>${r.sts_pk === "A" ? "active" : "not active"}</td>
-      <td>${InvalidDateToDefault(r.encoded_at, "-")}</td>
+      <td>${r?.ulo_pamilya_info?.first_name} ${r?.ulo_pamilya_info?.middle_name} ${r?.ulo_pamilya_info?.last_name} ${r?.ulo_pamilya_info?.suffix}</td>
+      <td>Purok ${r?.ulo_pamilya_info?.purok}</td>
+      <td>${r?.fam_members?.length} ka miyembro</td>
     </tr>`;
   }
 

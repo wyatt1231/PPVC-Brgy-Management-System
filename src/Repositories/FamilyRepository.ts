@@ -5,7 +5,8 @@ import { GenerateSearch } from "../Hooks/useSearch";
 import { FamilyModel } from "../Models/FamilyModel";
 import { PaginationModel } from "../Models/PaginationModel";
 import { ResponseModel } from "../Models/ResponseModels";
-
+import FamilyReport from "../PdfTemplates/FamilyReport";
+const puppeteer = require("puppeteer");
 const addFamily = async (
   payload: FamilyModel,
   user_pk: number
@@ -328,6 +329,7 @@ const updateFamily = async (
         `DELETE FROM family_biktima_pangabuso where fam_pk=@fam_pk;`,
         { fam_pk }
       );
+
       for (const mk of payload.biktima_pangabuso) {
         const insert = await con.Insert(
           `
@@ -681,22 +683,38 @@ const getFamilyDataTable = async (
   try {
     await con.BeginTransaction();
 
-    console.log(`filters`, payload.filters);
-
-    const all_family: Array<FamilyModel> = await con.Query(
+    const all_family: Array<FamilyModel> = await con.QueryPagination(
       `
       SELECT * FROM 
-      (
-        SELECT f.*,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok FROM family f JOIN
-        resident fu ON f.ulo_pamilya = fu.resident_pk
-      ) AS tmp
-      WHERE
-      coalesce(ulo_fam_member,'') LIKE concat('%',@search,'%')
-     # AND coalesce(ulo_fam_purok,'') LIKE concat('%',@search,'%')
-      order by ${payload.sort.column} ${payload.sort.direction}
-      limit ${payload.page.begin},${payload.page.limit + 1};
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        ) tmp2
+        group by fam_pk
+
       `,
-      payload.filters
+      payload
     );
 
     const hasMore: boolean = all_family.length > payload.page.limit;
@@ -764,6 +782,109 @@ const getFamilyDataTable = async (
   }
 };
 
+const getFamilyDataTablePdf = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const brand_info: any = await con.QuerySingle(
+      `
+        SELECT logo FROM brand_logo LIMIT 1
+      `,
+      {}
+    );
+
+    var base64data = brand_info?.logo.toString("base64");
+
+    const all_family: Array<FamilyModel> = await con.Query(
+      `
+      SELECT * FROM 
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        ) tmp2
+        group by fam_pk
+        ORDER BY ${payload.sort.column} ${payload.sort.direction}
+      `,
+      payload.filters
+    );
+
+    for (const fam of all_family) {
+      fam.ulo_pamilya_info = await con.QuerySingle(
+        `select * from resident where resident_pk=@resident_pk `,
+        {
+          resident_pk: fam.ulo_pamilya,
+        }
+      );
+
+      fam.fam_members = await con.Query(
+        `select * from family_member where fam_pk=@fam_pk `,
+        {
+          fam_pk: fam.fam_pk,
+        }
+      );
+    }
+
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: true,
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(`${FamilyReport.Content(all_family, payload)}`);
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      displayHeaderFooter: true,
+      headerTemplate: FamilyReport.Header(base64data),
+      footerTemplate: FamilyReport.Footer(),
+      margin: {
+        top: "160px",
+        bottom: "40px",
+      },
+    });
+
+    await browser.close();
+    con.Commit();
+    return {
+      success: true,
+      data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
+    };
+  } catch (error) {
+    await con.Rollback();
+
+    console.error(`error`, error);
+
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const getFamilyOfResident = async (
   resident_pk: number
 ): Promise<ResponseModel> => {
@@ -774,7 +895,7 @@ const getFamilyOfResident = async (
     const all_family: FamilyModel = await con.QuerySingle(
       `
       SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
-        `,
+      `,
       {
         resident_pk: resident_pk,
       }
@@ -882,8 +1003,6 @@ const searchFamMember = async (payload: any): Promise<ResponseModel> => {
   try {
     await con.BeginTransaction();
 
-    console.log(`payload`, payload);
-
     const search_data_set = await con.Query(
       `
       SELECT * FROM 
@@ -933,4 +1052,5 @@ export default {
   searchNoFamResident,
   searchFamMember,
   getSingleFamByFamPk,
+  getFamilyDataTablePdf,
 };

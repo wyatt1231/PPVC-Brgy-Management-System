@@ -61,10 +61,10 @@ const getBrgyOfficialDataTable = async (
       JOIN resident r ON bo.resident_pk = r.resident_pk
       LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       WHERE 
-      (first_name like concat('%',@search,'%')
-      OR last_name like concat('%',@search,'%')
-      OR position like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%'))
+      first_name like concat('%',@first_name,'%')
+      AND last_name like concat('%',@last_name,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
       `,
       payload
     );

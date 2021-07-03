@@ -134,6 +134,66 @@ const DashboardController = async (app: Express): Promise<void> => {
     }
   );
 
+  router.post(
+    "/StatsPasilidadKuryente",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsPasilidadKuryente());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsBiktikmaPangabuso",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsBiktikmaPangabuso());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsKahimtangKomunidad",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsKahimtangKomunidad());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsMatangBasura",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsMatangBasura());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsMatangKasilyas",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsMatangKasilyas());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
   app.use("/api/dashboard/", router);
 };
 
