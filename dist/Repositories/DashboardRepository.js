@@ -292,7 +292,7 @@ const statsComplaint = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield con.BeginTransaction();
         const stats_complaint = yield con.Query(`
-      SELECT  s.sts_desc as label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
+      SELECT  s.sts_desc as label,s.sts_color backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
           `, null);
         con.Commit();
         return {

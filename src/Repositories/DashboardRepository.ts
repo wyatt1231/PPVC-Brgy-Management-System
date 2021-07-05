@@ -346,7 +346,7 @@ const statsComplaint = async (): Promise<ResponseModel> => {
 
     const stats_complaint: Array<any> = await con.Query(
       `
-      SELECT  s.sts_desc as label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
+      SELECT  s.sts_desc as label,s.sts_color backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
           `,
       null
     );

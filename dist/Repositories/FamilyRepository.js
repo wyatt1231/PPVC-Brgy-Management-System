@@ -536,6 +536,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
         AND pasilidad_kuryente IN @pasilidad_kuryente
         AND matang_basura IN @matang_basura
         AND biktima_pangabuso IN @biktima_pangabuso
+        AND ulo_fam_purok IN @ulo_fam_purok
         ) tmp2
         group by fam_pk
 
@@ -620,6 +621,7 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
         AND pasilidad_kuryente IN @pasilidad_kuryente
         AND matang_basura IN @matang_basura
         AND biktima_pangabuso IN @biktima_pangabuso
+        AND ulo_fam_purok IN @ulo_fam_purok
         ) tmp2
         group by fam_pk
         ORDER BY ${payload.sort.column} ${payload.sort.direction}
