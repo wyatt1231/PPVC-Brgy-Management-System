@@ -8,38 +8,39 @@ const mysql2_1 = __importDefault(require("mysql2"));
 exports.connection_string = null;
 if (process.env.NODE_ENV === "production") {
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
-        port: 3306,
+        host: "127.0.0.1",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
         connectionLimit: 10,
         waitForConnections: true,
         queueLimit: 10,
     };
 }
 else {
-    // connection_string = {
-    //   host: "127.0.0.1",
-    //   user: "root",
-    //   password: "root sa",
-    //   database: "bms",
-    //   port: 3309,
-    //   connectionLimit: 10,
-    //   waitForConnections: true,
-    //   queueLimit: 10,
-    // };
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
-        port: 3306,
+        host: "127.0.0.1",
+        user: "root",
+        password: "root sa",
+        database: "bms",
+        port: 3309,
         connectionLimit: 10,
         waitForConnections: true,
         queueLimit: 10,
     };
+    // connection_string = {
+    //   host: "156.67.222.35",
+    //   user: "u583403240_bms",
+    //   password: "BMS@capstone2",
+    //   database: "u583403240_bms",
+    //   port: 3306,
+    //   connectionLimit: 10,
+    //   waitForConnections: true,
+    //   queueLimit: 10,
+    // };
 }
+0;
 const DatabaseConfig = mysql2_1.default.createPool(exports.connection_string);
 const DatabaseConnection = () => {
     return new Promise((resolve, reject) => {

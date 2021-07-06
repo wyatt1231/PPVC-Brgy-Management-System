@@ -260,7 +260,7 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
     console.log(search);
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * FROM resident WHERE first_name LIKE concat('%',@search,'%') || last_name LIKE concat('%',@search,'%')`, {
+        const data = yield con.Query(`SELECT * FROM searchable_user WHERE first_name LIKE CONCAT('%',@search,'%') || last_name LIKE CONCAT('%',@search,'%') AND resident_pk`, {
             search: search,
         });
         con.Commit();
