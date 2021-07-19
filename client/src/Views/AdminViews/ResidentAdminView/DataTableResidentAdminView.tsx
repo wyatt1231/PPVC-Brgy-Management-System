@@ -47,7 +47,7 @@ const initialSearch = {
   min_age: "",
   max_age: "",
   gender: ["m", "f"],
-  ulo_fam_purok: ["1", "2", "3", "4", "5", "6", "7", "8"],
+  purok: ["1", "2", "3", "4", "5", "6", "7", "8"],
   edad: "",
   sts_pk: ["A", "NA"],
   encoded_from: null,
@@ -401,7 +401,7 @@ export const DataTableResidentAdminView: FC<DataTableResidentAdminInterface> =
                               <FormikCheckbox
                                 row={true}
                                 color="primary"
-                                name="ulo_fam_purok"
+                                name="purok"
                                 label="Purok"
                                 data={[
                                   {
