@@ -1,3 +1,4 @@
+import mysql from "mysql2";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
@@ -10,7 +11,7 @@ import {
 } from "../Models/PostsModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
-const getPosts = async (user_pk: number): Promise<ResponseModel> => {
+const getPosts = async (user_pk: number,offset?:number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
 
   try {
@@ -22,9 +23,10 @@ const getPosts = async (user_pk: number): Promise<ResponseModel> => {
         ,u.full_name user_full_name,u.pic user_pic FROM posts p
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
-        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC)tmp;
-        `,
-      null
+        LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC LIMIT ${offset})tmp;
+        `,{
+          offset:offset
+        }
     );
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(

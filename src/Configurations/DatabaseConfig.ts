@@ -22,7 +22,11 @@ if (process.env.NODE_ENV === "production") {
   connection_string = {
     host: "127.0.0.1",
     user: "root",
+<<<<<<< HEAD
     password: "root sa",
+=======
+    password: "rootsa",
+>>>>>>> 667a393e407c314b0b711179267d2dc1d7fc01a3
     database: "bms",
     port: 3309,
     connectionLimit: 10,

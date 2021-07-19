@@ -115,8 +115,7 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
             email: payload.email,
             encoder_pk: "0",
         };
-        console.log(payload);
-        const update_user = yield con.Insert(`UPDATE user SET
+        const update_user = yield con.Modify(`UPDATE user SET
       email=@email,
       password=AES_ENCRYPT(@email,@email),
       full_name=@full_name
@@ -138,36 +137,47 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
         }
         const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date) });
         const sql_edit_resident = yield con.Modify(`UPDATE resident SET
-        user_pk=@user_pk,
-        pic=@pic,              
-        first_name=@first_name,       
-        middle_name=@middle_name,      
-        last_name=@last_name,        
-        suffix=@suffix,           
-        gender=@gender,           
-        birth_date=@birth_date,       
-        nationality=@nationality,      
-        religion=@religion,         
-        civil_status=@civil_status,  
-        purok=@purok,   
-        phone=@phone,    
-        email=@email,  
-        dialect=@dialect,          
-        tribe=@tribe,            
-        with_disability=@with_disability,  
-        is_employed=@is_employed,      
-        employment=@employment,       
-        house_income=@house_income,    
-   
-        educ=@educ,
-        house_ownership=@house_ownership
-        WHERE resident_pk=@resident_pk;`, resident_payload);
+      user_pk=@user_pk,
+      pic=@pic,              
+      first_name=@first_name,       
+      middle_name=@middle_name,      
+      last_name=@last_name,        
+      suffix=@suffix,           
+      gender=@gender,           
+      birth_date=@birth_date,       
+      nationality=@nationality,      
+      religion=@religion,         
+      civil_status=@civil_status,  
+      purok=@purok,   
+      phone=@phone,    
+      email=@email,  
+      dialect=@dialect,          
+      tribe=@tribe,            
+      with_disability=@with_disability,  
+      is_employed=@is_employed,      
+      employment=@employment,       
+      house_income=@house_income,    
+ 
+      educ=@educ,
+      house_ownership=@house_ownership
+      WHERE resident_pk=@resident_pk;`, resident_payload);
         if (sql_edit_resident > 0) {
-            con.Commit();
-            return {
-                success: true,
-                message: "The resident has been updated successfully",
-            };
+            const sql_edit_user = yield con.Modify(`UPDATE user SET full_name=CONCAT(@last_name,',',@first_name,' ',@middle_name,' ',@suffix) 
+          WHERE user_pk=@user_pk;`, resident_payload);
+            if (sql_edit_user > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                    message: "The resident has been updated successfully",
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "No affected rows while updating the resident",
+                };
+            }
         }
         else {
             con.Rollback();
@@ -250,7 +260,7 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
     console.log(search);
     try {
         yield con.BeginTransaction();
-        const data = yield con.Query(`SELECT * FROM resident WHERE first_name LIKE concat('%',@search,'%') || last_name LIKE concat('%',@search,'%')`, {
+        const data = yield con.Query(`SELECT * FROM searchable_user WHERE first_name LIKE CONCAT('%',@search,'%') || last_name LIKE CONCAT('%',@search,'%') AND resident_pk`, {
             search: search,
         });
         con.Commit();
