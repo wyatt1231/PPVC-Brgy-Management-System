@@ -29,6 +29,16 @@ else {
         waitForConnections: true,
         queueLimit: 10,
     };
+    exports.connection_string = {
+        host: "156.67.222.35",
+        user: "u583403240_bms",
+        password: "BMS@capstone2",
+        database: "u583403240_bms",
+        port: 3306,
+        connectionLimit: 10,
+        waitForConnections: true,
+        queueLimit: 10,
+    };
     // connection_string = {
     //   host: "156.67.222.35",
     //   user: "u583403240_bms",

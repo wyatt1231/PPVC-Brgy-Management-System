@@ -103,7 +103,11 @@ const total_sc = async (purok: Array<string>): Promise<ResponseModel> => {
 
     const db_res = await con.QuerySingle(
       `
-      select count(*) as total from resident where died_date is null  and DATEDIFF(DATE(NOW()), birth_date) >= 60   and purok in @purok
+      SELECT count(*) as total FROM (
+        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
+        FROM resident WHERE died_date IS NULL  AND purok IN @purok
+        ) AS tmp
+        WHERE  age >= 60 
     `,
       {
         purok: purok,
@@ -201,25 +205,25 @@ const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
       `
         SELECT * FROM 
         (
-        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 0 AND DATEDIFF(DATE(NOW()), birth_date) <=10 and purok in @purok
+        SELECT '0-10' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 0 AND getBirthdayAge(birth_date)  <=10 AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 11 AND DATEDIFF(DATE(NOW()), birth_date) <=20 and purok in @purok
+        SELECT '11-20' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 11 AND getBirthdayAge(birth_date)  <=20 AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 21 AND DATEDIFF(DATE(NOW()), birth_date) <=30 and purok in @purok
+        SELECT '21-30' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 21 AND getBirthdayAge(birth_date)  <=30 AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 31 AND DATEDIFF(DATE(NOW()), birth_date) <=40 and purok in @purok
+        SELECT '31-40' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 31 AND getBirthdayAge(birth_date)  <=40 AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 41 AND DATEDIFF(DATE(NOW()), birth_date) <=50 and purok in @purok
+        SELECT '41-50' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 41 AND getBirthdayAge(birth_date)  <=50 AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 51 AND DATEDIFF(DATE(NOW()), birth_date) <=60 and purok in @purok
+        SELECT '51-60' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 51 AND getBirthdayAge(birth_date)  <=60 AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 61 AND DATEDIFF(DATE(NOW()), birth_date) <=70 and purok in @purok
+        SELECT '61-70' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 61 AND getBirthdayAge(birth_date)  <=70 AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 71 AND DATEDIFF(DATE(NOW()), birth_date) <=80 and purok in @purok
+        SELECT '71-90' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 71 AND getBirthdayAge(birth_date)  <=80 AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 91 AND DATEDIFF(DATE(NOW()), birth_date) <=90 and purok in @purok
+        SELECT '81-90' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 91 AND getBirthdayAge(birth_date)  <=90 AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 100 AND died_date IS NOT NULL and purok in @purok
+        SELECT '100+' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 100 AND died_date IS NOT NULL AND purok IN @purok
         ) tmp
           `,
       {
@@ -258,14 +262,14 @@ const lifeStageStats = async (purok: Array<string>): Promise<ResponseModel> => {
 
     const life_stage_stats = await con.Query(
       `
-      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND YEAR(NOW()) - YEAR(birth_date) <= 1 AND purok in @purok
+      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) <= 1 AND purok IN @purok
       UNION ALL
-      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND YEAR(NOW()) - YEAR(birth_date) > 1 AND YEAR(NOW()) - YEAR(birth_date) < 18  AND purok in @purok
+      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) > 1 AND getBirthdayAge(birth_date) < 18  AND purok IN @purok
       UNION ALL
-      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND YEAR(NOW()) - YEAR(birth_date) > 18 AND YEAR(NOW()) - YEAR(birth_date) < 60  AND purok in @purok
+      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) > 18 AND getBirthdayAge(birth_date) < 60  AND purok IN @purok
       UNION ALL
-      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND YEAR(NOW()) - YEAR(birth_date) >= 60  AND purok in @purok
-          `,
+      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) >= 60  AND purok IN @purok
+         `,
       {
         purok,
       }
