@@ -255,12 +255,12 @@ const genderStats = (purok) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield con.BeginTransaction();
         const total_male = yield con.QuerySingle(`
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NOT NULL AND YEAR(resident_date) = YEAR(NOW()) AND gender = 'm'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'  AND purok in @purok
           `, {
             purok,
         });
         const total_female = yield con.QuerySingle(`
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NOT NULL AND YEAR(resident_date) = YEAR(NOW()) AND gender = 'f'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'  AND purok in @purok
           `, {
             purok,
         });

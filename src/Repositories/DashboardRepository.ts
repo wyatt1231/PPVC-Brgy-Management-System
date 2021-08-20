@@ -300,7 +300,7 @@ const genderStats = async (purok: Array<string>): Promise<ResponseModel> => {
 
     const total_male = await con.QuerySingle(
       `
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NOT NULL AND YEAR(resident_date) = YEAR(NOW()) AND gender = 'm'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'  AND purok in @purok
           `,
       {
         purok,
@@ -309,7 +309,7 @@ const genderStats = async (purok: Array<string>): Promise<ResponseModel> => {
 
     const total_female = await con.QuerySingle(
       `
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NOT NULL AND YEAR(resident_date) = YEAR(NOW()) AND gender = 'f'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'  AND purok in @purok
           `,
       {
         purok,
