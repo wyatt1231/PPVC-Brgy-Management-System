@@ -172,25 +172,25 @@ const ageGroupStats = (purok) => __awaiter(void 0, void 0, void 0, function* () 
         const ages = yield con.Query(`
         SELECT * FROM 
         (
-        SELECT '0-10' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 0 AND getBirthdayAge(birth_date)  <=10 AND purok IN @purok
+        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 0 AND getBirthdayAge(birth_date)  <=10 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 11 AND getBirthdayAge(birth_date)  <=20 AND purok IN @purok
+        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 11 AND getBirthdayAge(birth_date)  <=20 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 21 AND getBirthdayAge(birth_date)  <=30 AND purok IN @purok
+        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 21 AND getBirthdayAge(birth_date)  <=30 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 31 AND getBirthdayAge(birth_date)  <=40 AND purok IN @purok
+        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 31 AND getBirthdayAge(birth_date)  <=40 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 41 AND getBirthdayAge(birth_date)  <=50 AND purok IN @purok
+        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 41 AND getBirthdayAge(birth_date)  <=50 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 51 AND getBirthdayAge(birth_date)  <=60 AND purok IN @purok
+        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 51 AND getBirthdayAge(birth_date)  <=60 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 61 AND getBirthdayAge(birth_date)  <=70 AND purok IN @purok
+        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 61 AND getBirthdayAge(birth_date)  <=70 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 71 AND getBirthdayAge(birth_date)  <=80 AND purok IN @purok
+        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 71 AND getBirthdayAge(birth_date)  <=80 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 91 AND getBirthdayAge(birth_date)  <=90 AND purok IN @purok
+        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 91 AND getBirthdayAge(birth_date)  <=90 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS X, COUNT(*) Y FROM resident WHERE getBirthdayAge(birth_date)  >= 100 AND died_date IS NOT NULL AND purok IN @purok
+        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 100 AND died_date IS  NULL AND purok IN @purok
         ) tmp
           `, {
             purok,
@@ -199,6 +199,8 @@ const ageGroupStats = (purok) => __awaiter(void 0, void 0, void 0, function* () 
         for (const r of ages) {
             labels.push(r.x);
         }
+        console.log(`labels`, labels);
+        console.log(`ages`, ages);
         con.Commit();
         return {
             success: true,
