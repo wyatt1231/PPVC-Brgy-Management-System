@@ -336,8 +336,8 @@ const addNews = async (
               method: "post",
               url: `https://api-mapper.clicksend.com/http/v2/send.php`,
               data: qs.stringify({
-                username: "mrmontiveles@outlook.com",
-                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                username: "capstone.pcacas@gmail.com",
+                key: "BC24CC2C-792A-3874-B481-68659AE28841",
                 to: r.phone,
                 message: `Balita gikan sa Brgy. 37-D, Davao City. ${
                   payload.title

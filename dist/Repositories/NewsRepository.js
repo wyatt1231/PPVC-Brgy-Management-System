@@ -254,8 +254,8 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                             method: "post",
                             url: `https://api-mapper.clicksend.com/http/v2/send.php`,
                             data: qs_1.default.stringify({
-                                username: "mrmontiveles@outlook.com",
-                                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                                username: "capstone.pcacas@gmail.com",
+                                key: "BC24CC2C-792A-3874-B481-68659AE28841",
                                 to: r.phone,
                                 message: `Balita gikan sa Brgy. 37-D, Davao City. ${payload.title} karong ${useDateParser_1.parseInvalidDateToDefault(pub_date)}`,
                                 //https://dashboard.clicksend.com/#/sms/send-sms/main
