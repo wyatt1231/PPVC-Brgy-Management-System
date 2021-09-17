@@ -284,8 +284,6 @@ const getSingleComplaint = async (
       }
     );
 
-    console.log(`complaints`, data);
-
     data.complaint_file = await con.Query(
       `
             select * from complaint_file where complaint_pk=@complaint_pk

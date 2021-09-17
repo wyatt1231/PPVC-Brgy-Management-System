@@ -224,7 +224,6 @@ const getSingleComplaint = (complaint_pk) => __awaiter(void 0, void 0, void 0, f
         const data = yield con.QuerySingle(`SELECT * from complaint where complaint_pk = @complaint_pk`, {
             complaint_pk: complaint_pk,
         });
-        console.log(`complaints`, data);
         data.complaint_file = yield con.Query(`
             select * from complaint_file where complaint_pk=@complaint_pk
           `, {
