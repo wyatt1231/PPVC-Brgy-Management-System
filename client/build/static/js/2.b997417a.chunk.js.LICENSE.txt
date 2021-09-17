@@ -45,8 +45,6 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
-/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
-
 /**
  * @licstart The following is the entire license notice for the
  * Javascript code in this page
@@ -77,7 +75,6 @@ PERFORMANCE OF THIS SOFTWARE.
  * @license MIT
  */
 
-<<<<<<< HEAD:client/build/static/js/2.b997417a.chunk.js.LICENSE.txt
 /**
  * [chartjs-plugin-labels]{@link https://github.com/emn178/chartjs-plugin-labels}
  *
@@ -88,9 +85,15 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 /** @license React v0.18.0
-=======
-/** @license React v0.20.2
->>>>>>> 5e4a9d54a6941fe3b12fa2ac01c2dc2d35a3dda1:client/build/static/js/2.be54a8aa.chunk.js.LICENSE.txt
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v0.20.0
  * scheduler.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -108,7 +111,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v17.0.2
+/** @license React v17.0.0
  * react-dom.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -117,16 +120,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v17.0.2
- * react-is.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/** @license React v17.0.2
+/** @license React v17.0.0
  * react.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
