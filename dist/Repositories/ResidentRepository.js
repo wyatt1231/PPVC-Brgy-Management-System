@@ -21,7 +21,7 @@ const useValidator_1 = require("../Hooks/useValidator");
 const ResidentReport_1 = __importDefault(require("../PdfTemplates/ResidentReport"));
 const puppeteer = require("puppeteer");
 const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const user_payload = {
@@ -38,8 +38,8 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
       encoder_pk=@encoder_pk;
       `, user_payload);
         if (sql_insert_user.insertedId > 0) {
-            if (useValidator_1.isValidPicture(payload.pic)) {
-                const upload_result = yield useFileUploader_1.UploadImage({
+            if ((0, useValidator_1.isValidPicture)(payload.pic)) {
+                const upload_result = yield (0, useFileUploader_1.UploadImage)({
                     base_url: "./src/Storage/Files/Images/",
                     extension: "jpg",
                     file_name: sql_insert_user.insertedId,
@@ -52,7 +52,7 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
                     return upload_result;
                 }
             }
-            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date), died_date: useDateParser_1.parseInvalidDateToDefault(payload.died_date), resident_date: useDateParser_1.parseInvalidDateToDefault(payload.resident_date) });
+            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, encoder_pk: user_pk, birth_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.birth_date), died_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.died_date), resident_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.resident_date) });
             const sql_add_resident = yield con.Insert(`INSERT INTO resident SET
          user_pk=@user_pk,
          pic=@pic,              
@@ -111,12 +111,12 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         if (user_pk !== 1) {
@@ -132,8 +132,8 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         where user_pk=@encoder_pk;
         `, user_payload);
         }
-        if (useValidator_1.isValidPicture(payload.pic)) {
-            const upload_result = yield useFileUploader_1.UploadImage({
+        if ((0, useValidator_1.isValidPicture)(payload.pic)) {
+            const upload_result = yield (0, useFileUploader_1.UploadImage)({
                 base_url: "./src/Storage/Files/Images/",
                 extension: "jpg",
                 file_name: payload.user_pk,
@@ -146,7 +146,7 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
                 return upload_result;
             }
         }
-        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date), died_date: useDateParser_1.parseInvalidDateToDefault(payload.died_date), resident_date: useDateParser_1.parseInvalidDateToDefault(payload.resident_date) });
+        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.birth_date), died_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.died_date), resident_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.resident_date) });
         const sql_edit_resident = yield con.Modify(`UPDATE resident SET
         user_pk=@user_pk,
         pic=@pic,              
@@ -196,12 +196,12 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const toggleResidentStatus = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const sql_edit_resident = yield con.Modify(`UPDATE resident SET
@@ -229,12 +229,12 @@ const toggleResidentStatus = (resident_pk) => __awaiter(void 0, void 0, void 0, 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
@@ -248,10 +248,10 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
       AND gender IN @gender
       AND sts_pk IN @sts_pk
       AND purok IN @purok
-      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.min_age, "age")}
-      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.max_age, "age")}
-      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_from, "encoded_at")}
-      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
+      AND age >= ${(0, useDateParser_1.sqlFilterNumber)(payload.filters.min_age, "age")}
+      AND age >= ${(0, useDateParser_1.sqlFilterNumber)(payload.filters.max_age, "age")}
+      AND encoded_at >= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_from, "encoded_at")}
+      AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_to, "encoded_at")}
       `, payload);
         const hasMore = data.length > payload.page.limit;
         if (hasMore) {
@@ -261,7 +261,7 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
             ? -1
             : payload.page.begin * payload.page.limit + data.length;
         for (const row of data) {
-            row.pic = yield useFileUploader_1.GetUploadedImage(row.pic);
+            row.pic = yield (0, useFileUploader_1.GetUploadedImage)(row.pic);
         }
         con.Commit();
         return {
@@ -279,12 +279,12 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const brand_info = yield con.QuerySingle(`
@@ -304,10 +304,10 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       AND gender IN @gender
       AND sts_pk IN @sts_pk
       AND purok IN @purok
-      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.min_age, "age")}
-      AND age >= ${useDateParser_1.sqlFilterNumber(payload.filters.max_age, "age")}
-      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_from, "encoded_at")}
-      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.encoded_to, "encoded_at")}
+      AND age >= ${(0, useDateParser_1.sqlFilterNumber)(payload.filters.min_age, "age")}
+      AND age >= ${(0, useDateParser_1.sqlFilterNumber)(payload.filters.max_age, "age")}
+      AND encoded_at >= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_from, "encoded_at")}
+      AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_to, "encoded_at")}
       ORDER BY ${payload.sort.column} ${payload.sort.direction}
       `, payload.filters);
         const browser = yield puppeteer.launch({
@@ -338,12 +338,12 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.QuerySingle(`SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc
@@ -352,7 +352,7 @@ const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, fun
       LEFT JOIN status s ON s.sts_pk = r.sts_pk where r.resident_pk =@resident_pk`, {
             resident_pk: resident_pk,
         });
-        data.pic = yield useFileUploader_1.GetUploadedImage(data.pic);
+        data.pic = yield (0, useFileUploader_1.GetUploadedImage)(data.pic);
         data.status = yield con.QuerySingle(`select * from status where sts_pk = @sts_pk;`, {
             sts_pk: data.sts_pk,
         });
@@ -367,16 +367,16 @@ const getSingleResident = (resident_pk) => __awaiter(void 0, void 0, void 0, fun
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const searchResident = (search) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`select resident_pk id, concat(last_name,' ',first_name) label from resident
-       ${useSearch_1.GenerateSearch(search, "concat(last_name,' ',first_name)")}
+       ${(0, useSearch_1.GenerateSearch)(search, "concat(last_name,' ',first_name)")}
       `, {
             search,
         });
@@ -391,7 +391,7 @@ const searchResident = (search) => __awaiter(void 0, void 0, void 0, function* (
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

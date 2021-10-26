@@ -263,7 +263,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Encoded At</div>
-                    <div class="value">${useDateParser_1.InvalidDateToDefault((_l = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _l === void 0 ? void 0 : _l.encoded_from, "All prev. dates")} -  ${useDateParser_1.InvalidDateToDefault((_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.encoded_at, "All future dates")}</div>
+                    <div class="value">${(0, useDateParser_1.InvalidDateToDefault)((_l = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _l === void 0 ? void 0 : _l.encoded_from, "All prev. dates")} -  ${(0, useDateParser_1.InvalidDateToDefault)((_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.encoded_at, "All future dates")}</div>
                   </div>
                 </div>
               </div>
@@ -304,7 +304,7 @@ const GenerateResidentTable = (resident_data) => {
       <td>${r.age}</td>
       <td>Purok ${r.purok}</td>
       <td>${r.sts_pk === "A" ? "active" : "not active"}</td>
-      <td>${useDateParser_1.InvalidDateToDefault(r.encoded_at, "-")}</td>
+      <td>${(0, useDateParser_1.InvalidDateToDefault)(r.encoded_at, "-")}</td>
     </tr>`;
     }
     return table;

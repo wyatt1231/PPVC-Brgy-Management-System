@@ -16,25 +16,25 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const ComplaintsMobileRepository_1 = __importDefault(require("../Repositories/ComplaintsMobileRepository"));
 const ComplaintMobileController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/addComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/addComplaintMessage", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         payload.sent_by = req.user_pk;
         res.json(yield ComplaintsMobileRepository_1.default.addComplaintMessage(payload));
     }));
-    router.post("/getSingleComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getSingleComplaint", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintsMobileRepository_1.default.getSingleComplaint(complaint_pk));
     }));
-    router.post("/getComplaintMessage", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getComplaintMessage", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const complaint_pk = req.body.complaint_pk;
         res.json(yield ComplaintsMobileRepository_1.default.getComplaintMessage(complaint_pk));
     }));
-    router.post("/getComplaintList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getComplaintList", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reported_by = req.body.reported_by;
         res.json(yield ComplaintsMobileRepository_1.default.getComplaintList(reported_by));
     }));
-    router.post("/addComplaint", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addComplaint", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const payload = req.body;
         payload.reported_by = req.user_pk;

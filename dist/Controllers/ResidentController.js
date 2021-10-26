@@ -16,8 +16,8 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const ResidentRepository_1 = __importDefault(require("../Repositories/ResidentRepository"));
 const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getDataTableResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/getDataTableResident", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             res.json(yield ResidentRepository_1.default.getDataTableResident(payload));
@@ -37,7 +37,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
             res.json(500);
         }
     }));
-    router.post("/addResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addResident", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             res.json(yield ResidentRepository_1.default.addResident(payload, req.user_pk));
@@ -46,7 +46,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
             res.json(500);
         }
     }));
-    router.post("/updateResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/updateResident", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             res.json(yield ResidentRepository_1.default.updateResident(payload, req.user_pk));
@@ -55,7 +55,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
             res.json(500);
         }
     }));
-    router.post("/toggleResidentStatus", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/toggleResidentStatus", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const resident_pk = req.body.resident_pk;
             res.json(yield ResidentRepository_1.default.toggleResidentStatus(resident_pk));
@@ -64,7 +64,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
             res.json(500);
         }
     }));
-    router.post("/getSingleResident", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getSingleResident", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const resident_pk = req.body.resident_pk;
             res.json(yield ResidentRepository_1.default.getSingleResident(resident_pk));
@@ -73,7 +73,7 @@ const ResidentController = (app) => __awaiter(void 0, void 0, void 0, function* 
             res.json(500);
         }
     }));
-    router.post("/searchResident", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/searchResident", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const search = req.body.value;
             res.json(yield ResidentRepository_1.default.searchResident(search));

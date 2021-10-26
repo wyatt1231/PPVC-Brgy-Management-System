@@ -17,7 +17,7 @@ const fs_1 = __importDefault(require("fs"));
 const promises_1 = require("fs/promises");
 const moment_1 = __importDefault(require("moment"));
 const UploadImage = ({ base_url, file_name, extension, file_to_upload, }) => {
-    const extended_file_name = `${file_name}-${moment_1.default(new Date()).format("x")}.${extension}`;
+    const extended_file_name = `${file_name}-${(0, moment_1.default)(new Date()).format("x")}.${extension}`;
     return new Promise((resolve, reject) => {
         if (!fs_1.default.existsSync(base_url)) {
             fs_1.default.mkdirSync(base_url, { recursive: true });
@@ -41,7 +41,7 @@ const UploadImage = ({ base_url, file_name, extension, file_to_upload, }) => {
 exports.UploadImage = UploadImage;
 const RemoveImage = (base_url) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield promises_1.unlink(base_url);
+        yield (0, promises_1.unlink)(base_url);
         return {
             success: true,
             message: "Image has been removed",
@@ -73,7 +73,7 @@ const UploadFile = (base_url, file_to_upload) => {
         if (!fs_1.default.existsSync(base_url)) {
             fs_1.default.mkdirSync(base_url, { recursive: true });
         }
-        const file_name = moment_1.default(new Date()).format("x") + file_to_upload.name;
+        const file_name = (0, moment_1.default)(new Date()).format("x") + file_to_upload.name;
         fs_1.default.writeFile("./" + base_url + file_name, file_to_upload.data, function (err) {
             if (err) {
                 resolve({

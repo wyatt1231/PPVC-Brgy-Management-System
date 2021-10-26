@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvalidDateToDefault = exports.parseInvalidTimeToDefault = exports.sqlFilterNumber = exports.sqlFilterDate = exports.parseInvalidDateToDefault = void 0;
 const moment_1 = __importDefault(require("moment"));
 const parseInvalidDateToDefault = (date, defaultString) => {
-    const d = moment_1.default(date);
+    const d = (0, moment_1.default)(date);
     if (d.isValid()) {
         return d.format("YYYY-MM-DD");
     }
@@ -23,7 +23,7 @@ const parseInvalidDateToDefault = (date, defaultString) => {
 exports.parseInvalidDateToDefault = parseInvalidDateToDefault;
 const sqlFilterDate = (date, column) => {
     if (!!date) {
-        const d = moment_1.default(date);
+        const d = (0, moment_1.default)(date);
         if (d.isValid()) {
             return `'${d.format("YYYY-MM-DD")}'`;
         }
@@ -50,7 +50,7 @@ const sqlFilterNumber = (num, column) => {
 };
 exports.sqlFilterNumber = sqlFilterNumber;
 const parseInvalidTimeToDefault = (date, defaultString) => {
-    const d = moment_1.default(date, "hh:mm A");
+    const d = (0, moment_1.default)(date, "hh:mm A");
     if (d.isValid()) {
         return d.format("HH:mm:ss");
     }
@@ -69,7 +69,7 @@ const InvalidDateToDefault = (date, defaultString) => {
     if (!date) {
         return defaultString;
     }
-    const d = moment_1.default(date).format("MMM DD, YYYY");
+    const d = (0, moment_1.default)(date).format("MMM DD, YYYY");
     if (d.toLowerCase() === "invalid date") {
         return defaultString;
     }

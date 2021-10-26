@@ -13,7 +13,7 @@ const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const news_table = yield con.Query(`
@@ -56,12 +56,12 @@ const getNewsDataPublished = () => __awaiter(void 0, void 0, void 0, function* (
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getNewsDataPublishedLastWeek = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const news_table = yield con.Query(`
@@ -105,12 +105,12 @@ AND n.encoded_at < CURDATE() - INTERVAL DAYOFWEEK(CURDATE())-1 DAY ORDER BY n.en
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getNewsDataPublishedByMonth = (month) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         console.log(month);
@@ -156,12 +156,12 @@ AND MONTH(n.encoded_at) = @month ORDER BY n.encoded_at DESC) tmp;
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT u.user_pk,nw.news_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,nw.body,CASE WHEN DATE_FORMAT(nw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(nw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(nw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM news_comment nw JOIN resident u ON nw.user_pk=u.user_pk  where news_pk=@news_pk`, {
@@ -169,7 +169,7 @@ const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function*
         });
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
-            file.user_pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            file.user_pic = yield (0, useFileUploader_1.GetUploadedImage)(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
             console.error(`error`, file.user_pk);
         }
         con.Commit();
@@ -183,12 +183,12 @@ const getNewsComments = (news_pk) => __awaiter(void 0, void 0, void 0, function*
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addNewsComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
@@ -216,12 +216,12 @@ const addNewsComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addNewsReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
@@ -273,12 +273,12 @@ const addNewsReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
@@ -289,7 +289,7 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
            encoder_pk=@encoder_pk;`, payload);
         if (sql_add_news.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/News/", file);
+                const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/News/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -334,12 +334,12 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleNewsWithPhoto = (news_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
@@ -370,7 +370,7 @@ const getSingleNewsWithPhoto = (news_pk) => __awaiter(void 0, void 0, void 0, fu
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

@@ -14,7 +14,7 @@ const useDateParser_1 = require("../Hooks/useDateParser");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
@@ -28,7 +28,7 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
             if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
-                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+                file.user_pic = yield (0, useFileUploader_1.GetUploadedImage)(file.user_pic);
             }
         }
         for (const file of data) {
@@ -48,13 +48,13 @@ const getPosts = () => __awaiter(void 0, void 0, void 0, function* () {
         yield con.Rollback();
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const posts = yield con.QueryPagination(`
       select * from (SELECT p.*, u.full_name FROM posts p join vw_users u on u.user_pk = p.encoder_pk) as tmp
@@ -62,8 +62,8 @@ const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* (
       (coalesce(full_name,'')  like concat('%',@search,'%')
       OR coalesce(title,'') like concat('%',@search,'%'))
       AND sts_pk in @sts_pk
-      AND encoded_at >= ${useDateParser_1.sqlFilterDate(payload.filters.date_from, "encoded_at")}
-      AND encoded_at <= ${useDateParser_1.sqlFilterDate(payload.filters.date_to, "encoded_at")}
+      AND encoded_at >= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.date_from, "encoded_at")}
+      AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.date_to, "encoded_at")}
       `, payload);
         const hasMore = posts.length > payload.page.limit;
         if (hasMore) {
@@ -74,7 +74,7 @@ const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* (
                 user_pk: post.encoder_pk,
             });
             if (!!((_a = post === null || post === void 0 ? void 0 : post.user) === null || _a === void 0 ? void 0 : _a.pic)) {
-                post.user.pic = yield useFileUploader_1.GetUploadedImage(post.user.pic);
+                post.user.pic = yield (0, useFileUploader_1.GetUploadedImage)(post.user.pic);
             }
             post.status = yield con.QuerySingle(`select * from status where sts_pk = @sts_pk;`, {
                 sts_pk: post.sts_pk,
@@ -97,12 +97,12 @@ const getPostsAdmin = (payload) => __awaiter(void 0, void 0, void 0, function* (
         con.Rollback();
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
@@ -118,7 +118,7 @@ const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* ()
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.encoder_pk} LIMIT 1`, null);
             if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
-                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+                file.user_pic = yield (0, useFileUploader_1.GetUploadedImage)(file.user_pic);
             }
         }
         for (const file of data) {
@@ -139,12 +139,12 @@ const getUserPosts = (user_pk) => __awaiter(void 0, void 0, void 0, function* ()
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getPostsReaction = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
@@ -161,12 +161,12 @@ const getPostsReaction = () => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT u.user_pk,pw.posts_comment_pk,pic,CONCAT(first_name,' ',middle_name,'. ',last_name) AS fullname,pw.body,CASE WHEN DATE_FORMAT(pw.encoded_at,'%d')= DATE_FORMAT(CURDATE(),'%d') THEN CONCAT("Today at ",DATE_FORMAT(pw.encoded_at,'%h:%m %p')) ELSE DATE_FORMAT(pw.encoded_at,'%m-%d-%y %h:%m') END AS TIMESTAMP  FROM posts_comment pw JOIN resident u ON pw.user_pk=u.user_pk  where posts_pk=@posts_pk`, {
@@ -175,7 +175,7 @@ const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, functio
         for (const file of data) {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${file === null || file === void 0 ? void 0 : file.user_pk} LIMIT 1`, null);
             if (!!(file === null || file === void 0 ? void 0 : file.user_pic)) {
-                file.user_pic = yield useFileUploader_1.GetUploadedImage(file.user_pic);
+                file.user_pic = yield (0, useFileUploader_1.GetUploadedImage)(file.user_pic);
             }
         }
         con.Commit();
@@ -189,12 +189,12 @@ const getPostsComments = (posts_pk) => __awaiter(void 0, void 0, void 0, functio
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
@@ -205,7 +205,7 @@ const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, 
          encoder_pk=@encoder_pk;`, payload);
         if (sql_add_posts.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield useFileUploader_1.UploadFile("src/Storage/Files/Posts/", file);
+                const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/Posts/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -250,12 +250,12 @@ const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addPostComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
@@ -283,12 +283,12 @@ const addPostComment = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.user_pk = user_pk;
@@ -340,13 +340,13 @@ const addPostReaction = (payload, user_pk) => __awaiter(void 0, void 0, void 0, 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 //ADMIN POSTS
 const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const data = yield con.Query(`
        SELECT *,resident_pk as user_pk FROM posts_reaction  WHERE posts_pk=@posts_pk; 
@@ -364,14 +364,14 @@ const getPostReactionsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fu
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 //ADMIN REACTIONS
 const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const comments = yield con.Query(`
        SELECT * FROM posts_comment WHERE posts_pk = @posts_pk order by encoded_at desc;
@@ -383,7 +383,7 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
                 user_pk: comment.user_pk,
             });
             if (!!((_b = comment === null || comment === void 0 ? void 0 : comment.user) === null || _b === void 0 ? void 0 : _b.pic)) {
-                comment.user.pic = yield useFileUploader_1.GetUploadedImage(comment.user.pic);
+                comment.user.pic = yield (0, useFileUploader_1.GetUploadedImage)(comment.user.pic);
             }
         }
         con.Commit();
@@ -397,12 +397,12 @@ const getPostCommentsAdmin = (posts_pk) => __awaiter(void 0, void 0, void 0, fun
         con.Rollback();
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updatePostStatus = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const sql_update_post = yield con.Modify(`UPDATE posts SET
@@ -429,7 +429,7 @@ const updatePostStatus = (payload) => __awaiter(void 0, void 0, void 0, function
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

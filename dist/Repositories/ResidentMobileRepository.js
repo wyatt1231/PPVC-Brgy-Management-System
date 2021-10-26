@@ -15,7 +15,7 @@ const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useValidator_1 = require("../Hooks/useValidator");
 const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const user_payload = {
@@ -32,8 +32,8 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         encoder_pk=@encoder_pk; 
         `, user_payload);
         if (sql_insert_user.insertedId > 0) {
-            if (useValidator_1.isValidPicture(payload.pic)) {
-                const upload_result = yield useFileUploader_1.UploadImage({
+            if ((0, useValidator_1.isValidPicture)(payload.pic)) {
+                const upload_result = yield (0, useFileUploader_1.UploadImage)({
                     base_url: "./src/Storage/Files/Images/",
                     extension: "jpg",
                     file_name: sql_insert_user.insertedId,
@@ -46,7 +46,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
                     return upload_result;
                 }
             }
-            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date) });
+            const resident_payload = Object.assign(Object.assign({}, payload), { user_pk: sql_insert_user.insertedId, birth_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.birth_date) });
             const sql_add_resident = yield con.Insert(`INSERT INTO resident SET
            user_pk=@user_pk,
            pic=@pic,              
@@ -102,12 +102,12 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const user_payload = {
@@ -121,8 +121,8 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
       full_name=@full_name
       where user_pk=@encoder_pk;
       `, user_payload);
-        if (useValidator_1.isValidPicture(payload.pic)) {
-            const upload_result = yield useFileUploader_1.UploadImage({
+        if ((0, useValidator_1.isValidPicture)(payload.pic)) {
+            const upload_result = yield (0, useFileUploader_1.UploadImage)({
                 base_url: "./src/Storage/Files/Images/",
                 extension: "jpg",
                 file_name: payload.user_pk,
@@ -135,7 +135,7 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
                 return upload_result;
             }
         }
-        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: useDateParser_1.parseInvalidDateToDefault(payload.birth_date) });
+        const resident_payload = Object.assign(Object.assign({}, payload), { encoder_pk: user_pk, birth_date: (0, useDateParser_1.parseInvalidDateToDefault)(payload.birth_date) });
         const sql_edit_resident = yield con.Modify(`UPDATE resident SET
       user_pk=@user_pk,
       pic=@pic,              
@@ -192,12 +192,12 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getmembers_ulosapamilya = (fam_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(` SELECT  fm.fam_pk,r.first_name,r.middle_name,r.last_name FROM family_member fm JOIN family f ON fm.fam_pk=f.fam_pk JOIN resident r ON f.ulo_pamilya=r.resident_pk  WHERE fm.fam_pk=@fam_pk limit 1`, {
@@ -221,12 +221,12 @@ const getmembers_ulosapamilya = (fam_pk) => __awaiter(void 0, void 0, void 0, fu
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getmembers = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     console.log(resident_pk);
     try {
         yield con.BeginTransaction();
@@ -251,12 +251,12 @@ const getmembers = (resident_pk) => __awaiter(void 0, void 0, void 0, function* 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     console.log(search);
     try {
         yield con.BeginTransaction();
@@ -274,12 +274,12 @@ const getresidents = (search) => __awaiter(void 0, void 0, void 0, function* () 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getnationality = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT * FROM nationality_list`, null);
@@ -294,12 +294,12 @@ const getnationality = () => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getreligion = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`SELECT * FROM religion_list`, null);
@@ -314,12 +314,12 @@ const getreligion = () => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updatepassword = (email, password, currentpassword) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email AND password=AES_ENCRYPT(@currentpassword,@email)`, {
             email: email,
@@ -346,12 +346,12 @@ const updatepassword = (email, password, currentpassword) => __awaiter(void 0, v
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const forgotpassword = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const sql_edit_resident = yield con.Modify(`UPDATE user SET password=AES_ENCRYPT(@password,@email) WHERE email=@email`, {
             email: email,
@@ -378,12 +378,12 @@ const forgotpassword = (email, password) => __awaiter(void 0, void 0, void 0, fu
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         const sql_edit_resident = yield con.Modify(`UPDATE user SET
          new_user='false'
@@ -410,7 +410,7 @@ const upadatenewuser = (user_pk) => __awaiter(void 0, void 0, void 0, function* 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

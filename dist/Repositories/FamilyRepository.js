@@ -19,7 +19,7 @@ const useSearch_1 = require("../Hooks/useSearch");
 const FamilyReport_1 = __importDefault(require("../PdfTemplates/FamilyReport"));
 const puppeteer = require("puppeteer");
 const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoded_by = user_pk;
@@ -205,12 +205,12 @@ const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updateFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoded_by = user_pk;
@@ -408,12 +408,12 @@ const updateFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, fun
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.QuerySingle(`
@@ -430,7 +430,7 @@ const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, funct
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         con.Commit();
         return {
@@ -443,12 +443,12 @@ const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, funct
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const family = yield con.QuerySingle(`
@@ -475,7 +475,7 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         const tinubdan_tubig = yield con.Query(`SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`, { fam_pk });
         family.tinubdan_tubig = tinubdan_tubig.map((d) => d.descrip);
@@ -501,13 +501,13 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.QueryPagination(`
@@ -550,7 +550,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
                 resident_pk: fam.ulo_pamilya,
             });
             if (!!((_a = fam === null || fam === void 0 ? void 0 : fam.ulo_pamilya_info) === null || _a === void 0 ? void 0 : _a.pic)) {
-                fam.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(fam.ulo_pamilya_info.pic);
+                fam.ulo_pamilya_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fam.ulo_pamilya_info.pic);
             }
             fam.fam_members = yield con.Query(`select * from family_member where fam_pk=@fam_pk `, {
                 fam_pk: fam.fam_pk,
@@ -560,7 +560,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
                     resident_pk: fm.resident_pk,
                 });
                 if (!!((_b = fm === null || fm === void 0 ? void 0 : fm.resident_info) === null || _b === void 0 ? void 0 : _b.pic)) {
-                    fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+                    fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
                 }
             }
         }
@@ -583,12 +583,12 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const brand_info = yield con.QuerySingle(`
@@ -662,13 +662,13 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
     var _c;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.QuerySingle(`
@@ -687,7 +687,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
             resident_pk: all_family.ulo_pamilya,
         });
         if ((_c = all_family === null || all_family === void 0 ? void 0 : all_family.ulo_pamilya_info) === null || _c === void 0 ? void 0 : _c.pic) {
-            all_family.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(all_family.ulo_pamilya_info.pic);
+            all_family.ulo_pamilya_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(all_family.ulo_pamilya_info.pic);
         }
         all_family.fam_members = yield con.Query(`
             SELECT * FROM family_member WHERE fam_pk = @fam_pk
@@ -698,7 +698,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         con.Commit();
         return {
@@ -711,12 +711,12 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const search_data_set = yield con.Query(`
@@ -735,7 +735,7 @@ const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, functi
                   UNION
                   SELECT resident_pk FROM family_member  )
                 ) AS tmp
-        ${useSearch_1.GenerateSearch(search, "label")}
+        ${(0, useSearch_1.GenerateSearch)(search, "label")}
         `, null);
         con.Commit();
         return {
@@ -748,12 +748,12 @@ const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const search_data_set = yield con.Query(`
@@ -772,7 +772,7 @@ const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function*
                   UNION
                   SELECT resident_pk FROM family_member  )
                 ) AS tmp
-        ${useSearch_1.GenerateSearch(payload.value, "label")}
+        ${(0, useSearch_1.GenerateSearch)(payload.value, "label")}
         AND id not in @fam_members
         `, {
             fam_members: payload.fam_members,
@@ -788,7 +788,7 @@ const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function*
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

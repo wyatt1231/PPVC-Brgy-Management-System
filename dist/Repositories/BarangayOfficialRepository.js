@@ -13,7 +13,7 @@ const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const addBarangayOfficial = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
@@ -41,12 +41,12 @@ const addBarangayOfficial = (payload, user_pk) => __awaiter(void 0, void 0, void
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
@@ -68,7 +68,7 @@ const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, 
             ? -1
             : payload.page.begin * payload.page.limit + data.length;
         for (const admin of data) {
-            admin.pic = yield useFileUploader_1.GetUploadedImage(admin.pic);
+            admin.pic = yield (0, useFileUploader_1.GetUploadedImage)(admin.pic);
         }
         con.Commit();
         return {
@@ -86,12 +86,12 @@ const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getBrgyOfficialList = () => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const data = yield con.Query(`
@@ -101,7 +101,7 @@ const getBrgyOfficialList = () => __awaiter(void 0, void 0, void 0, function* ()
       LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       `, null);
         for (const admin of data) {
-            admin.pic = yield useFileUploader_1.GetUploadedImage(admin.pic);
+            admin.pic = yield (0, useFileUploader_1.GetUploadedImage)(admin.pic);
         }
         con.Commit();
         return {
@@ -114,7 +114,7 @@ const getBrgyOfficialList = () => __awaiter(void 0, void 0, void 0, function* ()
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });

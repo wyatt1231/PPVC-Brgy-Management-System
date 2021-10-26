@@ -1,0 +1,5 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/3ad857d2-e5a5-4c57-9d98-3e965c396d78/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/node-template-capstone",
+  "appService.deploySubpath": ".",
+  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"]
+}

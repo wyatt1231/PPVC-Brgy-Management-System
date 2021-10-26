@@ -16,8 +16,8 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const PostsRepository_1 = __importDefault(require("../Repositories/PostsRepository"));
 const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/getPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getPosts());
         }
@@ -25,7 +25,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/getUserPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getUserPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getUserPosts(req.user_pk));
         }
@@ -33,7 +33,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/getPostsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostsComments", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const posts_pk = req.body.posts_pk;
             res.json(yield PostsRepository_1.default.getPostsComments(posts_pk));
@@ -42,7 +42,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(error);
         }
     }));
-    router.post("/addPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         try {
             const payload = req.body;
@@ -53,7 +53,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/getPostsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostsReaction", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getPostsReaction());
         }
@@ -61,7 +61,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/addPostComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addPostComment", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             res.json(yield PostsRepository_1.default.addPostComment(payload, req.user_pk));
@@ -70,7 +70,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/addPostReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addPostReaction", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             console.log(`sdasd payload`, payload);
@@ -81,7 +81,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
         }
     }));
     //reactions
-    router.post("/getPostsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             res.json(yield PostsRepository_1.default.getPostsAdmin(payload));
@@ -90,7 +90,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostReactionsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const posts_pk = req.body.posts_pk;
             res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
@@ -100,7 +100,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
         }
     }));
     //comments
-    router.post("/getPostCommentsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostCommentsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const posts_pk = req.body.posts_pk;
             res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
@@ -109,7 +109,7 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(500);
         }
     }));
-    router.post("/updatePostStatus", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/updatePostStatus", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const payload = req.body;
             payload.encoder_pk = req.user_pk;
