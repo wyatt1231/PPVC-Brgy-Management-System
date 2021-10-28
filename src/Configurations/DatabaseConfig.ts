@@ -5,11 +5,21 @@ import { PaginationModel } from "../Models/PaginationModel";
 export let connection_string: mysql.PoolOptions | null = null;
 
 if (process.env.NODE_ENV === "production") {
+  // connection_string = {
+  //   host: "156.67.222.35",
+  //   user: "u583403240_bms",
+  //   password: "BMS@capstone2",
+  //   database: "u583403240_bms",
+  //   port: 3306,
+  //   connectionLimit: 10,
+  //   waitForConnections: true,
+  //   queueLimit: 10,
+  // };
   connection_string = {
-    host: "156.67.222.35",
-    user: "u583403240_bms",
-    password: "BMS@capstone2",
-    database: "u583403240_bms",
+    host: "brgy-37d-ppvc.mysql.database.azure.com",
+    user: "capstone_admin@brgy-37d-ppvc",
+    password: "C@PsT0n3_!@#",
+    database: "bms",
     port: 3306,
     connectionLimit: 10,
     waitForConnections: true,
@@ -28,10 +38,10 @@ if (process.env.NODE_ENV === "production") {
   };
 
   connection_string = {
-    host: "156.67.222.35",
-    user: "u583403240_bms",
-    password: "BMS@capstone2",
-    database: "u583403240_bms",
+    host: "brgy-37d-ppvc.mysql.database.azure.com",
+    user: "capstone_admin@brgy-37d-ppvc",
+    password: "C@PsT0n3_!@#",
+    database: "bms",
     port: 3306,
     connectionLimit: 10,
     waitForConnections: true,
@@ -242,7 +252,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
         const BeginTransaction = (): Promise<void> => {
           return new Promise((resolve, reject) => {
             try {
-              connection.beginTransaction((err) => {
+              connection.beginTransaction(err => {
                 if (err) {
                   connection.destroy();
                   connection.release();
@@ -262,7 +272,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
         const Commit = (): Promise<void> => {
           return new Promise((resolve, reject) => {
             try {
-              connection.commit((err) => {
+              connection.commit(err => {
                 connection.release();
                 connection.destroy();
                 // connection.end();
@@ -350,10 +360,10 @@ const queryFormat = (query: string, values: any): QueryFormatModel => {
             return "(NULL)";
           }
           if (values[key] instanceof Array) {
-            const furnished_arr = values[key].filter((v) => !!v);
+            const furnished_arr = values[key].filter(v => !!v);
 
             if (furnished_arr.length > 0) {
-              const formatArritem = furnished_arr.map((v) => mysql.escape(v));
+              const formatArritem = furnished_arr.map(v => mysql.escape(v));
               const arr_rep: string = formatArritem.join(",");
               return ` (${arr_rep}) `;
             } else {

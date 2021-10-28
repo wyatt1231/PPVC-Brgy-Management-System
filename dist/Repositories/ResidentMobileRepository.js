@@ -34,7 +34,7 @@ const addMobileResident = (payload) => __awaiter(void 0, void 0, void 0, functio
         if (sql_insert_user.insertedId > 0) {
             if ((0, useValidator_1.isValidPicture)(payload.pic)) {
                 const upload_result = yield (0, useFileUploader_1.UploadImage)({
-                    base_url: "./src/Storage/Files/Images/",
+                    base_url: "./Files/Images/",
                     extension: "jpg",
                     file_name: sql_insert_user.insertedId,
                     file_to_upload: payload.pic,
@@ -123,7 +123,7 @@ const updateMobileResident = (payload, user_pk) => __awaiter(void 0, void 0, voi
       `, user_payload);
         if ((0, useValidator_1.isValidPicture)(payload.pic)) {
             const upload_result = yield (0, useFileUploader_1.UploadImage)({
-                base_url: "./src/Storage/Files/Images/",
+                base_url: "./Files/Images/",
                 extension: "jpg",
                 file_name: payload.user_pk,
                 file_to_upload: payload.pic,

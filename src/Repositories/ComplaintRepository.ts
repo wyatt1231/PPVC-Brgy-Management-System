@@ -29,10 +29,7 @@ const addComplaint = async (
 
     if (sql_add_complaint.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile(
-          "src/Storage/Files/Complaints/",
-          file
-        );
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();

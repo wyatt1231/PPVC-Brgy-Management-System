@@ -19,6 +19,11 @@ import { RootStore } from "../../../Services/Store";
 import FilterDtPostAdinView from "./FilterDtPostAdinView";
 import PostReaction from "./PostReaction";
 import { StyledPostItem } from "./styles";
+import PostFiles from "./PostFiles";
+import {
+  CheckCircleRounded,
+  CheckCircleOutlineRounded,
+} from "@material-ui/icons";
 
 interface DtPostAdminViewProps {}
 
@@ -58,7 +63,7 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
 
   const [refetch_table, set_refetch_table] = useState(0);
   const handleRefetchTable = useCallback(() => {
-    set_refetch_table((c) => c + 1);
+    set_refetch_table(c => c + 1);
   }, []);
 
   useEffect(() => {
@@ -78,9 +83,11 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
     }
   }, [dispatch, refetch_table]);
 
+  console.log(`posts`, posts);
+
   return (
     <Container maxWidth="lg">
-      <LinearLoadingProgress show={fetch_posts} />
+      {/* <LinearLoadingProgress show={fetch_posts} /> */}
 
       {fetch_posts && !posts ? (
         <CircularLoadingProgress />
@@ -128,14 +135,7 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
                   hasMore={has_more}
                   loader={
                     <div className="loader" key={0}>
-                      <Skeleton
-                        style={{
-                          margin: `1em`,
-                        }}
-                        variant="rect"
-                        width={`100%`}
-                        height={200}
-                      />
+                      <CircularLoadingProgress size={30} />
                     </div>
                   }
                 >
@@ -151,6 +151,15 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
                           <div className="name">{p.user.full_name}</div>
                           <div className="time">
                             {moment(p.encoded_at).fromNow()}
+                          </div>
+
+                          <div className="tag">
+                            {p?.status?.sts_pk === "PU" && (
+                              <CheckCircleRounded color="primary" />
+                            )}
+                            {p?.status?.sts_pk === "UP" && (
+                              <CheckCircleOutlineRounded />
+                            )}
                           </div>
                         </div>
 
@@ -198,16 +207,10 @@ export const DtPostAdminView: FC<DtPostAdminViewProps> = memo(() => {
                           />
                         </div>
                       </div>
-                      <div className="body">
-                        <Chip
-                          label={p?.status?.sts_desc}
-                          style={{
-                            color: p?.status?.sts_color,
-                            backgroundColor: p?.status?.sts_backgroundColor,
-                          }}
-                        />
-                      </div>
+
                       <div className="body">{p.body}</div>
+                      <PostFiles files={p.files} />
+
                       <PostReaction posts_pk={p.posts_pk} />
                     </StyledPostItem>
                   ))}

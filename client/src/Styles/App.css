@@ -426,6 +426,17 @@ canvas {
   align-items: start;
 }
 
+@media only screen and (max-width: 800px) {
+  .sekso-ctnr {
+    display: grid;
+    grid-auto-flow: row;
+    justify-content: start;
+    grid-gap: 1em;
+    align-content: start;
+    align-items: start;
+  }
+}
+
 .sekso-ctnr .sekso-item {
   display: grid;
   grid-template-areas: "img label" "img val" "img graph";

@@ -289,7 +289,7 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
            encoder_pk=@encoder_pk;`, payload);
         if (sql_add_news.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/News/", file);
+                const file_res = yield (0, useFileUploader_1.UploadFile)("/Files/Complaints/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;

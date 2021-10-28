@@ -14,6 +14,7 @@ import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
 import ResidentReport from "../PdfTemplates/ResidentReport";
 const puppeteer = require("puppeteer");
+import path from "path";
 const addResident = async (
   payload: ResidentModel,
   user_pk: number
@@ -43,7 +44,7 @@ const addResident = async (
     if (sql_insert_user.insertedId > 0) {
       if (isValidPicture(payload.pic)) {
         const upload_result = await UploadImage({
-          base_url: "./src/Storage/Files/Images/",
+          base_url: "./Files/Images/",
           extension: "jpg",
           file_name: sql_insert_user.insertedId,
           file_to_upload: payload.pic,
@@ -157,7 +158,7 @@ const updateResident = async (
 
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
-        base_url: "./src/Storage/Files/Images/",
+        base_url: "./Files/Images/",
         extension: "jpg",
         file_name: payload.user_pk,
         file_to_upload: payload.pic,
@@ -356,8 +357,6 @@ const getDataTableResidentPdf = async (
 
     var base64data = brand_info?.logo.toString("base64");
 
-    console.log(`payload`, payload);
-
     const resident_data: Array<ResidentModel> = await con.Query(
       `
       SELECT * FROM
@@ -386,8 +385,17 @@ const getDataTableResidentPdf = async (
       payload.filters
     );
 
+    const ABS_PATH = path.resolve("./chrome/chrome.exe");
+
+    console.log(`ABS_PATH ---- `, ABS_PATH);
+
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
       headless: true,
     });
 

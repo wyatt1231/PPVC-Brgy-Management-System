@@ -37,7 +37,7 @@ const addAdmin = async (
     if (sql_insert_user.insertedId > 0) {
       if (isValidPicture(payload.pic)) {
         const upload_result = await UploadImage({
-          base_url: "./src/Storage/Files/Images/",
+          base_url: "./Files/Images/",
           extension: "jpg",
           file_name: sql_insert_user.insertedId,
           file_to_upload: payload.pic,
@@ -109,7 +109,7 @@ const updateAdmin = async (
 
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
-        base_url: "./src/Storage/Files/Images/",
+        base_url: "./Files/Images/",
         extension: "jpg",
         file_name: payload.user_pk,
         file_to_upload: payload.pic,

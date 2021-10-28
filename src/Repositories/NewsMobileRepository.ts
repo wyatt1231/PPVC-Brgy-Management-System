@@ -369,7 +369,7 @@ const addNews = async (
 
     if (sql_add_news.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/News/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();

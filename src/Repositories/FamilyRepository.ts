@@ -6,6 +6,7 @@ import { FamilyModel } from "../Models/FamilyModel";
 import { PaginationModel } from "../Models/PaginationModel";
 import { ResponseModel } from "../Models/ResponseModels";
 import FamilyReport from "../PdfTemplates/FamilyReport";
+import path from "path";
 const puppeteer = require("puppeteer");
 const addFamily = async (
   payload: FamilyModel,
@@ -624,37 +625,37 @@ const getSingleFamByFamPk = async (fam_pk: number): Promise<ResponseModel> => {
       `SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.tinubdan_tubig = tinubdan_tubig.map((d) => d.descrip);
+    family.tinubdan_tubig = tinubdan_tubig.map(d => d.descrip);
 
     const matang_kasilyas = await con.Query(
       `SELECT * FROM family_matang_kasilyas where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.matang_kasilyas = matang_kasilyas.map((d) => d.descrip);
+    family.matang_kasilyas = matang_kasilyas.map(d => d.descrip);
 
     const pasilidad_kuryente = await con.Query(
       `SELECT * FROM family_pasilidad_kuryente where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.pasilidad_kuryente = pasilidad_kuryente.map((d) => d.descrip);
+    family.pasilidad_kuryente = pasilidad_kuryente.map(d => d.descrip);
 
     const matang_basura = await con.Query(
       `SELECT * FROM family_matang_basura where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.matang_basura = matang_basura.map((d) => d.descrip);
+    family.matang_basura = matang_basura.map(d => d.descrip);
 
     const biktima_pangabuso = await con.Query(
       `SELECT * FROM family_biktima_pangabuso where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.biktima_pangabuso = biktima_pangabuso.map((d) => d.descrip);
+    family.biktima_pangabuso = biktima_pangabuso.map(d => d.descrip);
 
     const kahimtanang_komunidad = await con.Query(
       `SELECT * FROM family_kahimtanang_komunidad where fam_pk = @fam_pk;`,
       { fam_pk }
     );
-    family.kahimtanang_komunidad = kahimtanang_komunidad.map((d) => d.descrip);
+    family.kahimtanang_komunidad = kahimtanang_komunidad.map(d => d.descrip);
 
     family.serbisyo_nadawat = await con.Query(
       `  SELECT * FROM family_serbisyo_nadawat where fam_pk = @fam_pk;`,
@@ -850,8 +851,17 @@ const getFamilyDataTablePdf = async (
       );
     }
 
+    const ABS_PATH = path.resolve("./chrome/chrome.exe");
+
+    console.log(`ABS_PATH`, ABS_PATH);
+
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
       headless: true,
     });
 

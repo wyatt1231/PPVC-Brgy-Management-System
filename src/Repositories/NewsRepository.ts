@@ -281,7 +281,7 @@ const addNews = async (
 
     if (sql_add_news.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/News/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -332,16 +332,16 @@ const addNews = async (
 
         for (const r of residents) {
           if (/^(09|\+639)\d{9}$/.test(r.phone)) {
-            const sms_response = await axios({
+            await axios({
               method: "post",
               url: `https://api-mapper.clicksend.com/http/v2/send.php`,
               data: qs.stringify({
-                username: "princecas07@gmail.com",
-                key: "85DB2479-8366-1385-C35B-D6E1F8B90B06",
+                username: "detail.reynarcilla@gmail.com",
+                key: "1213B160-B60A-E831-A40D-B0E37CA03A8D",
                 to: r.phone,
-                message: `Balita gikan sa Brgy. 37-D, Davao City. ${
+                message: `Brgy. 37-D, Davao City. ${
                   payload.title
-                } karong ${parseInvalidDateToDefault(pub_date)}`,
+                } | ${parseInvalidDateToDefault(pub_date)}`,
                 //https://dashboard.clicksend.com/#/sms/send-sms/main
               }),
               headers: {
@@ -387,7 +387,7 @@ const addNewsFiles = async (
     payload.encoder_pk = user_pk;
 
     for (const file of files) {
-      const file_res = await UploadFile("src/Storage/Files/News/", file);
+      const file_res = await UploadFile("/Files/Complaints/", file);
 
       if (!file_res.success) {
         con.Rollback();

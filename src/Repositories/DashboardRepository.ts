@@ -205,25 +205,25 @@ const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
       `
         SELECT * FROM 
         (
-        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 0 AND getBirthdayAge(birth_date)  <=10 AND died_date IS NULL AND purok IN @purok
+        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 11 AND getBirthdayAge(birth_date)  <=20 AND died_date IS NULL AND purok IN @purok
+        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 21 AND getBirthdayAge(birth_date)  <=30 AND died_date IS NULL AND purok IN @purok
+        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 31 AND getBirthdayAge(birth_date)  <=40 AND died_date IS NULL AND purok IN @purok
+        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 41 AND getBirthdayAge(birth_date)  <=50 AND died_date IS NULL AND purok IN @purok
+        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 51 AND getBirthdayAge(birth_date)  <=60 AND died_date IS NULL AND purok IN @purok
+        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 61 AND getBirthdayAge(birth_date)  <=70 AND died_date IS NULL AND purok IN @purok
+        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 71 AND getBirthdayAge(birth_date)  <=80 AND died_date IS NULL AND purok IN @purok
+        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 91 AND getBirthdayAge(birth_date)  <=90 AND died_date IS NULL AND purok IN @purok
+        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE getBirthdayAge(birth_date)  >= 100 AND died_date IS  NULL AND purok IN @purok
+        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND purok IN @purok
         ) tmp
           `,
       {
@@ -236,8 +236,6 @@ const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
     for (const r of ages) {
       labels.push(r.x);
     }
-    console.log(`labels`, labels);
-    console.log(`ages`, ages);
 
     con.Commit();
     return {
@@ -264,13 +262,13 @@ const lifeStageStats = async (purok: Array<string>): Promise<ResponseModel> => {
 
     const life_stage_stats = await con.Query(
       `
-      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) <= 1 AND purok IN @purok
+      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND purok IN @purok
       UNION ALL
-      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) > 1 AND getBirthdayAge(birth_date) < 18  AND purok IN @purok
+      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND purok IN @purok
       UNION ALL
-      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) > 18 AND getBirthdayAge(birth_date) < 60  AND purok IN @purok
+      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND purok IN @purok
       UNION ALL
-      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND getBirthdayAge(birth_date) >= 60  AND purok IN @purok
+      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND purok IN @purok
          `,
       {
         purok,
@@ -287,7 +285,6 @@ const lifeStageStats = async (purok: Array<string>): Promise<ResponseModel> => {
     };
   } catch (error) {
     await con.Rollback();
-    console.error(`error`, error);
     return {
       success: false,
       message: ErrorMessage(error),
@@ -364,7 +361,6 @@ const statsComplaint = async (): Promise<ResponseModel> => {
     };
   } catch (error) {
     await con.Rollback();
-    console.error(`error`, error);
     return {
       success: false,
       message: ErrorMessage(error),
@@ -418,7 +414,6 @@ const StatsBiktikmaPangabuso = async (): Promise<ResponseModel> => {
     };
   } catch (error) {
     await con.Rollback();
-    console.error(`error`, error);
     return {
       success: false,
       message: ErrorMessage(error),

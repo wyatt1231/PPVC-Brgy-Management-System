@@ -24,7 +24,7 @@ const getPosts = (user_pk, offset) => __awaiter(void 0, void 0, void 0, function
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC LIMIT ${offset})tmp;
         `, {
-            offset: offset
+            offset: offset,
         });
         for (const postsreactions of data) {
             postsreactions.reactions = yield con.Query(`
@@ -232,7 +232,7 @@ const addPosts = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, 
            encoder_pk=@encoder_pk;`, payload);
         if (sql_add_posts.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/Posts/", file);
+                const file_res = yield (0, useFileUploader_1.UploadFile)("/Files/Complaints/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;

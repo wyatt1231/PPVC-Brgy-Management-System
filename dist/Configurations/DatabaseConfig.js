@@ -7,11 +7,21 @@ exports.DatabaseConnection = exports.connection_string = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
 exports.connection_string = null;
 if (process.env.NODE_ENV === "production") {
+    // connection_string = {
+    //   host: "156.67.222.35",
+    //   user: "u583403240_bms",
+    //   password: "BMS@capstone2",
+    //   database: "u583403240_bms",
+    //   port: 3306,
+    //   connectionLimit: 10,
+    //   waitForConnections: true,
+    //   queueLimit: 10,
+    // };
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
+        host: "brgy-37d-ppvc.mysql.database.azure.com",
+        user: "capstone_admin@brgy-37d-ppvc",
+        password: "C@PsT0n3_!@#",
+        database: "bms",
         port: 3306,
         connectionLimit: 10,
         waitForConnections: true,
@@ -30,10 +40,10 @@ else {
         queueLimit: 10,
     };
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
+        host: "brgy-37d-ppvc.mysql.database.azure.com",
+        user: "capstone_admin@brgy-37d-ppvc",
+        password: "C@PsT0n3_!@#",
+        database: "bms",
         port: 3306,
         connectionLimit: 10,
         waitForConnections: true,
@@ -235,7 +245,7 @@ const DatabaseConnection = () => {
                 const BeginTransaction = () => {
                     return new Promise((resolve, reject) => {
                         try {
-                            connection.beginTransaction((err) => {
+                            connection.beginTransaction(err => {
                                 if (err) {
                                     connection.destroy();
                                     connection.release();
@@ -256,7 +266,7 @@ const DatabaseConnection = () => {
                 const Commit = () => {
                     return new Promise((resolve, reject) => {
                         try {
-                            connection.commit((err) => {
+                            connection.commit(err => {
                                 connection.release();
                                 connection.destroy();
                                 // connection.end();
@@ -338,9 +348,9 @@ const queryFormat = (query, values) => {
                     return "(NULL)";
                 }
                 if (values[key] instanceof Array) {
-                    const furnished_arr = values[key].filter((v) => !!v);
+                    const furnished_arr = values[key].filter(v => !!v);
                     if (furnished_arr.length > 0) {
-                        const formatArritem = furnished_arr.map((v) => mysql2_1.default.escape(v));
+                        const formatArritem = furnished_arr.map(v => mysql2_1.default.escape(v));
                         const arr_rep = formatArritem.join(",");
                         return ` (${arr_rep}) `;
                     }

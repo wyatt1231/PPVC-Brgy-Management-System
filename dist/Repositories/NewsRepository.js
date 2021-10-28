@@ -214,7 +214,7 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
          encoder_pk=@encoder_pk;`, payload);
         if (sql_add_news.insertedId > 0) {
             for (const file of files) {
-                const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/News/", file);
+                const file_res = yield (0, useFileUploader_1.UploadFile)("/Files/Complaints/", file);
                 if (!file_res.success) {
                     con.Rollback();
                     return file_res;
@@ -250,14 +250,14 @@ const addNews = (payload, files, user_pk) => __awaiter(void 0, void 0, void 0, f
                 }
                 for (const r of residents) {
                     if (/^(09|\+639)\d{9}$/.test(r.phone)) {
-                        const sms_response = yield (0, axios_1.default)({
+                        yield (0, axios_1.default)({
                             method: "post",
                             url: `https://api-mapper.clicksend.com/http/v2/send.php`,
                             data: qs_1.default.stringify({
-                                username: "princecas07@gmail.com",
-                                key: "85DB2479-8366-1385-C35B-D6E1F8B90B06",
+                                username: "detail.reynarcilla@gmail.com",
+                                key: "1213B160-B60A-E831-A40D-B0E37CA03A8D",
                                 to: r.phone,
-                                message: `Balita gikan sa Brgy. 37-D, Davao City. ${payload.title} karong ${(0, useDateParser_1.parseInvalidDateToDefault)(pub_date)}`,
+                                message: `Brgy. 37-D, Davao City. ${payload.title} | ${(0, useDateParser_1.parseInvalidDateToDefault)(pub_date)}`,
                                 //https://dashboard.clicksend.com/#/sms/send-sms/main
                             }),
                             headers: {
@@ -297,7 +297,7 @@ const addNewsFiles = (payload, files, user_pk) => __awaiter(void 0, void 0, void
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
         for (const file of files) {
-            const file_res = yield (0, useFileUploader_1.UploadFile)("src/Storage/Files/News/", file);
+            const file_res = yield (0, useFileUploader_1.UploadFile)("/Files/Complaints/", file);
             if (!file_res.success) {
                 con.Rollback();
                 return file_res;

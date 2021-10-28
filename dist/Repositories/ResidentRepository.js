@@ -20,6 +20,7 @@ const useSearch_1 = require("../Hooks/useSearch");
 const useValidator_1 = require("../Hooks/useValidator");
 const ResidentReport_1 = __importDefault(require("../PdfTemplates/ResidentReport"));
 const puppeteer = require("puppeteer");
+const path_1 = __importDefault(require("path"));
 const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
@@ -40,7 +41,7 @@ const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, func
         if (sql_insert_user.insertedId > 0) {
             if ((0, useValidator_1.isValidPicture)(payload.pic)) {
                 const upload_result = yield (0, useFileUploader_1.UploadImage)({
-                    base_url: "./src/Storage/Files/Images/",
+                    base_url: "./Files/Images/",
                     extension: "jpg",
                     file_name: sql_insert_user.insertedId,
                     file_to_upload: payload.pic,
@@ -134,7 +135,7 @@ const updateResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, f
         }
         if ((0, useValidator_1.isValidPicture)(payload.pic)) {
             const upload_result = yield (0, useFileUploader_1.UploadImage)({
-                base_url: "./src/Storage/Files/Images/",
+                base_url: "./Files/Images/",
                 extension: "jpg",
                 file_name: payload.user_pk,
                 file_to_upload: payload.pic,
@@ -291,7 +292,6 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
         SELECT logo FROM brand_logo LIMIT 1
       `, {});
         var base64data = brand_info === null || brand_info === void 0 ? void 0 : brand_info.logo.toString("base64");
-        console.log(`payload`, payload);
         const resident_data = yield con.Query(`
       SELECT * FROM
       (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
@@ -310,8 +310,15 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_to, "encoded_at")}
       ORDER BY ${payload.sort.column} ${payload.sort.direction}
       `, payload.filters);
+        const ABS_PATH = path_1.default.resolve("./chrome/chrome.exe");
+        console.log(`ABS_PATH ---- `, ABS_PATH);
         const browser = yield puppeteer.launch({
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            args: [
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+            ],
             headless: true,
         });
         const page = yield browser.newPage();
