@@ -2,15 +2,17 @@ import BodyParser from "body-parser";
 import dotenv from "dotenv";
 import express from "express";
 import FileUpload from "express-fileupload";
-import { ControllerRegistry } from "./Registry/ControllerRegistry";
-import path from "path";
 import http from "http";
+import path from "path";
 import { Server } from "socket.io";
+import { ControllerRegistry } from "./Registry/ControllerRegistry";
 import SocketRegistry from "./Registry/SocketRegistry";
 export const app = express();
 
 const main = async () => {
   dotenv.config();
+
+  //test
 
   app.use(BodyParser.json({ limit: "100mb" }));
   app.use(FileUpload());

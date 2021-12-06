@@ -17,14 +17,15 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
-const ControllerRegistry_1 = require("./Registry/ControllerRegistry");
-const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 const socket_io_1 = require("socket.io");
+const ControllerRegistry_1 = require("./Registry/ControllerRegistry");
 const SocketRegistry_1 = __importDefault(require("./Registry/SocketRegistry"));
 exports.app = (0, express_1.default)();
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     dotenv_1.default.config();
+    //test
     exports.app.use(body_parser_1.default.json({ limit: "100mb" }));
     exports.app.use((0, express_fileupload_1.default)());
     exports.app.use(express_1.default.static("./"));
