@@ -20,6 +20,7 @@ const useSearch_1 = require("../Hooks/useSearch");
 const useValidator_1 = require("../Hooks/useValidator");
 const ResidentReport_1 = __importDefault(require("../PdfTemplates/ResidentReport"));
 const puppeteer = require("puppeteer");
+const path = require("path");
 const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
@@ -311,6 +312,8 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_to, "encoded_at")}
       ORDER BY ${payload.sort.column} ${payload.sort.direction}
       `, payload.filters);
+        var absolutePath = path.resolve("./chromium-browser/win64-884014/chrome-win/chrome.exe");
+        console.log(`path --------------`, absolutePath);
         const browser = yield puppeteer.launch({
             args: [
                 "--disable-gpu",
@@ -320,8 +323,9 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
             ],
             headless: true,
             ignoreDefaultArgs: ["--disable-extensions"],
+            // executablePath: absolutePath,
+            // executablePath: "/usr/bin/chromium",
         });
-        console.log(`browser`, browser);
         const page = yield browser.newPage();
         yield page.setContent(`${ResidentReport_1.default.Content(resident_data, payload)}`);
         const pdfBuffer = yield page.pdf({

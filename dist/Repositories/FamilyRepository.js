@@ -18,6 +18,7 @@ const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useSearch_1 = require("../Hooks/useSearch");
 const FamilyReport_1 = __importDefault(require("../PdfTemplates/FamilyReport"));
 const puppeteer = require("puppeteer");
+const path = require("path");
 const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
@@ -636,6 +637,8 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
                 fam_pk: fam.fam_pk,
             });
         }
+        var absolutePath = path.resolve("./chromium-browser/win64-884014/chrome-win/chrome.exe");
+        console.log(`path --------------`, absolutePath);
         const browser = yield puppeteer.launch({
             args: [
                 "--disable-gpu",
@@ -644,6 +647,8 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
                 "--no-sandbox",
             ],
             headless: true,
+            ignoreDefaultArgs: ["--disable-extensions"],
+            // executablePath: absolutePath,
         });
         console.log(`browser`, browser);
         const page = yield browser.newPage();

@@ -7,6 +7,7 @@ import { PaginationModel } from "../Models/PaginationModel";
 import { ResponseModel } from "../Models/ResponseModels";
 import FamilyReport from "../PdfTemplates/FamilyReport";
 const puppeteer = require("puppeteer");
+const path = require("path");
 const addFamily = async (
   payload: FamilyModel,
   user_pk: number
@@ -851,6 +852,11 @@ const getFamilyDataTablePdf = async (
         }
       );
     }
+    var absolutePath = path.resolve(
+      "./chromium-browser/win64-884014/chrome-win/chrome.exe"
+    );
+
+    console.log(`path --------------`, absolutePath);
 
     const browser = await puppeteer.launch({
       args: [
@@ -860,8 +866,9 @@ const getFamilyDataTablePdf = async (
         "--no-sandbox",
       ],
       headless: true,
+      ignoreDefaultArgs: ["--disable-extensions"],
+      // executablePath: absolutePath,
     });
-
     console.log(`browser`, browser);
 
     const page = await browser.newPage();

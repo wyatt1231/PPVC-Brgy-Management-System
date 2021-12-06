@@ -14,6 +14,8 @@ import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
 import ResidentReport from "../PdfTemplates/ResidentReport";
 const puppeteer = require("puppeteer");
+const path = require("path");
+
 const addResident = async (
   payload: ResidentModel,
   user_pk: number
@@ -386,6 +388,12 @@ const getDataTableResidentPdf = async (
       payload.filters
     );
 
+    var absolutePath = path.resolve(
+      "./chromium-browser/win64-884014/chrome-win/chrome.exe"
+    );
+
+    console.log(`path --------------`, absolutePath);
+
     const browser = await puppeteer.launch({
       args: [
         "--disable-gpu",
@@ -395,9 +403,9 @@ const getDataTableResidentPdf = async (
       ],
       headless: true,
       ignoreDefaultArgs: ["--disable-extensions"],
+      // executablePath: absolutePath,
+      // executablePath: "/usr/bin/chromium",
     });
-
-    console.log(`browser`, browser);
 
     const page = await browser.newPage();
     await page.setContent(`${ResidentReport.Content(resident_data, payload)}`);
