@@ -6,7 +6,6 @@ import {
   FormGroup,
   FormHelperText,
   FormLabel,
-  Grid,
 } from "@material-ui/core";
 import { useField } from "formik";
 import React, { memo } from "react";
@@ -37,6 +36,7 @@ const FormikCheckbox: React.FC<IFormikCheckbox & FormControlProps> = memo(
           {data &&
             data.map((val, ind) => (
               <FormControlLabel
+                key={ind}
                 control={
                   <Checkbox
                     checked={field.value.includes(val.id)}
@@ -47,12 +47,23 @@ const FormikCheckbox: React.FC<IFormikCheckbox & FormControlProps> = memo(
                     onChange={() => {
                       let nextValue = null;
 
-                      if (field.value.includes(val.id)) {
-                        nextValue = field.value.filter(
-                          (value) => value !== val.id
-                        );
+                      if (val.id.toString().toLowerCase() === "all") {
+                        let n: Array<any> = [];
+
+                        n = data.map(({ id }) => id);
+
+                        nextValue = n;
                       } else {
-                        nextValue = field.value.concat(val.id);
+                        if (field.value.includes(val.id)) {
+                          nextValue = field.value.filter(
+                            (value) => value !== val.id && value !== "all"
+                          );
+                        } else {
+                          nextValue = field.value.concat(val.id);
+
+                          // if(field?.value?.length === data.length) {
+                          // }
+                        }
                       }
 
                       nextValue && setters.setValue(nextValue);

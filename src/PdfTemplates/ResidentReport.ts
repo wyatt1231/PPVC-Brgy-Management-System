@@ -55,7 +55,10 @@ const CSS = () => {
 
       .col-6 {
         flex-basis: 50%;
-        
+      }
+
+      .col-12 {
+        flex-basis: 100%;
       }
 
       .header {
@@ -215,6 +218,14 @@ const Content = (
             <div class="info-title">Applied Filters</div>
         
             <div class="grid">
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Quick Search:</div>
+                    <div class="value">${filters?.filters?.quick_search}</div>
+                  </div>
+                </div>
+              </div>
               <div class="col-6">
                 <div>
                   <div class="info-group">

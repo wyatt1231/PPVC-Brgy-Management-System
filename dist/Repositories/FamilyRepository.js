@@ -17,7 +17,6 @@ const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useSearch_1 = require("../Hooks/useSearch");
 const FamilyReport_1 = __importDefault(require("../PdfTemplates/FamilyReport"));
-const path_1 = __importDefault(require("path"));
 const puppeteer = require("puppeteer");
 const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
@@ -479,17 +478,17 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
             fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         const tinubdan_tubig = yield con.Query(`SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`, { fam_pk });
-        family.tinubdan_tubig = tinubdan_tubig.map(d => d.descrip);
+        family.tinubdan_tubig = tinubdan_tubig.map((d) => d.descrip);
         const matang_kasilyas = yield con.Query(`SELECT * FROM family_matang_kasilyas where fam_pk = @fam_pk;`, { fam_pk });
-        family.matang_kasilyas = matang_kasilyas.map(d => d.descrip);
+        family.matang_kasilyas = matang_kasilyas.map((d) => d.descrip);
         const pasilidad_kuryente = yield con.Query(`SELECT * FROM family_pasilidad_kuryente where fam_pk = @fam_pk;`, { fam_pk });
-        family.pasilidad_kuryente = pasilidad_kuryente.map(d => d.descrip);
+        family.pasilidad_kuryente = pasilidad_kuryente.map((d) => d.descrip);
         const matang_basura = yield con.Query(`SELECT * FROM family_matang_basura where fam_pk = @fam_pk;`, { fam_pk });
-        family.matang_basura = matang_basura.map(d => d.descrip);
+        family.matang_basura = matang_basura.map((d) => d.descrip);
         const biktima_pangabuso = yield con.Query(`SELECT * FROM family_biktima_pangabuso where fam_pk = @fam_pk;`, { fam_pk });
-        family.biktima_pangabuso = biktima_pangabuso.map(d => d.descrip);
+        family.biktima_pangabuso = biktima_pangabuso.map((d) => d.descrip);
         const kahimtanang_komunidad = yield con.Query(`SELECT * FROM family_kahimtanang_komunidad where fam_pk = @fam_pk;`, { fam_pk });
-        family.kahimtanang_komunidad = kahimtanang_komunidad.map(d => d.descrip);
+        family.kahimtanang_komunidad = kahimtanang_komunidad.map((d) => d.descrip);
         family.serbisyo_nadawat = yield con.Query(`  SELECT * FROM family_serbisyo_nadawat where fam_pk = @fam_pk;`, { fam_pk });
         con.Commit();
         return {
@@ -530,7 +529,8 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
           LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
         ) AS tmp
         WHERE
-        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+        AND coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
         AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
         AND matang_kasilyas IN @matang_kasilyas
         AND tinubdan_tubig IN @tinubdan_tubig 
@@ -615,7 +615,8 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
           LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
         ) AS tmp
         WHERE
-        coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+        AND coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
         AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
         AND matang_kasilyas IN @matang_kasilyas
         AND tinubdan_tubig IN @tinubdan_tubig 
@@ -635,8 +636,6 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
                 fam_pk: fam.fam_pk,
             });
         }
-        const ABS_PATH = path_1.default.resolve("./chrome/chrome.exe");
-        console.log(`ABS_PATH`, ABS_PATH);
         const browser = yield puppeteer.launch({
             args: [
                 "--disable-gpu",
@@ -646,6 +645,7 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
             ],
             headless: true,
         });
+        console.log(`browser`, browser);
         const page = yield browser.newPage();
         yield page.setContent(`${FamilyReport_1.default.Content(all_family, payload)}`);
         const pdfBuffer = yield page.pdf({

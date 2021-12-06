@@ -15,106 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment_1 = __importDefault(require("moment"));
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
-const total_population = (purok) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
-    try {
-        yield con.BeginTransaction();
-        const db_res = yield con.QuerySingle(`
-      select count(*) as total from resident where died_date is  null  and purok in @purok
-    `, {
-            purok: purok,
-        });
-        con.Commit();
-        return {
-            success: true,
-            data: db_res.total,
-        };
-    }
-    catch (error) {
-        yield con.Rollback();
-        console.error(`error`, error);
-        return {
-            success: false,
-            message: (0, useErrorMessage_1.ErrorMessage)(error),
-        };
-    }
-});
-const total_death = (purok) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
-    try {
-        yield con.BeginTransaction();
-        const db_res = yield con.QuerySingle(`
-      select count(*) as total from resident where died_date is not null   and purok in @purok
-    `, {
-            purok: purok,
-        });
-        con.Commit();
-        return {
-            success: true,
-            data: db_res.total,
-        };
-    }
-    catch (error) {
-        yield con.Rollback();
-        console.error(`error`, error);
-        return {
-            success: false,
-            message: (0, useErrorMessage_1.ErrorMessage)(error),
-        };
-    }
-});
-const total_pwd = (purok) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
-    try {
-        yield con.BeginTransaction();
-        const db_res = yield con.QuerySingle(`
-      select count(*) as total from resident where died_date is  null  and with_disability = 'y'   and purok in @purok
-    `, {
-            purok: purok,
-        });
-        con.Commit();
-        return {
-            success: true,
-            data: db_res.total,
-        };
-    }
-    catch (error) {
-        yield con.Rollback();
-        console.error(`error`, error);
-        return {
-            success: false,
-            message: (0, useErrorMessage_1.ErrorMessage)(error),
-        };
-    }
-});
-const total_sc = (purok) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
-    try {
-        yield con.BeginTransaction();
-        const db_res = yield con.QuerySingle(`
-      SELECT count(*) as total FROM (
-        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
-        FROM resident WHERE died_date IS NULL  AND purok IN @purok
-        ) AS tmp
-        WHERE  age >= 60 
-    `, {
-            purok: purok,
-        });
-        con.Commit();
-        return {
-            success: true,
-            data: db_res.total,
-        };
-    }
-    catch (error) {
-        yield con.Rollback();
-        console.error(`error`, error);
-        return {
-            success: false,
-            message: (0, useErrorMessage_1.ErrorMessage)(error),
-        };
-    }
-});
 const overallPopulation = (purok) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
@@ -165,36 +65,126 @@ const overallPopulation = (purok) => __awaiter(void 0, void 0, void 0, function*
         };
     }
 });
-const ageGroupStats = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+const total_population = (filters) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is  null AND YEAR(resident_date) = @year  AND purok in @purok ;
+    `, filters);
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const total_death = (filters) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is not null AND YEAR(resident_date) = @year  and purok in @purok
+    `, filters);
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const total_pwd = (filters) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      select count(*) as total from resident where died_date is  null  and with_disability = 'y' AND YEAR(resident_date) = @year    and purok in @purok
+    `, filters);
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const total_sc = (filters) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const db_res = yield con.QuerySingle(`
+      SELECT count(*) as total FROM (
+        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
+        FROM resident WHERE died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
+        ) AS tmp
+        WHERE  age >= 60 
+    `, filters);
+        con.Commit();
+        return {
+            success: true,
+            data: db_res.total,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const ageGroupStats = (filters) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const ages = yield con.Query(`
         SELECT * FROM 
         (
-        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL AND purok IN @purok
+        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND purok IN @purok
+        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND purok IN @purok
+        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND purok IN @purok
+        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND purok IN @purok
+        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND purok IN @purok
+        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND purok IN @purok
+        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND purok IN @purok
+        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND purok IN @purok
+        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND purok IN @purok
+        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         ) tmp
-          `, {
-            purok,
-        });
+          `, filters);
         const labels = [];
         for (const r of ages) {
             labels.push(r.x);
@@ -217,21 +207,19 @@ const ageGroupStats = (purok) => __awaiter(void 0, void 0, void 0, function* () 
         };
     }
 });
-const lifeStageStats = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+const lifeStageStats = (filters) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const life_stage_stats = yield con.Query(`
-      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND purok IN @purok
+      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND purok IN @purok
+      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND purok IN @purok
+      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND purok IN @purok
-         `, {
-            purok,
-        });
+      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND YEAR(resident_date) = @year  AND purok IN @purok
+         `, filters);
         con.Commit();
         return {
             success: true,
@@ -249,20 +237,16 @@ const lifeStageStats = (purok) => __awaiter(void 0, void 0, void 0, function* ()
         };
     }
 });
-const genderStats = (purok) => __awaiter(void 0, void 0, void 0, function* () {
+const genderStats = (filters) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const total_male = yield con.QuerySingle(`
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'  AND purok in @purok
-          `, {
-            purok,
-        });
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'   AND YEAR(resident_date) = @year  AND purok in @purok
+          `, filters);
         const total_female = yield con.QuerySingle(`
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'  AND purok in @purok
-          `, {
-            purok,
-        });
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'   AND YEAR(resident_date) = @year  AND purok in @purok
+          `, filters);
         con.Commit();
         return {
             success: true,

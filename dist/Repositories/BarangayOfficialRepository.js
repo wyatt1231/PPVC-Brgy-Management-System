@@ -17,22 +17,70 @@ const addBarangayOfficial = (payload, user_pk) => __awaiter(void 0, void 0, void
     try {
         yield con.BeginTransaction();
         payload.encoder_pk = user_pk;
-        const sql_add_brgy_official = yield con.Insert(`INSERT INTO barangay_official SET
-         resident_pk=@resident_pk,
-         position=@position,
-         encoder_pk=@encoder_pk;`, payload);
-        if (sql_add_brgy_official.insertedId > 0) {
+        const count_existing = yield con.QuerySingle(`SELECT COUNT(*) AS total FROM barangay_official WHERE resident_pk = @resident_pk AND sts_pk = 'A'  LIMIT 1;`, {
+            resident_pk: payload.resident_pk,
+        });
+        if (parseInt(count_existing.total) > 0) {
+            con.Rollback();
+            return {
+                success: false,
+                message: "You cannot set this resident as Brgy. Official because he/she has an existing brgy. official position",
+            };
+        }
+        else {
+            const sql_add_brgy_official = yield con.Insert(`INSERT INTO barangay_official SET
+           resident_pk=@resident_pk,
+           position=@position,
+           encoder_pk=@encoder_pk;`, payload);
+            if (sql_add_brgy_official.insertedId > 0) {
+                con.Commit();
+                return {
+                    success: true,
+                    message: "The position has been granted to the brgy. official successfully",
+                };
+            }
+            else {
+                con.Rollback();
+                return {
+                    success: false,
+                    message: "No affected rows in the process",
+                };
+            }
+        }
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const removeBarangayOfficial = (official_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const sql_update = yield con.Modify(`
+          UPDATE barangay_official SET
+          sts_pk='X'
+          where official_pk=@official_pk;
+          ;
+           `, {
+            official_pk: official_pk,
+        });
+        if (sql_update > 0) {
             con.Commit();
             return {
                 success: true,
-                message: "The position has been granted to the brgy. official successfully",
+                message: "The barangay official has been deactivated successfully!",
             };
         }
         else {
             con.Rollback();
             return {
                 success: false,
-                message: "No affected rows in the process",
+                message: "No affected rows while updating the record",
             };
         }
     }
@@ -51,13 +99,15 @@ const getBrgyOfficialDataTable = (payload) => __awaiter(void 0, void 0, void 0, 
         yield con.BeginTransaction();
         const data = yield con.QueryPagination(`
       SELECT * FROM 
-      (SELECT r.first_name,r.resident_pk,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
+      (SELECT r.first_name,r.resident_pk,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.official_pk,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
       LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
       WHERE 
+      
       first_name like concat('%',@first_name,'%')
       AND last_name like concat('%',@last_name,'%')
       AND gender IN @gender
+      AND sts_pk <> 'X'
       AND sts_pk IN @sts_pk
       `, payload);
         const hasMore = data.length > payload.page.limit;
@@ -122,5 +172,6 @@ exports.default = {
     getBrgyOfficialList,
     addBarangayOfficial,
     getBrgyOfficialDataTable,
+    removeBarangayOfficial,
 };
 //# sourceMappingURL=BarangayOfficialRepository.js.map

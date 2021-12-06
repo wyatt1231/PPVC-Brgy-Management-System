@@ -14,7 +14,6 @@ import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
 import ResidentReport from "../PdfTemplates/ResidentReport";
 const puppeteer = require("puppeteer");
-import path from "path";
 const addResident = async (
   payload: ResidentModel,
   user_pk: number
@@ -288,7 +287,8 @@ const getDataTableResident = async (
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name LIKE concat('%',@first_name,'%')
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
       AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
@@ -365,7 +365,8 @@ const getDataTableResidentPdf = async (
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name LIKE concat('%',@first_name,'%')
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
       AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
@@ -385,10 +386,6 @@ const getDataTableResidentPdf = async (
       payload.filters
     );
 
-    const ABS_PATH = path.resolve("./chrome/chrome.exe");
-
-    console.log(`ABS_PATH ---- `, ABS_PATH);
-
     const browser = await puppeteer.launch({
       args: [
         "--disable-gpu",
@@ -397,7 +394,10 @@ const getDataTableResidentPdf = async (
         "--no-sandbox",
       ],
       headless: true,
+      ignoreDefaultArgs: ["--disable-extensions"],
     });
+
+    console.log(`browser`, browser);
 
     const page = await browser.newPage();
     await page.setContent(`${ResidentReport.Content(resident_data, payload)}`);

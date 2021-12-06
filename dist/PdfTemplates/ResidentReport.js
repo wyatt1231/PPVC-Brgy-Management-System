@@ -54,7 +54,10 @@ const CSS = () => {
 
       .col-6 {
         flex-basis: 50%;
-        
+      }
+
+      .col-12 {
+        flex-basis: 100%;
       }
 
       .header {
@@ -199,7 +202,7 @@ const Header = (logo) => {
 </header>`;
 };
 const Content = (resident_data, filters) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     return `
         <html>
           <head>
@@ -210,11 +213,19 @@ const Content = (resident_data, filters) => {
             <div class="info-title">Applied Filters</div>
         
             <div class="grid">
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Quick Search:</div>
+                    <div class="value">${(_a = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _a === void 0 ? void 0 : _a.quick_search}</div>
+                  </div>
+                </div>
+              </div>
               <div class="col-6">
                 <div>
                   <div class="info-group">
                     <div class="label">First Name:</div>
-                    <div class="value">${(_a = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _a === void 0 ? void 0 : _a.first_name}</div>
+                    <div class="value">${(_b = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _b === void 0 ? void 0 : _b.first_name}</div>
                   </div>
                 </div>
               </div>
@@ -222,7 +233,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Last Name:</div>
-                    <div class="value">${(_b = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _b === void 0 ? void 0 : _b.last_name}</div>
+                    <div class="value">${(_c = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _c === void 0 ? void 0 : _c.last_name}</div>
                   </div>
                 </div>
               </div>
@@ -230,7 +241,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Edad:</div>
-                    <div class="value">${(_c = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _c === void 0 ? void 0 : _c.min_age}-${(_d = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _d === void 0 ? void 0 : _d.max_age}</div>
+                    <div class="value">${(_d = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _d === void 0 ? void 0 : _d.min_age}-${(_e = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _e === void 0 ? void 0 : _e.max_age}</div>
                   </div>
                 </div>
               </div>
@@ -238,7 +249,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Sekso:</div>
-                    <div class="value">${(_f = (_e = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _e === void 0 ? void 0 : _e.gender) === null || _f === void 0 ? void 0 : _f.map((g) => g === "m" ? "Lalaki" : "Babae")}</div>
+                    <div class="value">${(_g = (_f = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _f === void 0 ? void 0 : _f.gender) === null || _g === void 0 ? void 0 : _g.map((g) => g === "m" ? "Lalaki" : "Babae")}</div>
                   </div>
                 </div>
               </div>
@@ -246,7 +257,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Mga Purok:</div>
-                    <div class="value">${(_h = (_g = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _g === void 0 ? void 0 : _g.purok) === null || _h === void 0 ? void 0 : _h.map((g) => g)}</div>
+                    <div class="value">${(_j = (_h = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _h === void 0 ? void 0 : _h.purok) === null || _j === void 0 ? void 0 : _j.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -255,7 +266,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Status</div>
-                    <div class="value">${(_k = (_j = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _j === void 0 ? void 0 : _j.sts_pk) === null || _k === void 0 ? void 0 : _k.map((s) => s === "A" ? "Active" : "Not Active")}</div>
+                    <div class="value">${(_l = (_k = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _k === void 0 ? void 0 : _k.sts_pk) === null || _l === void 0 ? void 0 : _l.map((s) => s === "A" ? "Active" : "Not Active")}</div>
                   </div>
                 </div>
               </div>
@@ -263,7 +274,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Encoded At</div>
-                    <div class="value">${(0, useDateParser_1.InvalidDateToDefault)((_l = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _l === void 0 ? void 0 : _l.encoded_from, "All prev. dates")} -  ${(0, useDateParser_1.InvalidDateToDefault)((_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.encoded_at, "All future dates")}</div>
+                    <div class="value">${(0, useDateParser_1.InvalidDateToDefault)((_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.encoded_from, "All prev. dates")} -  ${(0, useDateParser_1.InvalidDateToDefault)((_o = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _o === void 0 ? void 0 : _o.encoded_at, "All future dates")}</div>
                   </div>
                 </div>
               </div>

@@ -53,7 +53,9 @@ const CSS = () => {
 
       .col-6 {
         flex-basis: 50%;
-        
+      }
+      .col-12 {
+        flex-basis: 100%;
       }
 
       .header {
@@ -198,7 +200,7 @@ const Header = (logo) => {
 </header>`;
 };
 const Content = (resident_data, filters) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
     return `
         <html>
           <head>
@@ -209,11 +211,19 @@ const Content = (resident_data, filters) => {
             <div class="info-title">Applied Filters</div>
         
             <div class="grid">
+              <div class="col-12">
+                <div>
+                  <div class="info-group">
+                    <div class="label">Quick Search:</div>
+                    <div class="value">${(_a = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _a === void 0 ? void 0 : _a.quick_search}</div>
+                  </div>
+                </div>
+              </div>
               <div class="col-6">
                 <div>
                   <div class="info-group">
                     <div class="label">Pangalan sa Ulo sa Pamilya:</div>
-                    <div class="value">${(_a = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _a === void 0 ? void 0 : _a.ulo_pamilya_first_name}</div>
+                    <div class="value">${(_b = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _b === void 0 ? void 0 : _b.ulo_pamilya_first_name}</div>
                   </div>
                 </div>
               </div>
@@ -221,7 +231,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Apilyedo sa Ulo sa Pamilya:</div>
-                    <div class="value">${(_b = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _b === void 0 ? void 0 : _b.ulo_pamilya_last_name}</div>
+                    <div class="value">${(_c = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _c === void 0 ? void 0 : _c.ulo_pamilya_last_name}</div>
                   </div>
                 </div>
               </div>
@@ -230,7 +240,7 @@ const Content = (resident_data, filters) => {
                   <div class="info-group">
                     <div class="label">Mga Purok:</div>
                     <div class="value">
-                    ${(_d = (_c = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _c === void 0 ? void 0 : _c.ulo_fam_purok) === null || _d === void 0 ? void 0 : _d.map((g) => g)}
+                    ${(_e = (_d = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _d === void 0 ? void 0 : _d.ulo_fam_purok) === null || _e === void 0 ? void 0 : _e.map((g) => g)}
                     </div>
                   </div>
                 </div>
@@ -240,7 +250,7 @@ const Content = (resident_data, filters) => {
                   <div class="info-group">
                     <div class="label">Tinubdan Sa Tubig:</div>
                     <div class="value">
-                    ${(_f = (_e = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _e === void 0 ? void 0 : _e.tinubdan_tubig) === null || _f === void 0 ? void 0 : _f.map((g) => g)}
+                    ${(_g = (_f = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _f === void 0 ? void 0 : _f.tinubdan_tubig) === null || _g === void 0 ? void 0 : _g.map((g) => g)}
                     </div>
                   </div>
                 </div>
@@ -250,7 +260,7 @@ const Content = (resident_data, filters) => {
                   <div class="info-group">
                     <div class="label">Matang sa Kasilyas:</div>
                     <div class="value">
-                    ${(_h = (_g = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _g === void 0 ? void 0 : _g.matang_kasilyas) === null || _h === void 0 ? void 0 : _h.map((g) => g)}</div>
+                    ${(_j = (_h = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _h === void 0 ? void 0 : _h.matang_kasilyas) === null || _j === void 0 ? void 0 : _j.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -259,7 +269,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Pasilidad sa Kuryente:</div>
-                    <div class="value">${(_k = (_j = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _j === void 0 ? void 0 : _j.pasilidad_kuryente) === null || _k === void 0 ? void 0 : _k.map((g) => g)}</div>
+                    <div class="value">${(_l = (_k = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _k === void 0 ? void 0 : _k.pasilidad_kuryente) === null || _l === void 0 ? void 0 : _l.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -267,7 +277,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Matang sa Basura:</div>
-                    <div class="value">${(_m = (_l = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _l === void 0 ? void 0 : _l.matang_basura) === null || _m === void 0 ? void 0 : _m.map((g) => g)}</div>
+                    <div class="value">${(_o = (_m = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _m === void 0 ? void 0 : _m.matang_basura) === null || _o === void 0 ? void 0 : _o.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -275,7 +285,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Tinubdan sa Tubig:</div>
-                    <div class="value">${(_p = (_o = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _o === void 0 ? void 0 : _o.tinubdan_tubig) === null || _p === void 0 ? void 0 : _p.map((g) => g)}</div>
+                    <div class="value">${(_q = (_p = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _p === void 0 ? void 0 : _p.tinubdan_tubig) === null || _q === void 0 ? void 0 : _q.map((g) => g)}</div>
                   </div>
                 </div>
               </div>
@@ -283,7 +293,7 @@ const Content = (resident_data, filters) => {
                 <div>
                   <div class="info-group">
                     <div class="label">Biktikma sa Pang-abuso:</div>
-                    <div class="value">${(_r = (_q = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _q === void 0 ? void 0 : _q.biktima_pangabuso) === null || _r === void 0 ? void 0 : _r.map((g) => g)}</div>
+                    <div class="value">${(_s = (_r = filters === null || filters === void 0 ? void 0 : filters.filters) === null || _r === void 0 ? void 0 : _r.biktima_pangabuso) === null || _s === void 0 ? void 0 : _s.map((g) => g)}</div>
                   </div>
                 </div>
               </div>

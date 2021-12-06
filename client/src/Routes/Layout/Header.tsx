@@ -4,8 +4,6 @@ import clsx from "clsx";
 import React, { memo } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import Message from "../../Component/Message/Message";
-import Notification from "../../Component/Notification/Notification";
 import PageLinks from "../../Component/PageLinks";
 import SettingMenu from "../../Component/SettingMenu/SettingMenu";
 import { RootStore } from "../../Services/Store";
@@ -83,7 +81,7 @@ const StyledHeader = styled(AppBar)`
   padding-left: ${(p) => p.theme.sidebar.maxWidth + 10}px !important;
   padding-right: 10px !important;
   background: ${(p) => p.theme.header.backgroundColor} !important;
-  box-shadow: none !important;
+  /* box-shadow: none !important; */
   border: none !important;
   color: ${(p) => p.theme.header.color} !important;
   grid-auto-rows: ${(p) => p.theme.header.height}px;

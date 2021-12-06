@@ -24,9 +24,9 @@ const Body: React.FC<IBody> = memo(({ children, isOpenMobileHeader }) => {
 });
 export default Body;
 const StyledBody = styled.main`
-  margin-top: ${(p) => p.theme.header.height}px !important;
+  margin-top: ${(p) => p.theme.header.height + 50}px !important;
   transition: 0.2s margin-top ease-in-out;
-  background-color: #fafafa !important;
+  /* background-color: #fafafa !important; */
   &.expand-body {
     margin-top: ${(p) => p.theme.header.height * 2}px !important;
     transition: 0.2s margin-top ease-in-out;

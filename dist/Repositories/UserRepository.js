@@ -16,11 +16,14 @@ const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useJwt_1 = require("../Hooks/useJwt");
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
-    console.log(`con`, con);
     try {
         yield con.BeginTransaction();
-        yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'sql6400894';`, null);
+        // await con.QuerySingle(
+        //   `SELECT table_name FROM information_schema.tables
+        //   WHERE table_schema = 'sql6400894';`,
+        //   null
+        // );
+        console.log(`payload`, payload);
         const user = yield con.QuerySingle(`SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`, payload);
         if (user) {
             if (user.allow_login === "n") {

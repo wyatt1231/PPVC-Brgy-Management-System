@@ -19,17 +19,17 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     const router = (0, express_1.Router)();
     router.post("/overallPopulation", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.overallPopulation(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.overallPopulation(filters));
         }
         catch (error) {
             res.json(error);
         }
     }));
     router.post("/ageGroupStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const purok = req.body;
+        const filters = req.body;
         try {
-            res.json(yield DashboardRepository_1.default.ageGroupStats(purok));
+            res.json(yield DashboardRepository_1.default.ageGroupStats(filters));
         }
         catch (error) {
             res.json(error);
@@ -37,8 +37,8 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/genderStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.genderStats(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.genderStats(filters));
         }
         catch (error) {
             res.json(error);
@@ -46,8 +46,8 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/lifeStageStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.lifeStageStats(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.lifeStageStats(filters));
         }
         catch (error) {
             res.json(error);
@@ -70,18 +70,14 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
         }
     }));
     router.post("/total_population", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.total_population(purok));
-        }
-        catch (error) {
-            res.json(500);
-        }
+        const filters = req.body;
+        console.log(`total_population`, filters);
+        res.json(yield DashboardRepository_1.default.total_population(filters));
     }));
     router.post("/total_death", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.total_death(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_death(filters));
         }
         catch (error) {
             res.json(500);
@@ -89,8 +85,8 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/total_pwd", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.total_pwd(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_pwd(filters));
         }
         catch (error) {
             res.json(500);
@@ -98,8 +94,8 @@ const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function*
     }));
     router.post("/total_sc", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const purok = req.body;
-            res.json(yield DashboardRepository_1.default.total_sc(purok));
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_sc(filters));
         }
         catch (error) {
             res.json(500);

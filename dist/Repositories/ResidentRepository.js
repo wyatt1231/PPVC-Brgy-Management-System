@@ -20,7 +20,6 @@ const useSearch_1 = require("../Hooks/useSearch");
 const useValidator_1 = require("../Hooks/useValidator");
 const ResidentReport_1 = __importDefault(require("../PdfTemplates/ResidentReport"));
 const puppeteer = require("puppeteer");
-const path_1 = __importDefault(require("path"));
 const addResident = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
     const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
@@ -244,7 +243,8 @@ const getDataTableResident = (payload) => __awaiter(void 0, void 0, void 0, func
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name LIKE concat('%',@first_name,'%')
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
       AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
@@ -299,7 +299,8 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name LIKE concat('%',@first_name,'%')
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
       AND last_name LIKE concat('%',@last_name,'%')
       AND gender IN @gender
       AND sts_pk IN @sts_pk
@@ -310,8 +311,6 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
       AND encoded_at <= ${(0, useDateParser_1.sqlFilterDate)(payload.filters.encoded_to, "encoded_at")}
       ORDER BY ${payload.sort.column} ${payload.sort.direction}
       `, payload.filters);
-        const ABS_PATH = path_1.default.resolve("./chrome/chrome.exe");
-        console.log(`ABS_PATH ---- `, ABS_PATH);
         const browser = yield puppeteer.launch({
             args: [
                 "--disable-gpu",
@@ -320,7 +319,9 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
                 "--no-sandbox",
             ],
             headless: true,
+            ignoreDefaultArgs: ["--disable-extensions"],
         });
+        console.log(`browser`, browser);
         const page = yield browser.newPage();
         yield page.setContent(`${ResidentReport_1.default.Content(resident_data, payload)}`);
         const pdfBuffer = yield page.pdf({

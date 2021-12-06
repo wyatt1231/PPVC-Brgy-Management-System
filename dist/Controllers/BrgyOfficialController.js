@@ -43,6 +43,16 @@ const BrgyOfficialController = (app) => __awaiter(void 0, void 0, void 0, functi
             res.json(500);
         }
     }));
+    router.post("/removeBarangayOfficial", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const official_pk = (_a = req.body) === null || _a === void 0 ? void 0 : _a.official_pk;
+            res.json(yield BarangayOfficialRepository_1.default.removeBarangayOfficial(official_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
     app.use("/api/official/", router);
 });
 exports.default = BrgyOfficialController;

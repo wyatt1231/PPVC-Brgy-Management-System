@@ -1,14 +1,6 @@
-import {
-  FormControl,
-  OutlinedInput,
-  InputAdornment,
-  IconButton,
-  Popover,
-  Paper,
-} from "@material-ui/core";
-import React, { memo, FC } from "react";
-import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
+import { IconButton, Paper, Popover } from "@material-ui/core";
 import FilterListRoundedIcon from "@material-ui/icons/FilterListRounded";
+import React, { FC, memo } from "react";
 import styled from "styled-components";
 interface IDataTableSearch {
   // onSubmit: (values: any) => void;
@@ -38,9 +30,15 @@ export const DataTableSearch: FC<IDataTableSearch> = memo(
     return (
       <div>
         {!!FilterComponent && (
-          <IconButton type="button" aria-describedby={id} onClick={handleClick}>
-            <FilterListRoundedIcon color="primary" />
-          </IconButton>
+          <>
+            <IconButton
+              type="button"
+              aria-describedby={id}
+              onClick={handleClick}
+            >
+              <FilterListRoundedIcon color="primary" />
+            </IconButton>
+          </>
         )}
         <Popover
           id={id}

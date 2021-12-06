@@ -107,13 +107,13 @@ const addComplaintMessage = async (
       con.Commit();
       return {
         success: true,
-        message: "The complaint has been updated successfully!",
+        message: "The complaint has been added successfully!",
       };
     } else {
       con.Rollback();
       return {
         success: false,
-        message: "No affected rows while updating the complaint",
+        message: "No affected rows while adding the complaint",
       };
     }
   } catch (error) {

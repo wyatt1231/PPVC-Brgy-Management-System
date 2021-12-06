@@ -11,21 +11,27 @@ import {
   TablePagination,
   TableRow,
 } from "@material-ui/core";
-import { Formik, Form } from "formik";
-import React, { FC, memo, useEffect } from "react";
+import { Form, Formik } from "formik";
+import React, { FC, memo, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import DataTableSearch from "../../../Component/DataTableSearch";
 import DataTableSort from "../../../Component/DataTableSort";
 import FormikCheckbox from "../../../Component/Formik/FormikCheckbox";
-import FormikDateField from "../../../Component/Formik/FormikDateField";
 import FormikInputField from "../../../Component/Formik/FormikInputField";
+import IconButtonPopper from "../../../Component/IconButtonPopper/IconButtonPopper";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import { InvalidDateTimeToDefault } from "../../../Hooks/UseDateParser";
 import useFilter from "../../../Hooks/useFilter";
-import { setBrgyOfficialDataTableAction } from "../../../Services/Actions/BrgyOfficialActions";
-import { setPageLinks } from "../../../Services/Actions/PageActions";
+import {
+  removeBarangayOfficialAction,
+  setBrgyOfficialDataTableAction,
+} from "../../../Services/Actions/BrgyOfficialActions";
+import {
+  setGeneralPrompt,
+  setPageLinks,
+} from "../../../Services/Actions/PageActions";
 import ITableColumns from "../../../Services/Interface/ITableColumns";
 import ITableInitialSort from "../../../Services/Interface/ITableInitialSort";
 import { BarangayOfficialModel } from "../../../Services/Models/BarangayOfficialModels";
@@ -98,9 +104,14 @@ const tableColumns: Array<ITableColumns> = [
     width: 150,
     align: "left",
   },
+  {
+    label: "Actions",
+    width: 50,
+    align: "center",
+  },
 ];
 
-export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterface> =
+const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterface> =
   memo(() => {
     const dispatch = useDispatch();
 
@@ -112,6 +123,8 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
       (store: RootStore) =>
         store.BrgyOfficialReducer?.brgy_official_data_table?.table
     );
+
+    const [reset_table, set_reset_table] = useState(0);
 
     const [
       tableSearch,
@@ -127,6 +140,24 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
       handleChagenSelectedSortIndex,
       handleSetSearchField,
     ] = useFilter(initialSearch, initialTableSort, 50);
+
+    const handleRemoveBrgyOfficial = useCallback(
+      async (official_pk: string) => {
+        dispatch(
+          setGeneralPrompt({
+            open: true,
+            continue_callback: () =>
+              dispatch(
+                removeBarangayOfficialAction(official_pk, (msg: string) => {
+                  // helpers.resetForm();
+                  set_reset_table((r) => r + 1);
+                })
+              ),
+          })
+        );
+      },
+      [dispatch]
+    );
 
     useEffect(() => {
       let mounted = true;
@@ -148,7 +179,7 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
       return () => {
         mounted = false;
       };
-    }, [activeSort, dispatch, tableLimit, tablePage, tableSearch]);
+    }, [activeSort, dispatch, tableLimit, tablePage, tableSearch, reset_table]);
 
     useEffect(() => {
       let mounted = true;
@@ -429,6 +460,21 @@ export const DataTableBrgyOfficialAdminView: FC<DataTableBrgyOfficialAdminInterf
                             <div className="datetime">
                               {InvalidDateTimeToDefault(row.encoded_at, "-")}
                             </div>
+                          </TableCell>
+
+                          <TableCell align="center">
+                            <IconButtonPopper
+                              buttons={[
+                                {
+                                  text: "Unset/Remove Brgy. Official",
+                                  color: "primary",
+                                  handleClick: () =>
+                                    handleRemoveBrgyOfficial(
+                                      row.official_pk?.toString()
+                                    ),
+                                },
+                              ]}
+                            />
                           </TableCell>
                         </TableRow>
                       ))}

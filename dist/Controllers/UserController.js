@@ -41,9 +41,12 @@ const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     }));
     router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield user_repo.loginUser(req.body));
+            const response = yield user_repo.loginUser(req.body);
+            console.log(`response`, response);
+            res.json(response);
         }
         catch (error) {
+            console.error(`e`, error);
             res.json(500);
         }
     }));
@@ -57,9 +60,13 @@ const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
     }));
     router.post("/userinfo", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield user_repo.userinfo(req.user_pk));
+            const response = yield user_repo.userinfo(req.user_pk);
+            console.log(`userinfo response`, response);
+            res.json(response);
         }
         catch (error) {
+            //marktabang@gmail.com
+            console.error(`userinfo`, error);
             res.json(500);
         }
     }));

@@ -2,132 +2,11 @@ import moment from "moment";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import {
+  DashboardFilterInterface,
   OverallPopulationModel,
   YearlyStatsModel,
 } from "../Models/DashboardModels";
 import { ResponseModel } from "../Models/ResponseModels";
-
-const total_population = async (
-  purok: Array<string>
-): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const db_res = await con.QuerySingle(
-      `
-      select count(*) as total from resident where died_date is  null  and purok in @purok
-    `,
-      {
-        purok: purok,
-      }
-    );
-
-    con.Commit();
-    return {
-      success: true,
-      data: db_res.total,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-
-const total_death = async (purok: Array<string>): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const db_res = await con.QuerySingle(
-      `
-      select count(*) as total from resident where died_date is not null   and purok in @purok
-    `,
-      {
-        purok: purok,
-      }
-    );
-
-    con.Commit();
-    return {
-      success: true,
-      data: db_res.total,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-
-const total_pwd = async (purok: Array<string>): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const db_res = await con.QuerySingle(
-      `
-      select count(*) as total from resident where died_date is  null  and with_disability = 'y'   and purok in @purok
-    `,
-      {
-        purok: purok,
-      }
-    );
-
-    con.Commit();
-    return {
-      success: true,
-      data: db_res.total,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
-
-const total_sc = async (purok: Array<string>): Promise<ResponseModel> => {
-  const con = await DatabaseConnection();
-  try {
-    await con.BeginTransaction();
-
-    const db_res = await con.QuerySingle(
-      `
-      SELECT count(*) as total FROM (
-        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
-        FROM resident WHERE died_date IS NULL  AND purok IN @purok
-        ) AS tmp
-        WHERE  age >= 60 
-    `,
-      {
-        purok: purok,
-      }
-    );
-
-    con.Commit();
-    return {
-      success: true,
-      data: db_res.total,
-    };
-  } catch (error) {
-    await con.Rollback();
-    console.error(`error`, error);
-    return {
-      success: false,
-      message: ErrorMessage(error),
-    };
-  }
-};
 
 const overallPopulation = async (
   purok: Array<string>
@@ -196,7 +75,129 @@ const overallPopulation = async (
   }
 };
 
-const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
+const total_population = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is  null AND YEAR(resident_date) = @year  AND purok in @purok ;
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_death = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is not null AND YEAR(resident_date) = @year  and purok in @purok
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_pwd = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is  null  and with_disability = 'y' AND YEAR(resident_date) = @year    and purok in @purok
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_sc = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      SELECT count(*) as total FROM (
+        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
+        FROM resident WHERE died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
+        ) AS tmp
+        WHERE  age >= 60 
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const ageGroupStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -205,30 +206,28 @@ const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
       `
         SELECT * FROM 
         (
-        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL AND purok IN @purok
+        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND purok IN @purok
+        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND purok IN @purok
+        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND purok IN @purok
+        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND purok IN @purok
+        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND purok IN @purok
+        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND purok IN @purok
+        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND purok IN @purok
+        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND purok IN @purok
+        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND purok IN @purok
+        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         ) tmp
           `,
-      {
-        purok,
-      }
+      filters
     );
 
     const labels: Array<number> = [];
@@ -255,24 +254,24 @@ const ageGroupStats = async (purok: Array<string>): Promise<ResponseModel> => {
   }
 };
 
-const lifeStageStats = async (purok: Array<string>): Promise<ResponseModel> => {
+const lifeStageStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     const life_stage_stats = await con.Query(
       `
-      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND purok IN @purok
+      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND purok IN @purok
+      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND purok IN @purok
+      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND YEAR(resident_date) = @year  AND purok IN @purok
       UNION ALL
-      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND purok IN @purok
+      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND YEAR(resident_date) = @year  AND purok IN @purok
          `,
-      {
-        purok,
-      }
+      filters
     );
 
     con.Commit();
@@ -292,27 +291,25 @@ const lifeStageStats = async (purok: Array<string>): Promise<ResponseModel> => {
   }
 };
 
-const genderStats = async (purok: Array<string>): Promise<ResponseModel> => {
+const genderStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     const total_male = await con.QuerySingle(
       `
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'   AND YEAR(resident_date) = @year  AND purok in @purok
           `,
-      {
-        purok,
-      }
+      filters
     );
 
     const total_female = await con.QuerySingle(
       `
-      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'  AND purok in @purok
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'   AND YEAR(resident_date) = @year  AND purok in @purok
           `,
-      {
-        purok,
-      }
+      filters
     );
 
     con.Commit();
