@@ -1,8 +1,6 @@
 src
 .vscode
 node_modules
-chromium
-chromium-browser
 client/node_modules
 client/package-lock.json
 client/public

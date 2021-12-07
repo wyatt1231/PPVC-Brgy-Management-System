@@ -1,8 +1,8 @@
 {
   "appService.zipIgnorePattern": [
+    "node_modules{,/**}",
     ".vscode{,/**}",
     "src{,/**}",
-    "src",
     "client/node_modules",
     "client/package-lock.json",
     "client/public",
