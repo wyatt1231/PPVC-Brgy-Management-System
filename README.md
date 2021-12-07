@@ -9,3 +9,5 @@
 "watch-node": "nodemon dist/index.js",
 "watch-ts": "tsc -w",
 "deploy": "git add . && git commit -m Heroku && git push heroku master"
+
+    "node_modules{,/**}",

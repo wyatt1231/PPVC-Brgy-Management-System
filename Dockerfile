@@ -1,4 +1,4 @@
-FROM node:14-slim
+FROM node:12-slim
 
 # Create app directorya
 WORKDIR /app
@@ -14,7 +14,6 @@ RUN npm install
 # RUN npm ci --only=production
 
 
-
 # Bundle app source
 COPY . .
 
@@ -27,8 +26,10 @@ RUN apt-get update \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
+
+
 RUN npm init -y &&  \
-  npm i puppeteer \
+  && npm i puppeteer \
   && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
   && mkdir -p /home/pptruser/Downloads \
   && chown -R pptruser:pptruser /home/pptruser \
@@ -36,16 +37,15 @@ RUN npm init -y &&  \
   && chown -R pptruser:pptruser /package.json \
   && chown -R pptruser:pptruser /package-lock.json
 
-#RUN npm init -y &&  \
-# npm i puppeteer \
-#&& groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
-#&& mkdir -p /home/pptruser/Downloads \
-#&& chown -R pptruser:pptruser /home/pptruser \
-#&& chown -R pptruser:pptruser /app/node_modules \
-#&& chown -R pptruser:pptruser /app/package.json \
-#&& chown -R pptruser:pptruser /app/package-lock.json
+# RUN npm init -y &&  \
+#   npm i puppeteer \
+#   && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+#   && mkdir -p /home/pptruser/Downloads \
+#   && chown -R pptruser:pptruser /home/pptruser \
+#   && chown -R pptruser:pptruser /app/node_modules \
+#   && chown -R pptruser:pptruser /app/package.json \
+#   && chown -R pptruser:pptruser /app/package-lock.json
 
 EXPOSE 80
 
 CMD [ "node", "dist/index.js" ]
-#CMD [ "google-chrome-stable","node", "dist/index.js" ]

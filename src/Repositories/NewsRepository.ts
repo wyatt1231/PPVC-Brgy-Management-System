@@ -6,11 +6,7 @@ import {
   sqlFilterDate,
 } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import {
-  GetUploadedImage,
-  RemoveImage,
-  UploadFile,
-} from "../Hooks/useFileUploader";
+import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
@@ -494,7 +490,7 @@ const deleteNewsFile = async (
     );
 
     if (sql_delete_file > 0) {
-      await RemoveImage(news_file.file_path);
+      // await RemoveImage(news_file.file_path);
       con.Commit();
       return {
         success: true,

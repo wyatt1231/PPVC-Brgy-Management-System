@@ -245,7 +245,7 @@ const DatabaseConnection = () => {
                 const BeginTransaction = () => {
                     return new Promise((resolve, reject) => {
                         try {
-                            connection.beginTransaction(err => {
+                            connection.beginTransaction((err) => {
                                 if (err) {
                                     connection.destroy();
                                     connection.release();
@@ -266,7 +266,7 @@ const DatabaseConnection = () => {
                 const Commit = () => {
                     return new Promise((resolve, reject) => {
                         try {
-                            connection.commit(err => {
+                            connection.commit((err) => {
                                 connection.release();
                                 connection.destroy();
                                 // connection.end();
@@ -348,9 +348,9 @@ const queryFormat = (query, values) => {
                     return "(NULL)";
                 }
                 if (values[key] instanceof Array) {
-                    const furnished_arr = values[key].filter(v => !!v);
+                    const furnished_arr = values[key].filter((v) => !!v);
                     if (furnished_arr.length > 0) {
-                        const formatArritem = furnished_arr.map(v => mysql2_1.default.escape(v));
+                        const formatArritem = furnished_arr.map((v) => mysql2_1.default.escape(v));
                         const arr_rep = formatArritem.join(",");
                         return ` (${arr_rep}) `;
                     }

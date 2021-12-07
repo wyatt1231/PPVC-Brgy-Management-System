@@ -1,16 +1,15 @@
 {
-  "appService.deploySubpath": ".",
   "appService.zipIgnorePattern": [
-    "node_modules{,/**}",
     ".vscode{,/**}",
-    "/client/node_modules",
-    "/client/package-lock.json",
-    "/client/public",
-    "/client/.env",
-    "/client/src",
-    "/client/package.json",
-    "/client/tsconfig.json",
-    "/client/static.json"
+    "src{,/**}",
+    "src",
+    "client/node_modules",
+    "client/package-lock.json",
+    "client/public",
+    "client/.env",
+    "client/src",
+    "client/package.json",
+    "client/tsconfig.json",
+    "client/static.json"
   ],
-  "appService.defaultWebAppToDeploy": "/subscriptions/3ad857d2-e5a5-4c57-9d98-3e965c396d78/resourceGroups/BMS/providers/Microsoft.Web/sites/Brgy-37D-PPVC"
 }

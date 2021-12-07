@@ -252,7 +252,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
         const BeginTransaction = (): Promise<void> => {
           return new Promise((resolve, reject) => {
             try {
-              connection.beginTransaction(err => {
+              connection.beginTransaction((err) => {
                 if (err) {
                   connection.destroy();
                   connection.release();
@@ -272,7 +272,7 @@ export const DatabaseConnection = (): Promise<DatabaseConnectionModel> => {
         const Commit = (): Promise<void> => {
           return new Promise((resolve, reject) => {
             try {
-              connection.commit(err => {
+              connection.commit((err) => {
                 connection.release();
                 connection.destroy();
                 // connection.end();
@@ -360,10 +360,10 @@ const queryFormat = (query: string, values: any): QueryFormatModel => {
             return "(NULL)";
           }
           if (values[key] instanceof Array) {
-            const furnished_arr = values[key].filter(v => !!v);
+            const furnished_arr = values[key].filter((v) => !!v);
 
             if (furnished_arr.length > 0) {
-              const formatArritem = furnished_arr.map(v => mysql.escape(v));
+              const formatArritem = furnished_arr.map((v) => mysql.escape(v));
               const arr_rep: string = formatArritem.join(",");
               return ` (${arr_rep}) `;
             } else {

@@ -379,7 +379,7 @@ const deleteNewsFile = (news_file) => __awaiter(void 0, void 0, void 0, function
             news_file_pk: news_file.news_file_pk,
         });
         if (sql_delete_file > 0) {
-            yield (0, useFileUploader_1.RemoveImage)(news_file.file_path);
+            // await RemoveImage(news_file.file_path);
             con.Commit();
             return {
                 success: true,
