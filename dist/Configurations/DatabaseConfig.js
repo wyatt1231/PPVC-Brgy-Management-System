@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseConnection = exports.connection_string = void 0;
 const mysql2_1 = __importDefault(require("mysql2"));
 exports.connection_string = null;
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV !== "production") {
     exports.connection_string = {
         host: "156.67.222.35",
         user: "u583403240_bms",

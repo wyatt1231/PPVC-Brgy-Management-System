@@ -7,7 +7,7 @@ import {
 
 export let connection_string: mysql.PoolOptions | null = null;
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV !== "production") {
   connection_string = {
     host: "156.67.222.35",
     user: "u583403240_bms",

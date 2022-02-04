@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadFile = exports.GetUploadedImage = exports.RemoveImage = exports.UploadImage = void 0;
 const fs_1 = __importDefault(require("fs"));
-const promises_1 = require("fs/promises");
+const promises_1 = require("fs");
 const moment_1 = __importDefault(require("moment"));
 const UploadImage = ({ base_url, file_name, extension, file_to_upload, }) => {
     const extended_file_name = `${file_name}-${moment_1.default(new Date()).format("x")}.${extension}`;
