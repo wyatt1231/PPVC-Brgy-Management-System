@@ -8,10 +8,10 @@ const mysql2_1 = __importDefault(require("mysql2"));
 exports.connection_string = null;
 if (process.env.NODE_ENV !== "production") {
     exports.connection_string = {
-        host: "156.67.222.35",
-        user: "u583403240_bms",
-        password: "BMS@capstone2",
-        database: "u583403240_bms",
+        host: "brgy-37d-ppvc.mysql.database.azure.com",
+        user: "capstone_admin@brgy-37d-ppvc",
+        password: "C@PsT0n3_!@#",
+        database: "bms",
         port: 3306,
         connectionLimit: 10,
         waitForConnections: true,
@@ -22,9 +22,19 @@ else {
     exports.connection_string = {
         host: "127.0.0.1",
         user: "root",
-        password: "rootsa",
+        password: "root sa",
         database: "bms",
         port: 3309,
+        connectionLimit: 10,
+        waitForConnections: true,
+        queueLimit: 10,
+    };
+    exports.connection_string = {
+        host: "brgy-37d-ppvc.mysql.database.azure.com",
+        user: "capstone_admin@brgy-37d-ppvc",
+        password: "C@PsT0n3_!@#",
+        database: "bms",
+        port: 3306,
         connectionLimit: 10,
         waitForConnections: true,
         queueLimit: 10,
@@ -84,6 +94,7 @@ const DatabaseConnection = () => {
                     return new Promise((resolve, reject) => {
                         const { filters, sort, page } = pagination;
                         const { success, message, query } = queryFormat(sql, filters);
+                        // console.log(`QueryPagination`, query);
                         if (!success) {
                             connection.destroy();
                             connection.release();

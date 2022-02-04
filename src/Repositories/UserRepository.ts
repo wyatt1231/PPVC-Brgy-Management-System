@@ -8,15 +8,15 @@ import { UserClaims, UserLogin } from "../Models/UserModels";
 export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
 
-  console.log(`con`, con);
   try {
     await con.BeginTransaction();
 
-    await con.QuerySingle(
-      `SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'sql6400894';`,
-      null
-    );
+    // await con.QuerySingle(
+    //   `SELECT table_name FROM information_schema.tables
+    //   WHERE table_schema = 'sql6400894';`,
+    //   null
+    // );
+    console.log(`payload`, payload);
 
     const user: UserClaims | null = await con.QuerySingle(
       `SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`,

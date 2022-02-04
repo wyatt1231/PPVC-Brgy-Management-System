@@ -6,11 +6,7 @@ import {
   sqlFilterDate,
 } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import {
-  GetUploadedImage,
-  RemoveImage,
-  UploadFile,
-} from "../Hooks/useFileUploader";
+import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
@@ -281,7 +277,7 @@ const addNews = async (
 
     if (sql_add_news.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/News/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -332,16 +328,16 @@ const addNews = async (
 
         for (const r of residents) {
           if (/^(09|\+639)\d{9}$/.test(r.phone)) {
-            const sms_response = await axios({
+            await axios({
               method: "post",
               url: `https://api-mapper.clicksend.com/http/v2/send.php`,
               data: qs.stringify({
-                username: "mrmontiveles@outlook.com",
-                key: "4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1",
+                username: "detail.reynarcilla@gmail.com",
+                key: "1213B160-B60A-E831-A40D-B0E37CA03A8D",
                 to: r.phone,
-                message: `Balita gikan sa Brgy. 37-D, Davao City. ${
+                message: `Brgy. 37-D, Davao City. ${
                   payload.title
-                } karong ${parseInvalidDateToDefault(pub_date)}`,
+                } | ${parseInvalidDateToDefault(pub_date)}`,
                 //https://dashboard.clicksend.com/#/sms/send-sms/main
               }),
               headers: {
@@ -387,7 +383,7 @@ const addNewsFiles = async (
     payload.encoder_pk = user_pk;
 
     for (const file of files) {
-      const file_res = await UploadFile("src/Storage/Files/News/", file);
+      const file_res = await UploadFile("/Files/Complaints/", file);
 
       if (!file_res.success) {
         con.Rollback();
@@ -494,7 +490,7 @@ const deleteNewsFile = async (
     );
 
     if (sql_delete_file > 0) {
-      await RemoveImage(news_file.file_path);
+      // await RemoveImage(news_file.file_path);
       con.Commit();
       return {
         success: true,

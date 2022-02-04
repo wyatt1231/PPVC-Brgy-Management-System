@@ -89,6 +89,19 @@ const FamilyController = async (app: Express): Promise<void> => {
   );
 
   router.post(
+    "/getFamilyDataTablePdf",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const payload: PaginationModel = req.body;
+        res.json(await FamilyRepository.getFamilyDataTablePdf(payload));
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
     "/searchNoFamResident",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {

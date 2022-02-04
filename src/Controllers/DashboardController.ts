@@ -1,5 +1,6 @@
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
+import { DashboardFilterInterface } from "../Models/DashboardModels";
 import { UserClaims } from "../Models/UserModels";
 import DashboardRepository from "../Repositories/DashboardRepository";
 
@@ -11,8 +12,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.overallPopulation(purok));
+        const filters: Array<string> = req.body;
+        res.json(await DashboardRepository.overallPopulation(filters));
       } catch (error) {
         res.json(error);
       }
@@ -23,9 +24,9 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/ageGroupStats",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      const purok: Array<string> = req.body;
+      const filters: DashboardFilterInterface = req.body;
       try {
-        res.json(await DashboardRepository.ageGroupStats(purok));
+        res.json(await DashboardRepository.ageGroupStats(filters));
       } catch (error) {
         res.json(error);
       }
@@ -37,8 +38,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.genderStats(purok));
+        const filters: DashboardFilterInterface = req.body;
+        res.json(await DashboardRepository.genderStats(filters));
       } catch (error) {
         res.json(error);
       }
@@ -50,8 +51,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.lifeStageStats(purok));
+        const filters: DashboardFilterInterface = req.body;
+        res.json(await DashboardRepository.lifeStageStats(filters));
       } catch (error) {
         res.json(error);
       }
@@ -86,12 +87,9 @@ const DashboardController = async (app: Express): Promise<void> => {
     "/total_population",
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
-      try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.total_population(purok));
-      } catch (error) {
-        res.json(500);
-      }
+      const filters: DashboardFilterInterface = req.body;
+      console.log(`total_population`, filters);
+      res.json(await DashboardRepository.total_population(filters));
     }
   );
 
@@ -100,8 +98,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.total_death(purok));
+        const filters: DashboardFilterInterface = req.body;
+        res.json(await DashboardRepository.total_death(filters));
       } catch (error) {
         res.json(500);
       }
@@ -113,8 +111,8 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.total_pwd(purok));
+        const filters: DashboardFilterInterface = req.body;
+        res.json(await DashboardRepository.total_pwd(filters));
       } catch (error) {
         res.json(500);
       }
@@ -126,8 +124,68 @@ const DashboardController = async (app: Express): Promise<void> => {
     Authorize("admin"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        const purok: Array<string> = req.body;
-        res.json(await DashboardRepository.total_sc(purok));
+        const filters: DashboardFilterInterface = req.body;
+        res.json(await DashboardRepository.total_sc(filters));
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsPasilidadKuryente",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsPasilidadKuryente());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsBiktikmaPangabuso",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsBiktikmaPangabuso());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsKahimtangKomunidad",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsKahimtangKomunidad());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsMatangBasura",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsMatangBasura());
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/StatsMatangKasilyas",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await DashboardRepository.StatsMatangKasilyas());
       } catch (error) {
         res.json(500);
       }

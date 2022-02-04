@@ -11,7 +11,10 @@ import {
 } from "../Models/PostsModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
-const getPosts = async (user_pk: number,offset?:number): Promise<ResponseModel> => {
+const getPosts = async (
+  user_pk: number,
+  offset?: number
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
 
   try {
@@ -24,9 +27,10 @@ const getPosts = async (user_pk: number,offset?:number): Promise<ResponseModel> 
         LEFT JOIN status s ON p.sts_pk = s.sts_pk 
         LEFT JOIN posts_reaction pr ON pr.posts_pk=p.posts_pk
         LEFT JOIN vw_users u ON u.user_pk = p.encoder_pk WHERE p.sts_pk="PU"  ORDER BY p.encoded_at DESC LIMIT ${offset})tmp;
-        `,{
-          offset:offset
-        }
+        `,
+      {
+        offset: offset,
+      }
     );
     for (const postsreactions of data) {
       postsreactions.reactions = await con.Query(
@@ -305,7 +309,7 @@ const addPosts = async (
 
     if (sql_add_posts.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/Posts/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();

@@ -52,6 +52,21 @@ const BrgyOfficialController = async (app: Express): Promise<void> => {
     }
   );
 
+  router.post(
+    "/removeBarangayOfficial",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const official_pk: string = req.body?.official_pk;
+        res.json(
+          await BarangayOfficialRepository.removeBarangayOfficial(official_pk)
+        );
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
   app.use("/api/official/", router);
 };
 

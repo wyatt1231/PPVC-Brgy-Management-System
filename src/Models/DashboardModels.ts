@@ -36,3 +36,8 @@ export interface StatsModel {
   data: Array<YearlyStatsModel>;
   backgroundColor: Array<string>;
 }
+
+export interface DashboardFilterInterface {
+  year: string;
+  purok: Array<string>;
+}

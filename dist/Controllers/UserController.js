@@ -35,16 +35,22 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const user_repo = __importStar(require("../Repositories/UserRepository"));
 const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
+    const router = (0, express_1.Router)();
+    router.get("/test", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        res.json("Running");
+    }));
     router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield user_repo.loginUser(req.body));
+            const response = yield user_repo.loginUser(req.body);
+            console.log(`response`, response);
+            res.json(response);
         }
         catch (error) {
+            console.error(`e`, error);
             res.json(500);
         }
     }));
-    router.post("/currentUser", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/currentUser", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield user_repo.currentUser(req.user_pk));
         }
@@ -52,11 +58,15 @@ const UserController = (app) => __awaiter(void 0, void 0, void 0, function* () {
             res.json(500);
         }
     }));
-    router.post("/userinfo", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/userinfo", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield user_repo.userinfo(req.user_pk));
+            const response = yield user_repo.userinfo(req.user_pk);
+            console.log(`userinfo response`, response);
+            res.json(response);
         }
         catch (error) {
+            //marktabang@gmail.com
+            console.error(`userinfo`, error);
             res.json(500);
         }
     }));

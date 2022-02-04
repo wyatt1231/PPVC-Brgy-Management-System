@@ -29,10 +29,7 @@ const addComplaint = async (
 
     if (sql_add_complaint.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile(
-          "src/Storage/Files/Complaints/",
-          file
-        );
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -110,13 +107,13 @@ const addComplaintMessage = async (
       con.Commit();
       return {
         success: true,
-        message: "The complaint has been updated successfully!",
+        message: "The complaint has been added successfully!",
       };
     } else {
       con.Rollback();
       return {
         success: false,
-        message: "No affected rows while updating the complaint",
+        message: "No affected rows while adding the complaint",
       };
     }
   } catch (error) {
@@ -283,8 +280,6 @@ const getSingleComplaint = async (
         complaint_pk: complaint_pk,
       }
     );
-
-    console.log(`complaints`, data);
 
     data.complaint_file = await con.Query(
       `

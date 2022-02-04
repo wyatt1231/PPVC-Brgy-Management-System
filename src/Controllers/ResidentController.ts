@@ -1,8 +1,10 @@
 import { Express, Request, Response, Router } from "express";
+import { Readable } from "stream";
 import Authorize from "../Middlewares/Authorize";
 import { AdministratorModel } from "../Models/AdministratorModels";
 import { PaginationModel } from "../Models/PaginationModel";
 import { UserClaims } from "../Models/UserModels";
+import ResidentReport from "../PdfTemplates/ResidentReport";
 import ResidentRepository from "../Repositories/ResidentRepository";
 
 const ResidentController = async (app: Express): Promise<void> => {
@@ -15,6 +17,19 @@ const ResidentController = async (app: Express): Promise<void> => {
       try {
         const payload: PaginationModel = req.body;
         res.json(await ResidentRepository.getDataTableResident(payload));
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/getDataTableResidentPdf",
+    // Authorize("admin,resident"),
+    async (req: Request, res: Response) => {
+      try {
+        const payload: PaginationModel = req.body;
+        res.json(await ResidentRepository.getDataTableResidentPdf(payload));
       } catch (error) {
         res.json(500);
       }

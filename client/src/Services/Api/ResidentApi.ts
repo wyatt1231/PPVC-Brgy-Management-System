@@ -15,6 +15,16 @@ const getResidentDataTableApi = async (
   return response;
 };
 
+const getDataTableResidentPdf = async (
+  payload: PaginationModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "getDataTableResidentPdf",
+    payload
+  );
+  return response;
+};
+
 const addResidentApi = async (
   payload: ResidentModel
 ): Promise<IServerResponse> => {
@@ -52,6 +62,7 @@ const getSingleResident = async (
 
 export default {
   getResidentDataTableApi,
+  getDataTableResidentPdf,
   addResidentApi,
   updateResidentApi,
   getSingleResident,

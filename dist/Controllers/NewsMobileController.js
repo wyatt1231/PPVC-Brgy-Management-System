@@ -16,8 +16,8 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const NewsMobileRepository_1 = __importDefault(require("../Repositories/NewsMobileRepository"));
 const NewsMobileController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getNewsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/getNewsComments", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const news_pk = req.body.news_pk;
             res.json(yield NewsMobileRepository_1.default.getNewsComments(news_pk));
@@ -26,7 +26,7 @@ const NewsMobileController = (app) => __awaiter(void 0, void 0, void 0, function
             res.json(error);
         }
     }));
-    router.post("/getNewsDataPublished", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getNewsDataPublished", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield NewsMobileRepository_1.default.getNewsDataPublished());
         }
@@ -34,19 +34,19 @@ const NewsMobileController = (app) => __awaiter(void 0, void 0, void 0, function
             res.json(error);
         }
     }));
-    router.post("/getSingleNewsWithPhoto", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getSingleNewsWithPhoto", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const news_pk = req.body.news_pk;
         res.json(yield NewsMobileRepository_1.default.getSingleNewsWithPhoto(news_pk));
     }));
-    router.post("/addNewsComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addNewsComment", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsMobileRepository_1.default.addNewsComment(payload, req.user_pk));
     }));
-    router.post("/addNewsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addNewsReaction", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = req.body;
         res.json(yield NewsMobileRepository_1.default.addNewsReaction(payload, req.user_pk));
     }));
-    router.post("/addNews", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addNews", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const payload = req.body;
         let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];

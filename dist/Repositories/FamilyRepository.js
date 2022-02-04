@@ -8,13 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useSearch_1 = require("../Hooks/useSearch");
+const FamilyReport_1 = __importDefault(require("../PdfTemplates/FamilyReport"));
+const puppeteer = require("puppeteer");
 const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoded_by = user_pk;
@@ -200,12 +205,12 @@ const addFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const updateFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         payload.encoded_by = user_pk;
@@ -403,12 +408,12 @@ const updateFamily = (payload, user_pk) => __awaiter(void 0, void 0, void 0, fun
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.QuerySingle(`
@@ -425,7 +430,7 @@ const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, funct
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         con.Commit();
         return {
@@ -438,12 +443,12 @@ const getSingleFamily = (ulo_pamilya) => __awaiter(void 0, void 0, void 0, funct
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const family = yield con.QuerySingle(`
@@ -470,7 +475,7 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         const tinubdan_tubig = yield con.Query(`SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`, { fam_pk });
         family.tinubdan_tubig = tinubdan_tubig.map((d) => d.descrip);
@@ -496,28 +501,47 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
-        console.log(`filters`, payload.filters);
-        const all_family = yield con.Query(`
+        const all_family = yield con.QueryPagination(`
       SELECT * FROM 
-      (
-        SELECT f.*,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok FROM family f JOIN
-        resident fu ON f.ulo_pamilya = fu.resident_pk
-      ) AS tmp
-      WHERE
-      coalesce(ulo_fam_member,'') LIKE concat('%',@search,'%')
-     # AND coalesce(ulo_fam_purok,'') LIKE concat('%',@search,'%')
-      order by ${payload.sort.column} ${payload.sort.direction}
-      limit ${payload.page.begin},${payload.page.limit + 1};
-      `, payload.filters);
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+        AND coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        AND ulo_fam_purok IN @ulo_fam_purok
+        ) tmp2
+        group by fam_pk
+
+      `, payload);
         const hasMore = all_family.length > payload.page.limit;
         if (hasMore) {
             all_family.splice(all_family.length - 1, 1);
@@ -527,7 +551,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
                 resident_pk: fam.ulo_pamilya,
             });
             if (!!((_a = fam === null || fam === void 0 ? void 0 : fam.ulo_pamilya_info) === null || _a === void 0 ? void 0 : _a.pic)) {
-                fam.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(fam.ulo_pamilya_info.pic);
+                fam.ulo_pamilya_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fam.ulo_pamilya_info.pic);
             }
             fam.fam_members = yield con.Query(`select * from family_member where fam_pk=@fam_pk `, {
                 fam_pk: fam.fam_pk,
@@ -537,7 +561,7 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
                     resident_pk: fm.resident_pk,
                 });
                 if (!!((_b = fm === null || fm === void 0 ? void 0 : fm.resident_info) === null || _b === void 0 ? void 0 : _b.pic)) {
-                    fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+                    fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
                 }
             }
         }
@@ -560,18 +584,105 @@ const getFamilyDataTable = (payload) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const brand_info = yield con.QuerySingle(`
+        SELECT logo FROM brand_logo LIMIT 1
+      `, {});
+        var base64data = brand_info === null || brand_info === void 0 ? void 0 : brand_info.logo.toString("base64");
+        const all_family = yield con.Query(`
+      SELECT * FROM 
+      ( SELECT * FROM 
+        (
+          SELECT f.*,fu.first_name,fu.last_name,CONCAT(fu.first_name,' ',fu.last_name) ulo_fam_member,fu.purok ulo_fam_purok,
+          coalesce(fbp.descrip, 'blanko')  AS 'biktima_pangabuso', 
+          coalesce(fmk.descrip, 'blanko')  AS 'matang_kasilyas', 
+          coalesce(fpk.descrip, 'blanko')  AS 'pasilidad_kuryente', 
+          coalesce(fmb.descrip, 'blanko')   AS 'matang_basura',
+          coalesce(ftb.descrip, 'blanko')  AS 'tinubdan_tubig'
+           FROM family f JOIN
+          resident fu ON f.ulo_pamilya = fu.resident_pk
+          LEFT JOIN family_tinubdan_tubig ftb ON ftb.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_kasilyas fmk ON fmk.fam_pk = f.fam_pk
+          LEFT JOIN family_pasilidad_kuryente fpk ON fpk.fam_pk = f.fam_pk
+          LEFT JOIN family_matang_basura fmb ON fmb.fam_pk = f.fam_pk
+          LEFT JOIN family_biktima_pangabuso fbp ON fbp.fam_pk = f.fam_pk
+        ) AS tmp
+        WHERE
+        concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+        AND coalesce(first_name, '') like concat('%',@ulo_pamilya_first_name,'%') 
+        AND coalesce(last_name, '')  like concat('%',@ulo_pamilya_last_name,'%') 
+        AND matang_kasilyas IN @matang_kasilyas
+        AND tinubdan_tubig IN @tinubdan_tubig 
+        AND pasilidad_kuryente IN @pasilidad_kuryente
+        AND matang_basura IN @matang_basura
+        AND biktima_pangabuso IN @biktima_pangabuso
+        AND ulo_fam_purok IN @ulo_fam_purok
+        ) tmp2
+        group by fam_pk
+        ORDER BY ${payload.sort.column} ${payload.sort.direction}
+      `, payload.filters);
+        for (const fam of all_family) {
+            fam.ulo_pamilya_info = yield con.QuerySingle(`select * from resident where resident_pk=@resident_pk `, {
+                resident_pk: fam.ulo_pamilya,
+            });
+            fam.fam_members = yield con.Query(`select * from family_member where fam_pk=@fam_pk `, {
+                fam_pk: fam.fam_pk,
+            });
+        }
+        const browser = yield puppeteer.launch({
+            args: [
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+            ],
+            headless: true,
+            ignoreDefaultArgs: ["--disable-extensions"],
+        });
+        console.log(`browser`, browser);
+        const page = yield browser.newPage();
+        yield page.setContent(`${FamilyReport_1.default.Content(all_family, payload)}`);
+        const pdfBuffer = yield page.pdf({
+            format: "A4",
+            displayHeaderFooter: true,
+            headerTemplate: FamilyReport_1.default.Header(base64data),
+            footerTemplate: FamilyReport_1.default.Footer(),
+            margin: {
+                top: "160px",
+                bottom: "40px",
+            },
+        });
+        yield browser.close();
+        con.Commit();
+        return {
+            success: true,
+            data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, function* () {
     var _c;
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const all_family = yield con.QuerySingle(`
       SELECT * FROM family WHERE ulo_pamilya = @resident_pk or fam_pk = (SELECT fam_pk FROM family_member WHERE resident_pk = @resident_pk LIMIT 1)
-        `, {
+      `, {
             resident_pk: resident_pk,
         });
         if (!all_family) {
@@ -585,7 +696,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
             resident_pk: all_family.ulo_pamilya,
         });
         if ((_c = all_family === null || all_family === void 0 ? void 0 : all_family.ulo_pamilya_info) === null || _c === void 0 ? void 0 : _c.pic) {
-            all_family.ulo_pamilya_info.pic = yield useFileUploader_1.GetUploadedImage(all_family.ulo_pamilya_info.pic);
+            all_family.ulo_pamilya_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(all_family.ulo_pamilya_info.pic);
         }
         all_family.fam_members = yield con.Query(`
             SELECT * FROM family_member WHERE fam_pk = @fam_pk
@@ -596,7 +707,7 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
             fm.resident_info = yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
                 resident_pk: fm.resident_pk,
             });
-            fm.resident_info.pic = yield useFileUploader_1.GetUploadedImage(fm.resident_info.pic);
+            fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
         con.Commit();
         return {
@@ -609,12 +720,12 @@ const getFamilyOfResident = (resident_pk) => __awaiter(void 0, void 0, void 0, f
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
         const search_data_set = yield con.Query(`
@@ -633,7 +744,7 @@ const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, functi
                   UNION
                   SELECT resident_pk FROM family_member  )
                 ) AS tmp
-        ${useSearch_1.GenerateSearch(search, "label")}
+        ${(0, useSearch_1.GenerateSearch)(search, "label")}
         `, null);
         con.Commit();
         return {
@@ -646,15 +757,14 @@ const searchNoFamResident = (search) => __awaiter(void 0, void 0, void 0, functi
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
-        console.log(`payload`, payload);
         const search_data_set = yield con.Query(`
       SELECT * FROM 
                 (
@@ -671,7 +781,7 @@ const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function*
                   UNION
                   SELECT resident_pk FROM family_member  )
                 ) AS tmp
-        ${useSearch_1.GenerateSearch(payload.value, "label")}
+        ${(0, useSearch_1.GenerateSearch)(payload.value, "label")}
         AND id not in @fam_members
         `, {
             fam_members: payload.fam_members,
@@ -687,7 +797,7 @@ const searchFamMember = (payload) => __awaiter(void 0, void 0, void 0, function*
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
@@ -700,5 +810,6 @@ exports.default = {
     searchNoFamResident,
     searchFamMember,
     getSingleFamByFamPk,
+    getFamilyDataTablePdf,
 };
 //# sourceMappingURL=FamilyRepository.js.map

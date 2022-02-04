@@ -1,5 +1,4 @@
 node_modules
-/src/storage
 /client/node_modules
 /client/package-lock.json
 /client/public

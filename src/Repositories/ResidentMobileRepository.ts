@@ -35,7 +35,7 @@ const addMobileResident = async (
     if (sql_insert_user.insertedId > 0) {
       if (isValidPicture(payload.pic)) {
         const upload_result = await UploadImage({
-          base_url: "./src/Storage/Files/Images/",
+          base_url: "./Files/Images/",
           extension: "jpg",
           file_name: sql_insert_user.insertedId,
           file_to_upload: payload.pic,
@@ -139,7 +139,7 @@ const updateMobileResident = async (
 
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
-        base_url: "./src/Storage/Files/Images/",
+        base_url: "./Files/Images/",
         extension: "jpg",
         file_name: payload.user_pk,
         file_to_upload: payload.pic,
@@ -160,9 +160,8 @@ const updateMobileResident = async (
       // resident_date: parseInvalidDateToDefault(payload.resident_date),
     };
 
-
-  const sql_edit_resident = await con.Modify(
-    `UPDATE resident SET
+    const sql_edit_resident = await con.Modify(
+      `UPDATE resident SET
       user_pk=@user_pk,
       pic=@pic,              
       first_name=@first_name,       
@@ -187,30 +186,28 @@ const updateMobileResident = async (
       educ=@educ,
       house_ownership=@house_ownership
       WHERE resident_pk=@resident_pk;`,
-    resident_payload
-  );
-
-
+      resident_payload
+    );
 
     if (sql_edit_resident > 0) {
       const sql_edit_user = await con.Modify(
         `UPDATE user SET full_name=CONCAT(@last_name,',',@first_name,' ',@middle_name,' ',@suffix) 
           WHERE user_pk=@user_pk;`,
         resident_payload
-      );   
-      if(sql_edit_user >0){
-      con.Commit();
-      return {
-        success: true,
-        message: "The resident has been updated successfully",
-      };
-    }else{
-      con.Rollback();
-      return {
-        success: false,
-        message: "No affected rows while updating the resident",
-      };
-    }
+      );
+      if (sql_edit_user > 0) {
+        con.Commit();
+        return {
+          success: true,
+          message: "The resident has been updated successfully",
+        };
+      } else {
+        con.Rollback();
+        return {
+          success: false,
+          message: "No affected rows while updating the resident",
+        };
+      }
     } else {
       con.Rollback();
       return {
@@ -218,7 +215,6 @@ const updateMobileResident = async (
         message: "No affected rows while updating the resident",
       };
     }
-  
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);

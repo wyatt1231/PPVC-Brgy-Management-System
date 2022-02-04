@@ -6,10 +6,17 @@ import * as user_repo from "../Repositories/UserRepository";
 const UserController = async (app: Express): Promise<void> => {
   const router = Router();
 
+  router.get("/test", async (req: Request & UserClaims, res: Response) => {
+    res.json("Running");
+  });
+
   router.post("/login", async (req: Request & UserClaims, res: Response) => {
     try {
-      res.json(await user_repo.loginUser(req.body));
+      const response = await user_repo.loginUser(req.body);
+      console.log(`response`, response);
+      res.json(response);
     } catch (error) {
+      console.error(`e`, error);
       res.json(500);
     }
   });
@@ -30,8 +37,13 @@ const UserController = async (app: Express): Promise<void> => {
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
       try {
-        res.json(await user_repo.userinfo(req.user_pk));
+        const response = await user_repo.userinfo(req.user_pk);
+
+        console.log(`userinfo response`, response);
+        res.json(response);
       } catch (error) {
+        //marktabang@gmail.com
+        console.error(`userinfo`, error);
         res.json(500);
       }
     }

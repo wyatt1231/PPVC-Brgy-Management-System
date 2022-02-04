@@ -22,13 +22,33 @@ export const sqlFilterDate = (
   date: Date | string,
   column: string
 ): string | null => {
-  const d = moment(date);
+  if (!!date) {
+    const d = moment(date);
 
-  if (d.isValid()) {
-    return `'${d.format("YYYY-MM-DD")}'`;
+    if (d.isValid()) {
+      return `'${d.format("YYYY-MM-DD")}'`;
+    }
   }
 
   return column;
+};
+
+export const sqlFilterNumber = (num: number, column: string): string | null => {
+  try {
+    if (!!num) {
+      let parse_num: null | number = null;
+      if (typeof num === "string") {
+        parse_num = parseInt(num);
+      }
+
+      if (!isNaN(parse_num)) {
+        return `'${parse_num}'`;
+      }
+    }
+    return column;
+  } catch (error) {
+    return column;
+  }
 };
 
 export const parseInvalidTimeToDefault = (
@@ -47,4 +67,20 @@ export const parseInvalidTimeToDefault = (
     }
   }
   return null;
+};
+
+export const InvalidDateToDefault = (
+  date: Date | null | string,
+  defaultString: string
+): string => {
+  if (!date) {
+    return defaultString;
+  }
+
+  const d = moment(date).format("MMM DD, YYYY");
+
+  if (d.toLowerCase() === "invalid date") {
+    return defaultString;
+  }
+  return d;
 };

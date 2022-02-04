@@ -1,25 +1,32 @@
+import { Paper } from "@material-ui/core";
 import styled from "styled-components";
 
-export const StyledPostItem = styled.div`
+export const StyledPostItem = styled(Paper)`
   padding: 0.5em;
   background-color: #fff;
   align-items: start;
   align-content: start;
   display: grid;
-  grid-gap: 0.7em;
-  margin: 0.5em 1em;
+  grid-gap: 0.5em;
+  margin: 1.5em 1em;
   /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); */
-  border-bottom: 0.1em solid rgba(0, 0, 0, 0.3);
+  /* border-bottom: 0.1em solid rgba(0, 0, 0, 0.3); */
   .header {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr auto;
+    align-items: center;
+    align-content: center;
 
     .profile {
       display: grid;
-      grid-auto-columns: auto 1fr;
-      grid-template-areas: "img name" "img time";
+      grid-auto-columns: auto auto auto;
+      grid-template-areas: "img name tag " "img time tag";
       align-items: start;
+      align-content: start;
+      justify-content: start;
+      justify-items: start;
+
       .img {
         grid-area: img;
         margin-right: 1em;
@@ -28,11 +35,18 @@ export const StyledPostItem = styled.div`
         grid-area: name;
         font-weight: 600;
       }
+
       .time {
         grid-area: time;
         font-size: 0.87em;
       }
+      .tag {
+        margin-left: 1em;
+        grid-area: tag;
+        align-self: center;
+      }
     }
+
     .actions {
     }
   }
@@ -40,7 +54,7 @@ export const StyledPostItem = styled.div`
   .body {
     padding: 0.5em;
     border-radius: 10px;
-    background-color: #f5f5f5;
+    /* background-color: #f5f5f5; */
     font-size: 0.83em;
     justify-self: start;
   }

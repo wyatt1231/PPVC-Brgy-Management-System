@@ -16,12 +16,12 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const FamilyMobileRepository_1 = __importDefault(require("../Repositories/FamilyMobileRepository"));
 const FamilyMobileController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getfamilyexist", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/getfamilyexist", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ulo_pamilya = req.body.ulo_pamilya;
         res.json(yield FamilyMobileRepository_1.default.getfamilyexist(ulo_pamilya));
     }));
-    router.post("/getforms", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getforms", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ulo_pamilya = req.body.ulo_pamilya;
         const fam_pk = req.body.fam_pk;
         res.json(yield FamilyMobileRepository_1.default.getforms(ulo_pamilya, fam_pk));

@@ -40,4 +40,6 @@ export interface ResidentModel {
   kita?: number;
   educ?: string;
   status?: StatusMasterModel;
+
+  age?: number;
 }

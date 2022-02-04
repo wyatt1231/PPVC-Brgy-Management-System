@@ -11,12 +11,16 @@ import {
   TablePagination,
   TableRow,
 } from "@material-ui/core";
+import { Formik, Form } from "formik";
 import React, { FC, memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import CustomAvatar from "../../../Component/CustomAvatar";
 import DataTableSearch from "../../../Component/DataTableSearch";
 import DataTableSort from "../../../Component/DataTableSort";
+import FormikCheckbox from "../../../Component/Formik/FormikCheckbox";
+import FormikDateField from "../../../Component/Formik/FormikDateField";
+import FormikInputField from "../../../Component/Formik/FormikInputField";
 import LinearLoadingProgress from "../../../Component/LinearLoadingProgress";
 import { InvalidDateToDefault } from "../../../Hooks/UseDateParser";
 import useFilter from "../../../Hooks/useFilter";
@@ -31,7 +35,12 @@ import { RootStore } from "../../../Services/Store";
 interface DataTableCoAdminViewInterface {}
 
 const initialSearch = {
-  search: "",
+  firstname: "",
+  lastname: "",
+  gender: ["m", "f"],
+  sts_pk: ["A", "NA"],
+  encoded_from: null,
+  encoded_to: null,
 };
 
 const initialTableSort: Array<ITableInitialSort> = [
@@ -238,15 +247,131 @@ export const DataTableCoAdminView: FC<DataTableCoAdminViewInterface> = memo(
 
                 <Grid item>
                   <DataTableSearch
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSetTableSearch({
-                        ...tableSearch,
-                        search: searchField,
-                      });
-                    }}
-                    handleSetSearchField={handleSetSearchField}
-                    searchField={searchField}
+                    width={450}
+                    FilterComponent={
+                      <Formik
+                        initialValues={tableSearch}
+                        enableReinitialize
+                        onSubmit={(form_values) => {
+                          const filter_payload = {
+                            ...form_values,
+                          };
+                          handleSetTableSearch(filter_payload);
+                        }}
+                      >
+                        {() => (
+                          <Form className="form">
+                            <Grid container spacing={3}>
+                              <Grid item xs={6}>
+                                <FormikInputField
+                                  name="firstname"
+                                  label="First Name"
+                                  type="text"
+                                  fullWidth={true}
+                                  InputLabelProps={{
+                                    shrink: true,
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <FormikInputField
+                                  name="lastname"
+                                  label="Last Name"
+                                  type="text"
+                                  fullWidth={true}
+                                  InputLabelProps={{
+                                    shrink: true,
+                                  }}
+                                />
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <FormikCheckbox
+                                  row={true}
+                                  color="primary"
+                                  name="gender"
+                                  label="Gender"
+                                  data={[
+                                    {
+                                      id: "m",
+                                      label: "Lalaki",
+                                    },
+                                    {
+                                      id: "f",
+                                      label: "Babae",
+                                    },
+                                  ]}
+                                />
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <FormikCheckbox
+                                  row={true}
+                                  color="primary"
+                                  name="sts_pk"
+                                  label="Status"
+                                  data={[
+                                    {
+                                      id: "A",
+                                      label: "Active",
+                                    },
+                                    {
+                                      id: "NA",
+                                      label: "Not Active",
+                                    },
+                                  ]}
+                                />
+                              </Grid>
+
+                              <Grid item xs={6}>
+                                <FormikDateField
+                                  name="encoded_from"
+                                  clearable={true}
+                                  label="Encoded From"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <FormikDateField
+                                  name="encoded_to"
+                                  clearable={true}
+                                  label="Encoded To"
+                                />
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <Grid container spacing={2} justify="flex-end">
+                                  <Grid item>
+                                    <Button
+                                      variant="contained"
+                                      color="secondary"
+                                      type="button"
+                                      onClick={() => {
+                                        const filter_payload = {
+                                          ...initialSearch,
+                                          search: tableSearch.search,
+                                        };
+                                        handleSetTableSearch(filter_payload);
+                                      }}
+                                    >
+                                      Clear Filters
+                                    </Button>
+                                  </Grid>
+                                  <Grid item>
+                                    <Button
+                                      type="submit"
+                                      variant="contained"
+                                      color="primary"
+                                    >
+                                      Apply Filters
+                                    </Button>
+                                  </Grid>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Form>
+                        )}
+                      </Formik>
+                    }
                   />
                 </Grid>
               </Grid>
