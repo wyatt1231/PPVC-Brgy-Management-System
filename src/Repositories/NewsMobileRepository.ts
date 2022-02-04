@@ -482,4 +482,6 @@ export default {
   addNewsComment,
   getSingleNewsWithPhoto,
   getNewsComments,
+  getNewsDataPublishedByMonth,
+  getNewsDataPublishedLastWeek,
 };

@@ -33,6 +33,29 @@ const NewsMobileController = async (app: Express): Promise<void> => {
     }
   );
   router.post(
+    "/getNewsDataPublishedByMonth",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const month: number = req.body.month;
+        res.json(await NewsMobileRepository.getNewsDataPublishedByMonth(month));
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
+    "/getNewsDataPublishedLastWeek",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        res.json(await NewsMobileRepository.getNewsDataPublishedLastWeek());
+      } catch (error) {
+        res.json(error);
+      }
+    }
+  );
+  router.post(
     "/getSingleNewsWithPhoto",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
