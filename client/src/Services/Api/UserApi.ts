@@ -12,7 +12,7 @@ export const CurrentUserApi = async (): Promise<IServerResponse> => {
 export const LoginApi = async (
   payload: UserLogin
 ): Promise<IServerResponse> => {
-  console.log(`payload`);
+  console.log(`payload`, API_DEFAULT_ROUTE);
   const response = await PostFetch(API_DEFAULT_ROUTE + "login", payload);
   return response;
 };

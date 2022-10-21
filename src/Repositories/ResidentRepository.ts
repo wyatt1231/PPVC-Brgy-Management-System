@@ -356,6 +356,8 @@ const getDataTableResidentPdf = async (
       {}
     );
 
+    console.log(`getDataTableResidentPdf: 06-12-2021 6:29PM`);
+
     var base64data = brand_info?.logo.toString("base64");
 
     const resident_data: Array<ResidentModel> = await con.Query(
@@ -507,3 +509,10 @@ export default {
   toggleResidentStatus,
   getDataTableResidentPdf,
 };
+
+/*
+az webapp config container set --name  rg-bms   --resource-group brgy37dppvc --docker-custom-image-name brgy37dppvc.azurecr.io/dkr_bms:latest --docker-registry-server-url https://brgy37dppvc.azurecr.io
+
+az webapp config container set --name brgy37dppvc --resource-group brgy37dppvc --docker-custom-image-name brgy37dppvc.azurecr.io/dkr_bms:latest --docker-registry-server-url https://brgy37dppvc.azurecr.io
+
+*/

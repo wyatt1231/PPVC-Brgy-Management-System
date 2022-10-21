@@ -39,6 +39,7 @@ else {
         waitForConnections: true,
         queueLimit: 10,
     };
+    //remove in deploy
     exports.connection_string = {
         host: "brgy-37d-ppvc.mysql.database.azure.com",
         user: "capstone_admin@brgy-37d-ppvc",

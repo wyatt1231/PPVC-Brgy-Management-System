@@ -4,19 +4,20 @@ import AddBrgyOfficialAdminView from "../Views/AdminViews/BrgyOfficialAdminView/
 import DataTableBrgyOfficialAdminView from "../Views/AdminViews/BrgyOfficialAdminView/DataTableBrgyOfficialAdminView";
 import AddCoAdminView from "../Views/AdminViews/CoAdminView/AddCoAdminView";
 import DataTableCoAdminView from "../Views/AdminViews/CoAdminView/DataTableCoAdminView";
+import ManageCoAdminView from "../Views/AdminViews/CoAdminView/ManageCoAdminView";
 import DtComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/DtComplaintAdminView";
 import ManageComplaintAdminView from "../Views/AdminViews/ComplaintAdminView/ManageComplaintAdminView";
 import DashbboardAdminView from "../Views/AdminViews/DashbboardAdminView";
-import FamilyAdminView from "../Views/AdminViews/FamilyAdminView/FamilyAdminView";
 import CreateFamilyAdmin from "../Views/AdminViews/FamilyAdminView/CreateFamilyAdminView/CreateFamilyAdmin";
+import FamilyAdminView from "../Views/AdminViews/FamilyAdminView/FamilyAdminView";
+import FamilyView from "../Views/AdminViews/FamilyAdminView/FamilyView";
+import ManageFamilyAdminView from "../Views/AdminViews/FamilyAdminView/ManageFamilyAdminView/ManageFamilyAdminView";
 import DtNewsAdminView from "../Views/AdminViews/NewsAdminView/DtNewsAdminView";
 import DtPostAdminView from "../Views/AdminViews/PostAdminViews/DtPostAdminView";
 import AddResidentAdminView from "../Views/AdminViews/ResidentAdminView/AddResidentAdminView";
 import DataTableResidentAdminView from "../Views/AdminViews/ResidentAdminView/DataTableResidentAdminView";
 import ManageResidentAdminView from "../Views/AdminViews/ResidentAdminView/ManageResidentAdminView";
 import CreateFamily from "../Views/SharedViews/CreateFamily";
-import ManageFamilyAdminView from "../Views/AdminViews/FamilyAdminView/ManageFamilyAdminView/ManageFamilyAdminView";
-import ManageCoAdminView from "../Views/AdminViews/CoAdminView/ManageCoAdminView";
 // import DataTableResidentAdminView from "../Views/AdminView";
 
 const SysAdminRoutes = () => {
@@ -58,6 +59,11 @@ const SysAdminRoutes = () => {
         </Route>
 
         <Route path="/admin/family/:fam_pk" exact>
+          {/* <ManageFamilyAdminView /> */}
+          <FamilyView />
+        </Route>
+
+        <Route path="/admin/family/update/:fam_pk" exact>
           <ManageFamilyAdminView />
         </Route>
 

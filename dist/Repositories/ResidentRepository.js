@@ -291,6 +291,7 @@ const getDataTableResidentPdf = (payload) => __awaiter(void 0, void 0, void 0, f
         const brand_info = yield con.QuerySingle(`
         SELECT logo FROM brand_logo LIMIT 1
       `, {});
+        console.log(`getDataTableResidentPdf: 06-12-2021 6:29PM`);
         var base64data = brand_info === null || brand_info === void 0 ? void 0 : brand_info.logo.toString("base64");
         const resident_data = yield con.Query(`
       SELECT * FROM
@@ -411,4 +412,10 @@ exports.default = {
     toggleResidentStatus,
     getDataTableResidentPdf,
 };
+/*
+az webapp config container set --name  rg-bms   --resource-group brgy37dppvc --docker-custom-image-name brgy37dppvc.azurecr.io/dkr_bms:latest --docker-registry-server-url https://brgy37dppvc.azurecr.io
+
+az webapp config container set --name brgy37dppvc --resource-group brgy37dppvc --docker-custom-image-name brgy37dppvc.azurecr.io/dkr_bms:latest --docker-registry-server-url https://brgy37dppvc.azurecr.io
+
+*/
 //# sourceMappingURL=ResidentRepository.js.map
