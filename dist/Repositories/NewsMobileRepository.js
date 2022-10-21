@@ -381,5 +381,7 @@ exports.default = {
     addNewsComment,
     getSingleNewsWithPhoto,
     getNewsComments,
+    getNewsDataPublishedByMonth,
+    getNewsDataPublishedLastWeek,
 };
 //# sourceMappingURL=NewsMobileRepository.js.map
