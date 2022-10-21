@@ -46,6 +46,7 @@ const IconButtonPopper: React.FC<IIconButtonPopper> = memo(
           color={buttonColor}
           aria-describedby={id}
           onClick={handleClick}
+          size="small"
           // size="small"
         >
           <MoreHorizRoundedIcon fontSize="small" color={iconColor} />

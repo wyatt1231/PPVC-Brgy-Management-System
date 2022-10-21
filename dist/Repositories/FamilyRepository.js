@@ -477,6 +477,10 @@ const getSingleFamByFamPk = (fam_pk) => __awaiter(void 0, void 0, void 0, functi
             });
             fm.resident_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(fm.resident_info.pic);
         }
+        family.ulo_pamilya_info = yield yield con.QuerySingle(`select * from resident where resident_pk = @resident_pk`, {
+            resident_pk: family.ulo_pamilya,
+        });
+        family.ulo_pamilya_info.pic = yield (0, useFileUploader_1.GetUploadedImage)(family.ulo_pamilya_info.pic);
         const tinubdan_tubig = yield con.Query(`SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`, { fam_pk });
         family.tinubdan_tubig = tinubdan_tubig.map((d) => d.descrip);
         const matang_kasilyas = yield con.Query(`SELECT * FROM family_matang_kasilyas where fam_pk = @fam_pk;`, { fam_pk });
@@ -638,10 +642,10 @@ const getFamilyDataTablePdf = (payload) => __awaiter(void 0, void 0, void 0, fun
         }
         const browser = yield puppeteer.launch({
             args: [
-                "--disable-gpu",
-                "--disable-dev-shm-usage",
-                "--disable-setuid-sandbox",
+                // "--disable-gpu",
+                // "--disable-dev-shm-usage",
                 "--no-sandbox",
+                "--disable-setuid-sandbox",
             ],
             headless: true,
             ignoreDefaultArgs: ["--disable-extensions"],

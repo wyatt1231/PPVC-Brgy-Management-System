@@ -620,6 +620,16 @@ const getSingleFamByFamPk = async (fam_pk: number): Promise<ResponseModel> => {
       fm.resident_info.pic = await GetUploadedImage(fm.resident_info.pic);
     }
 
+    family.ulo_pamilya_info = await await con.QuerySingle(
+      `select * from resident where resident_pk = @resident_pk`,
+      {
+        resident_pk: family.ulo_pamilya,
+      }
+    );
+    family.ulo_pamilya_info.pic = await GetUploadedImage(
+      family.ulo_pamilya_info.pic
+    );
+
     const tinubdan_tubig = await con.Query(
       `SELECT descrip FROM family_tinubdan_tubig where fam_pk = @fam_pk;`,
       { fam_pk }
@@ -854,10 +864,10 @@ const getFamilyDataTablePdf = async (
 
     const browser = await puppeteer.launch({
       args: [
-        "--disable-gpu",
-        "--disable-dev-shm-usage",
-        "--disable-setuid-sandbox",
+        // "--disable-gpu",
+        // "--disable-dev-shm-usage",
         "--no-sandbox",
+        "--disable-setuid-sandbox",
       ],
       headless: true,
       ignoreDefaultArgs: ["--disable-extensions"],

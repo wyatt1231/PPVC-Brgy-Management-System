@@ -4,7 +4,7 @@ import { useTheme } from "@material-ui/styles";
 import { Form, Formik, FormikHelpers } from "formik";
 import React, { FC, memo, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { NavLink, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import app_logo from "../../Assets/Images/Logo/logo.jpg";
 import LoadingButton from "../../Component/LoadingButton";
 import { APP_NAME } from "../../Helpers/AppConfig";
