@@ -307,7 +307,7 @@ const getresidents = async (search: string): Promise<ResponseModel> => {
     await con.BeginTransaction();
 
     const data: Array<ResidentModel> = await con.Query(
-      `SELECT * FROM searchable_user WHERE first_name LIKE CONCAT('%',@search,'%') || last_name LIKE CONCAT('%',@search,'%') AND resident_pk`,
+      `SELECT * FROM resident WHERE first_name LIKE CONCAT('%',@search,'%') || last_name LIKE CONCAT('%',@search,'%') AND resident_pk`,
 
       {
         search: search,
