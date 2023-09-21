@@ -43,9 +43,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             root: path_1.default.join(__dirname, "../client/build/"),
         });
     });
-    const PORT = process.env.PORT || 8080;
-    // const PORT = 8080;
+    const PORT = process.env.PORT || 8080; //8080
     server.listen(PORT, () => console.log(`listening to ports ${PORT}`));
 });
+//COPIED FROM LAPTOP
 main();
 //# sourceMappingURL=index.js.map
