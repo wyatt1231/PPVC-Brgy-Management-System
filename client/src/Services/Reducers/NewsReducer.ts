@@ -20,6 +20,13 @@ const NewsReducer = (
       };
     }
 
+    case "news_table_has_more": {
+      return {
+        ...state,
+        news_table_has_more: action.news_table_has_more,
+      };
+    }
+
     case "single_news": {
       return {
         ...state,
@@ -32,7 +39,20 @@ const NewsReducer = (
         fetch_single_news: action.fetch_single_news,
       };
     }
-
+    //
+    case "news_latest": {
+      return {
+        ...state,
+        news_latest: action.news_latest,
+      };
+    }
+    case "fetch_news_latest": {
+      return {
+        ...state,
+        fetch_news_latest: action.fetch_news_latest,
+      };
+    }
+    //
     default:
       return state;
   }

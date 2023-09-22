@@ -21,16 +21,45 @@ const NewsController_1 = __importDefault(require("../Controllers/NewsController"
 const ResidentController_1 = __importDefault(require("../Controllers/ResidentController"));
 const UserController_1 = __importDefault(require("../Controllers/UserController"));
 const PostsController_1 = __importDefault(require("../Controllers/PostsController"));
+const FamilyController_1 = __importDefault(require("../Controllers/FamilyController"));
+const PostsMobileController_1 = __importDefault(require("../Controllers/PostsMobileController"));
+const NewsMobileController_1 = __importDefault(require("../Controllers/NewsMobileController"));
+const ComplaintsMobileController_1 = __importDefault(require("../Controllers/ComplaintsMobileController"));
+const ResidentMobileController_1 = __importDefault(require("../Controllers/ResidentMobileController"));
+const FamilyMobileController_1 = __importDefault(require("../Controllers/FamilyMobileController"));
 const ControllerRegistry = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    yield UserController_1.default(app);
-    yield AdminController_1.default(app);
-    yield ResidentController_1.default(app);
-    yield NewsController_1.default(app);
-    yield ComplaintController_1.default(app);
-    yield BrgyOfficialController_1.default(app);
-    yield DashboardController_1.default(app);
-    yield PostsController_1.default(app);
+    yield (0, UserController_1.default)(app);
+    yield (0, AdminController_1.default)(app);
+    yield (0, ResidentController_1.default)(app);
+    yield (0, NewsController_1.default)(app);
+    yield (0, ComplaintController_1.default)(app);
+    yield (0, BrgyOfficialController_1.default)(app);
+    yield (0, DashboardController_1.default)(app);
+    yield (0, PostsController_1.default)(app);
+    yield (0, PostsMobileController_1.default)(app);
+    yield (0, NewsMobileController_1.default)(app);
+    yield (0, ResidentMobileController_1.default)(app);
+    yield (0, ComplaintsMobileController_1.default)(app);
+    yield (0, FamilyController_1.default)(app);
+    yield (0, FamilyMobileController_1.default)(app);
 });
 exports.ControllerRegistry = ControllerRegistry;
 exports.default = exports.ControllerRegistry;
+//update family
+//view all fam
+//add fam
+//fix login
+// dashboard
+//   death chart
+// population chart
+//age range by year
+//total population
+//total deaths
+//PWD
+//senior citizen
+//children
+//infant
+//male female ratio
+//pie chart
+//infant children sc
 //# sourceMappingURL=ControllerRegistry.js.map

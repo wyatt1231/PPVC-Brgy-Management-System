@@ -1,5 +1,6 @@
 import { Express, Request, Response, Router } from "express";
 import Authorize from "../Middlewares/Authorize";
+import { PaginationModel } from "../Models/PaginationModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
 import { PostsModel } from "../Models/PostsModel";
@@ -16,7 +17,7 @@ const PostsController = async (app: Express): Promise<void> => {
       try {
         res.json(await PostsRepository.getPosts());
       } catch (error) {
-        res.json(error);
+        res.json(500);
       }
     }
   );
@@ -27,7 +28,7 @@ const PostsController = async (app: Express): Promise<void> => {
       try {
         res.json(await PostsRepository.getUserPosts(req.user_pk));
       } catch (error) {
-        res.json(error);
+        res.json(500);
       }
     }
   );
@@ -47,16 +48,20 @@ const PostsController = async (app: Express): Promise<void> => {
     "/addPosts",
     Authorize("admin,resident"),
     async (req: Request & { files: any } & UserClaims, res: Response) => {
-      const payload: PostsModel = req.body;
-      let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
+      try {
+        const payload: PostsModel = req.body;
+        let files = req.files?.uploaded_files ? req.files?.uploaded_files : [];
 
-      res.json(
-        await PostsRepository.addPosts(
-          payload,
-          files instanceof Array ? files : [files],req.user_pk
-        )
-      );
-    
+        res.json(
+          await PostsRepository.addPosts(
+            payload,
+            files instanceof Array ? files : [files],
+            req.user_pk
+          )
+        );
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -67,7 +72,7 @@ const PostsController = async (app: Express): Promise<void> => {
       try {
         res.json(await PostsRepository.getPostsReaction());
       } catch (error) {
-        res.json(error);
+        res.json(500);
       }
     }
   );
@@ -75,11 +80,11 @@ const PostsController = async (app: Express): Promise<void> => {
     "/addPostComment",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: PostsCommentModel = req.body;
       try {
+        const payload: PostsCommentModel = req.body;
         res.json(await PostsRepository.addPostComment(payload, req.user_pk));
       } catch (error) {
-        res.json(error);
+        res.json(500);
       }
     }
   );
@@ -87,19 +92,42 @@ const PostsController = async (app: Express): Promise<void> => {
     "/addPostReaction",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const payload: PostReactionModel = req.body;
+      try {
+        const payload: PostReactionModel = req.body;
+        console.log(`sdasd payload`, payload);
 
-      res.json(await PostsRepository.addPostReaction(payload, req.user_pk));
+        res.json(await PostsRepository.addPostReaction(payload, req.user_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
   //reactions
+
+  router.post(
+    "/getPostsAdmin",
+    Authorize("admin,resident"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const payload: PaginationModel = req.body;
+        res.json(await PostsRepository.getPostsAdmin(payload));
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
   router.post(
     "/getPostReactionsAdmin",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const posts_pk: number = req.body.posts_pk;
-      res.json(await PostsRepository.getPostReactionsAdmin(posts_pk));
+      try {
+        const posts_pk: number = req.body.posts_pk;
+        res.json(await PostsRepository.getPostReactionsAdmin(posts_pk));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 
@@ -108,8 +136,26 @@ const PostsController = async (app: Express): Promise<void> => {
     "/getPostCommentsAdmin",
     Authorize("admin,resident"),
     async (req: Request & UserClaims, res: Response) => {
-      const posts_pk: number = req.body.posts_pk;
-      res.json(await PostsRepository.getPostCommentsAdmin(posts_pk));
+      try {
+        const posts_pk: number = req.body.posts_pk;
+        res.json(await PostsRepository.getPostCommentsAdmin(posts_pk));
+      } catch (error) {
+        res.json(500);
+      }
+    }
+  );
+
+  router.post(
+    "/updatePostStatus",
+    Authorize("admin"),
+    async (req: Request & UserClaims, res: Response) => {
+      try {
+        const payload: PostsModel = req.body;
+        payload.encoder_pk = req.user_pk;
+        res.json(await PostsRepository.updatePostStatus(payload));
+      } catch (error) {
+        res.json(500);
+      }
     }
   );
 

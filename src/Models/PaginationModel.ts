@@ -14,7 +14,14 @@ export interface SqlPage {
 export interface PaginationModel {
   page: SqlPage;
   sort: SqlSort;
-  filters: TableFilterModel;
+  filters: any;
+}
+
+export interface ScrollPaginationModel {
+  sort: SqlSort;
+  filters: any;
+  page?: SqlPage;
+  has_more?: boolean;
 }
 
 export interface DataTableResult {

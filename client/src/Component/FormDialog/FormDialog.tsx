@@ -22,10 +22,20 @@ interface IFormDialog {
   body?: any;
   actions?: any;
   minWidth?: number;
+  maxWidth?: false | "lg" | "xs" | "sm" | "md" | "xl";
 }
 
 export const FormDialog: React.FC<IFormDialog> = memo(
-  ({ children, open, title, handleClose, body, actions, minWidth }) => {
+  ({
+    children,
+    open,
+    title,
+    handleClose,
+    body,
+    actions,
+    minWidth,
+    maxWidth,
+  }) => {
     const theme = useTheme();
 
     const descriptionElementRef = useRef<any>(null);
@@ -66,6 +76,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
         scroll="body"
         disableBackdropClick={true}
         disableEscapeKeyDown={true}
+        maxWidth={maxWidth}
         TransitionComponent={Grow}
         PaperProps={{
           style: {
@@ -80,7 +91,7 @@ export const FormDialog: React.FC<IFormDialog> = memo(
         }}
       >
         <DialogTitleStyle theme={theme} disableTypography={true}>
-          <div className="title">{title}</div>
+          <div className="dialog-title">{title}</div>
           <div className="toolbar">
             <Tooltip title="">
               <IconButton size="small" onClick={handleClose}>
@@ -111,8 +122,9 @@ const DialogTitleStyle = styled(DialogTitle)`
   align-content: center;
   grid-gap: 1em;
 
-  .title {
+  .dialog-title {
     font-weight: 900;
+    color: ${(p) => p.theme.palette.primary.contrastText} !important;
   }
 
   .toolbar {

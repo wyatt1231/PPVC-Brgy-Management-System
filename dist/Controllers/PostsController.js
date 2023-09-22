@@ -16,24 +16,24 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const PostsRepository_1 = __importDefault(require("../Repositories/PostsRepository"));
 const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/getPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getPosts());
         }
         catch (error) {
-            res.json(error);
+            res.json(500);
         }
     }));
-    router.post("/getUserPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getUserPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getUserPosts(req.user_pk));
         }
         catch (error) {
-            res.json(error);
+            res.json(500);
         }
     }));
-    router.post("/getPostsComments", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostsComments", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const posts_pk = req.body.posts_pk;
             res.json(yield PostsRepository_1.default.getPostsComments(posts_pk));
@@ -42,42 +42,82 @@ const PostsController = (app) => __awaiter(void 0, void 0, void 0, function* () 
             res.json(error);
         }
     }));
-    router.post("/addPosts", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/addPosts", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
-        const payload = req.body;
-        let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
-        res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
+        try {
+            const payload = req.body;
+            let files = ((_a = req.files) === null || _a === void 0 ? void 0 : _a.uploaded_files) ? (_b = req.files) === null || _b === void 0 ? void 0 : _b.uploaded_files : [];
+            res.json(yield PostsRepository_1.default.addPosts(payload, files instanceof Array ? files : [files], req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
-    router.post("/getPostsReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/getPostsReaction", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             res.json(yield PostsRepository_1.default.getPostsReaction());
         }
         catch (error) {
-            res.json(error);
+            res.json(500);
         }
     }));
-    router.post("/addPostComment", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
+    router.post("/addPostComment", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
+            const payload = req.body;
             res.json(yield PostsRepository_1.default.addPostComment(payload, req.user_pk));
         }
         catch (error) {
-            res.json(error);
+            res.json(500);
         }
     }));
-    router.post("/addPostReaction", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield PostsRepository_1.default.addPostReaction(payload, req.user_pk));
+    router.post("/addPostReaction", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            console.log(`sdasd payload`, payload);
+            res.json(yield PostsRepository_1.default.addPostReaction(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     //reactions
-    router.post("/getPostReactionsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
+    router.post("/getPostsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            res.json(yield PostsRepository_1.default.getPostsAdmin(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/getPostReactionsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const posts_pk = req.body.posts_pk;
+            res.json(yield PostsRepository_1.default.getPostReactionsAdmin(posts_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     //comments
-    router.post("/getPostCommentsAdmin", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const posts_pk = req.body.posts_pk;
-        res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
+    router.post("/getPostCommentsAdmin", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const posts_pk = req.body.posts_pk;
+            res.json(yield PostsRepository_1.default.getPostCommentsAdmin(posts_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/updatePostStatus", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            payload.encoder_pk = req.user_pk;
+            res.json(yield PostsRepository_1.default.updatePostStatus(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/posts/", router);
 });

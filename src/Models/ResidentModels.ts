@@ -1,3 +1,5 @@
+import { StatusMasterModel } from "./StatusMasterModel";
+
 export interface ResidentModel {
   resident_pk?: number;
   user_pk?: number;
@@ -8,6 +10,8 @@ export interface ResidentModel {
   suffix?: string;
   gender?: string;
   birth_date?: Date | string;
+  resident_date?: Date | string;
+  died_date?: Date | string;
   nationality?: string;
   religion?: string;
   civil_status?: string;
@@ -30,4 +34,12 @@ export interface ResidentModel {
   sts_backgroundColor?: string;
   encoder_pk?: number;
   encoded_at?: Date;
+  ulo_pamilya?: string;
+  fam_pk?: string;
+  members?: Array<any>;
+  kita?: number;
+  educ?: string;
+  status?: StatusMasterModel;
+
+  age?: number;
 }

@@ -18,7 +18,6 @@ export const GetFetch = async (endpoint: string): Promise<IServerResponse> => {
       },
     });
 
-    console.log(`response`, serverResponse);
 
     return serverResponse.data;
   } catch (error) {

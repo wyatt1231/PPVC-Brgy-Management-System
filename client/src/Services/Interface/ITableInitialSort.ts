@@ -1,6 +1,6 @@
 interface ITableSortValue {
   column: string;
-  direction: string;
+  direction: "asc" | "desc";
 }
 
 interface ITableInitialSort {

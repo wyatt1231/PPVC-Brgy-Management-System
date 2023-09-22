@@ -20,6 +20,13 @@ const PostReducer = (
       };
     }
 
+    case "posts_table_has_more": {
+      return {
+        ...state,
+        posts_table_has_more: action.posts_table_has_more,
+      };
+    }
+
     default:
       return state;
   }

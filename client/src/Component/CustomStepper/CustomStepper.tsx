@@ -96,6 +96,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface StepsProps {
   label: string;
+  subtitle?: string;
   View: any;
 }
 
@@ -120,7 +121,23 @@ const CustomStepper: React.FC<CustomStepperProps> = ({
         {steps?.map((step, key) => (
           <Step key={key}>
             <StepLabel StepIconComponent={QontoStepIcon}>
-              {step.label}
+              <div style={{ fontWeight: 900, fontSize: `.89em` }}>
+                {step.label}
+              </div>
+              {!!step.subtitle && (
+                <div>
+                  <small
+                    style={{
+                      fontSize: `.67em`,
+                      fontWeight: 500,
+                      color: `black`,
+                      opacity: 1,
+                    }}
+                  >
+                    {step.subtitle}
+                  </small>
+                </div>
+              )}
             </StepLabel>
           </Step>
         ))}

@@ -13,7 +13,6 @@ const getBrgyOfficialDataTableApi = async (
     payload
   );
 
-  console.log(`response`, response);
   return response;
 };
 
@@ -26,8 +25,20 @@ const addBarangayOfficialApi = async (
   );
   return response;
 };
+const removeBarangayOfficialApi = async (
+  official_pk: string
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "removeBarangayOfficial",
+    {
+      official_pk,
+    }
+  );
+  return response;
+};
 
 export default {
   getBrgyOfficialDataTableApi,
   addBarangayOfficialApi,
+  removeBarangayOfficialApi,
 };

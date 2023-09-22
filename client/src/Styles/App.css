@@ -255,7 +255,12 @@ tr td {
   padding: 0.5em 0;
   grid-auto-columns: auto 1fr;
   font-size: 1em !important;
-  font-size: 0.9em !important;
+}
+
+.info-group.row {
+  grid-auto-flow: row;
+  align-items: start;
+  grid-gap: 0.3em;
 }
 
 .info-group.bordered {
@@ -264,21 +269,22 @@ tr td {
 
 .info-group .label {
   font-weight: 900;
-  font-size: 0.8em;
-  opacity: 0.87;
+  font-size: 0.7em;
+  opacity: 0.5;
 }
 
 .info-group .value {
-  font-weight: 500 !important;
+  font-weight: 400 !important;
+  font-size: 0.9em;
   /* font-size: 0.95em; */
 }
 
-.MuiChip-label {
+/* .MuiChip-label {
   font-weight: 600 !important;
   font-family: Nunito !important;
   letter-spacing: 0.3pt;
   word-spacing: 0.3pt;
-}
+} */
 
 .form-title {
   padding: 0.5em 0;
@@ -293,8 +299,8 @@ tr td {
 
 .table-cell-profile {
   display: grid;
-  grid-template-areas: "img title" "img sub";
-  grid-gap: 0.2em;
+  grid-template-areas: "img title";
+  grid-gap: 0.5em;
   align-items: center;
   align-content: center;
   justify-content: start;
@@ -310,13 +316,9 @@ tr td {
 }
 .table-cell-profile .title {
   grid-area: title;
+  font-size: 1em;
   font-weight: 700;
-}
-.table-cell-profile .sub-title {
-  grid-area: sub;
-  font-size: 0.87em;
-  font-weight: 700;
-  color: rgba(0, 0, 0, 0.55);
+  border: none;
 }
 
 .autocomplete-picture {
@@ -330,13 +332,148 @@ tr td {
 
 .error {
   color: red;
-  font-size: 0.7em;
+  font-size: 1em;
   font-weight: 700;
+  display: grid;
+  width: 100%;
+  padding: 1em;
+  text-align: center;
 }
 
-.MuiChip-label {
+/* .MuiChip-label {
   font-weight: 900 !important;
   font-size: 0.87em !important;
   letter-spacing: 0.3pt !important;
   word-spacing: 0.3pt !important;
+} */
+
+.title {
+  /* padding: 0.3em 0; */
+  margin: 0.5em 0;
+  opacity: 0.65;
+  font-weight: 900;
+  font-size: 0.9em;
+  /* border-bottom: 0.1em solid rgba(0, 0, 0, 0.1); */
+}
+
+.info-group-column {
+  display: grid;
+  align-items: center;
+  align-content: center;
+  /* justify-content: start; */
+  /* grid-auto-flow: column; */
+
+  padding: 0.5em 0;
+}
+
+.info-group-column .label {
+  opacity: 0.7;
+  font-weight: 900;
+  font-size: 0.7em;
+  padding: 0.1em 0;
+}
+
+.info-group-column .value {
+  font-weight: 500;
+  font-size: 1em;
+  padding: 0.1em 0;
+  border-bottom: 0.01em solid rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.info-group .value.profile {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 0.5em;
+  font-weight: 500;
+  align-items: center;
+  align-content: center;
+  justify-content: start;
+  justify-items: start;
+}
+
+canvas {
+  background-color: #fff;
+}
+
+.stats-item {
+  height: 100%;
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  padding: 1.5em 2.5em;
+  text-align: center;
+}
+
+.stats-item .label {
+  /* font-size: 0.9em; */
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.stats-item .value {
+  font-size: 2em;
+  font-weight: 900;
+}
+
+.sekso-ctnr {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: start;
+  grid-gap: 1em;
+  align-content: start;
+  align-items: start;
+}
+
+@media only screen and (max-width: 800px) {
+  .sekso-ctnr {
+    display: grid;
+    grid-auto-flow: row;
+    justify-content: start;
+    grid-gap: 1em;
+    align-content: start;
+    align-items: start;
+  }
+}
+
+.sekso-ctnr .sekso-item {
+  display: grid;
+  grid-template-areas: "img label" "img val" "img graph";
+  align-items: start;
+  align-content: start;
+  padding: 0.5em;
+}
+
+.sekso-ctnr .sekso-item .dp {
+  grid-area: img;
+  height: 150px;
+  width: 50px;
+  margin-right: 0.5em;
+}
+.sekso-ctnr .sekso-item .label {
+  grid-area: label;
+  font-size: 0.9em;
+  opacity: 0.6;
+  font-weight: 900;
+}
+.sekso-ctnr .sekso-item .value {
+  grid-area: val;
+  align-self: start;
+  font-weight: 900;
+  font-size: 2em;
+}
+
+.sekso-ctnr .sekso-item .graph {
+  grid-area: graph;
+  width: 100px;
+}
+
+.Mui-disabled {
+  color: #333 !important;
+  opacity: 1 !important;
+}
+
+.MuiTypography-root.MuiFormControlLabel-label.MuiTypography-body1 {
+  padding: 0.3em 0;
 }

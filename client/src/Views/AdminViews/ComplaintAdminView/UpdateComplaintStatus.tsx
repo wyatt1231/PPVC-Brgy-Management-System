@@ -56,9 +56,9 @@ export const UpdateComplaintStatusView: FC<UpdateComplaintStatusProps> = memo(
             continue_callback: () =>
               dispatch(
                 NewsActions.updateNews(payload, () => {
-                  dispatch(NewsActions.setNewsDataTable());
-                  form_edit_news.reset();
-                  handleSetOpen(false);
+                  // dispatch(NewsActions.setNewsDataTable());
+                  // form_edit_news.reset();
+                  // handleSetOpen(false);
                 })
               ),
           })

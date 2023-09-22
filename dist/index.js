@@ -17,16 +17,17 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
-const ControllerRegistry_1 = require("./Registry/ControllerRegistry");
-const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 const socket_io_1 = require("socket.io");
+const ControllerRegistry_1 = require("./Registry/ControllerRegistry");
 const SocketRegistry_1 = __importDefault(require("./Registry/SocketRegistry"));
-exports.app = express_1.default();
+exports.app = (0, express_1.default)();
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     dotenv_1.default.config();
+    //test
     exports.app.use(body_parser_1.default.json({ limit: "100mb" }));
-    exports.app.use(express_fileupload_1.default());
+    exports.app.use((0, express_fileupload_1.default)());
     exports.app.use(express_1.default.static("./"));
     const server = http_1.default.createServer(exports.app);
     const socketServer = new socket_io_1.Server(server, {
@@ -34,17 +35,16 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             origin: "*",
         },
     });
-    ControllerRegistry_1.ControllerRegistry(exports.app);
-    SocketRegistry_1.default(socketServer);
-    if (process.env.NODE_ENV === "production") {
-        exports.app.use("/static", express_1.default.static(path_1.default.join(__dirname, "../client/build//static")));
-        exports.app.get("*", function (req, res) {
-            res.sendFile("index.html", {
-                root: path_1.default.join(__dirname, "../client/build/"),
-            });
+    (0, ControllerRegistry_1.ControllerRegistry)(exports.app);
+    (0, SocketRegistry_1.default)(socketServer);
+    exports.app.use("/static", express_1.default.static(path_1.default.join(__dirname, "../client/build//static")));
+    exports.app.get("*", function (req, res) {
+        res.sendFile("index.html", {
+            root: path_1.default.join(__dirname, "../client/build/"),
         });
-    }
-    const PORT = process.env.PORT || 4050;
+    });
+    const PORT = process.env.PORT || 8080;
+    // const PORT = 8080;
     server.listen(PORT, () => console.log(`listening to ports ${PORT}`));
 });
 main();

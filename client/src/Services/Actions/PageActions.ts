@@ -1,4 +1,5 @@
 import { Dispatch } from "react";
+import { SelectedFamHeadModel } from "../Models/SelectedFamHeadModel";
 import {
   PagePromptTypes,
   PageReducerTypes,
@@ -89,5 +90,15 @@ export const setPageSuccessPromptAction = (
   dispatch({
     type: "SET_PAGE_SUCCESS_PROMPT",
     page_success_prompt: payload,
+  });
+};
+
+//others
+export const setSelectedHeadFam = (
+  payload: SelectedFamHeadModel | null
+) => async (dispatch: Dispatch<PageReducerTypes>) => {
+  dispatch({
+    type: "SET_PAGE_SELECTED_HEAD_FAM",
+    selected_head_fam: payload,
   });
 };

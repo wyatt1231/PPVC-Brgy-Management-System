@@ -54,6 +54,11 @@ const generateNavLinks = (user: any): Array<IPageNavLinks> => {
         hasSubLinks: false,
       },
       {
+        to: "/admin/family",
+        text: "Families",
+        hasSubLinks: false,
+      },
+      {
         to: "/admin/brgy-official",
         text: "Brgy. Officials",
         hasSubLinks: false,

@@ -16,30 +16,129 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const DashboardRepository_1 = __importDefault(require("../Repositories/DashboardRepository"));
 const DashboardController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getYearlyPopulationStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const router = (0, express_1.Router)();
+    router.post("/overallPopulation", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.getYearlyPopulationStats());
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.overallPopulation(filters));
         }
         catch (error) {
             res.json(error);
         }
     }));
-    router.post("/getPopulationOfYearStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const current_year = req.body.current_year;
+    router.post("/ageGroupStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const filters = req.body;
         try {
-            res.json(yield DashboardRepository_1.default.getPopulationOfYearStats(current_year));
+            res.json(yield DashboardRepository_1.default.ageGroupStats(filters));
         }
         catch (error) {
             res.json(error);
         }
     }));
-    router.post("/getAgeGroupStats", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post("/genderStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.json(yield DashboardRepository_1.default.getAgeGroupStats());
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.genderStats(filters));
         }
         catch (error) {
             res.json(error);
+        }
+    }));
+    router.post("/lifeStageStats", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.lifeStageStats(filters));
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }));
+    router.post("/statsComplaint", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.statsComplaint());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/statsNews", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.statsNews());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/total_population", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const filters = req.body;
+        console.log(`total_population`, filters);
+        res.json(yield DashboardRepository_1.default.total_population(filters));
+    }));
+    router.post("/total_death", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_death(filters));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/total_pwd", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_pwd(filters));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/total_sc", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const filters = req.body;
+            res.json(yield DashboardRepository_1.default.total_sc(filters));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsPasilidadKuryente", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsPasilidadKuryente());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsBiktikmaPangabuso", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsBiktikmaPangabuso());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsKahimtangKomunidad", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsKahimtangKomunidad());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsMatangBasura", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsMatangBasura());
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/StatsMatangKasilyas", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield DashboardRepository_1.default.StatsMatangKasilyas());
+        }
+        catch (error) {
+            res.json(500);
         }
     }));
     app.use("/api/dashboard/", router);

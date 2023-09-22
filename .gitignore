@@ -1,3 +1,11 @@
 node_modules
 /client/node_modules
+/client/package-lock.json
+/client/public
+/client/.env
+/client/src
+/client/package.json
+/client/tsconfig.json
+/client/static.json
+
 package-lock.json

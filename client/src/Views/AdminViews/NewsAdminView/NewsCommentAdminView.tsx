@@ -53,7 +53,7 @@ export const NewsCommentAdminView: FC<INewsCommentAdminView> = memo(
 
               dispatch(
                 NewsActions.toggleLike(payload, () => {
-                  dispatch(NewsActions.setNewsDataTable());
+                  // dispatch(NewsActions.setNewsDataTable());
                 })
               );
             }}
@@ -78,20 +78,13 @@ export const NewsCommentAdminView: FC<INewsCommentAdminView> = memo(
               className="add-comment"
               onSubmit={(e: any) => {
                 e.preventDefault();
-                console.log(`e`, e.target.body.value);
-                console.log(e.target.elements.body.value);
-
                 if (e?.target?.body?.value) {
                   const payload: NewsCommentModel = {
                     body: e.target.body.value,
                     news_pk: news.news_pk,
                   };
 
-                  dispatch(
-                    NewsActions.addNewsComment(payload, () => {
-                      dispatch(NewsActions.setNewsDataTable());
-                    })
-                  );
+                  dispatch(NewsActions.addNewsComment(payload, () => {}));
                 }
               }}
             >

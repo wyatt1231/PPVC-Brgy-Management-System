@@ -13,11 +13,15 @@ export interface PostsModel {
   encoded_at?: Date;
   encoder_pk?: number;
   posts_files?: Array<PostFilesModel>;
+  reactions?: Array<any>;
   upload_files: Array<any>;
   user_full_name?: string;
   user_pic?: string;
   user_pk?: string;
-
+  offset?:number
+  totalcomments?: Array<any>;
+  liked?: Array<any>;
+  comments?: Array<any>;
   user?: UserModel;
   status?: StatusMasterModel;
   files?: Array<PostsFileModel>;
@@ -29,7 +33,6 @@ export interface PostFilesModel {
   encoder_pk?: number;
   file_path?: string;
   mimetype?: string;
-  
 }
 export interface PostCommentModel {
   posts_comment_pk?: number;
@@ -46,5 +49,4 @@ export interface PostFilesModel {
   encoder_pk?: number;
   file_path?: string;
   mimetype?: string;
-  
 }

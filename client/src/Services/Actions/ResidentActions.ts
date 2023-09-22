@@ -18,6 +18,7 @@ export const setResidentDataTableAction = (payload: PaginationModel) => async (
     const response: IServerResponse = await ResidentApi.getResidentDataTableApi(
       payload
     );
+    console.log(`resident res`, response);
     dispatch({
       type: "fetch_resident_data_table",
       fetch_resident_data_table: false,
@@ -132,4 +133,41 @@ export const updateResidentAction = (
   } catch (error) {
     console.error(`action error`, error);
   }
+};
+
+const toggleResidentStatus = (
+  resident_pk: number,
+  onSuccess: (msg: string) => any
+) => async (dispatch: Dispatch<ResidentReducerTypes | PageReducerTypes>) => {
+  try {
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        loading_message: "Loading, thank you for your patience!",
+        show: true,
+      },
+    });
+    const response: IServerResponse = await ResidentApi.toggleResidentStatus(
+      resident_pk
+    );
+    dispatch({
+      type: "SET_PAGE_LOADING",
+      page_loading: {
+        show: false,
+      },
+    });
+    if (response.success) {
+      if (typeof onSuccess === "function") {
+        onSuccess(response.message.toString());
+      }
+    } else {
+      helperErrorMessage(dispatch, response);
+    }
+  } catch (error) {
+    console.error(`action error`, error);
+  }
+};
+
+export default {
+  toggleResidentStatus,
 };

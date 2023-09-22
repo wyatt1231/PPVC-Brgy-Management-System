@@ -123,14 +123,14 @@ export const LoginPortal: FC<ILoginPortal> = memo(() => {
               </Form>
             </Formik>
           </section>
-          <section className="footer">
+          {/* <section className="footer">
             <div className="title">Welcome back</div>
             <NavLink to="/login" className="forgetpass">
               <div className="forget-text">
                 <span>Did you forgot your password?</span>
               </div>
             </NavLink>
-          </section>
+          </section> */}
         </div>
       </div>
     </LoginStyles>

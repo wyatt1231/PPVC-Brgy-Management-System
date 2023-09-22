@@ -15,6 +15,7 @@ interface IProps {
   className?: string | undefined;
   borderRadius?: number | string;
   form?: string;
+  startIcon?: any;
 }
 
 const LoadingButton: React.FC<IProps> = ({
@@ -30,6 +31,7 @@ const LoadingButton: React.FC<IProps> = ({
   children,
   borderRadius,
   form,
+  startIcon,
 }) => {
   return (
     <StyledLoadingButton>
@@ -43,6 +45,7 @@ const LoadingButton: React.FC<IProps> = ({
         onClick={handleClick}
         fullWidth={fullWidth}
         disableElevation
+        startIcon={startIcon}
         style={{
           borderRadius: borderRadius,
         }}

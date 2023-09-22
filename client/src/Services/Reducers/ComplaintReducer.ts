@@ -23,6 +23,13 @@ const ComplaintReducer = (
       };
     }
 
+    case "has_more_complaints_table": {
+      return {
+        ...state,
+        has_more_complaints_table: action.has_more_complaints_table,
+      };
+    }
+
     case "single_complaint": {
       return {
         ...state,
@@ -59,6 +66,19 @@ const ComplaintReducer = (
       return {
         ...state,
         fetch_complaint_messages: action.fetch_complaint_messages,
+      };
+    }
+    //
+    case "latest_complaint": {
+      return {
+        ...state,
+        latest_complaint: action.latest_complaint,
+      };
+    }
+    case "fetch_latest_complaint": {
+      return {
+        ...state,
+        fetch_latest_complaint: action.fetch_latest_complaint,
       };
     }
 

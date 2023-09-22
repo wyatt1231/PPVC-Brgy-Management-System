@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["node_modules/@types", "src/Types"],
     "target": "es6",
     "module": "commonjs",
     "lib": ["dom", "es6", "es2017", "esnext.asynciterable"],
@@ -22,10 +23,14 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     // "baseUrl": ".",
-    "allowJs": true,
+    "allowJs": true
     // "sourceRoot": "src",
   },
   "exclude": ["node_modules"],
-  "include": ["./src/**/*.tsx", "./src/**/*.ts", "./src/**/*.jpg"],
-  
+  "include": [
+    "./src/**/*.tsx",
+    "./src/**/*.ts",
+    "./src/**/*.jpg",
+    "./src/**/*.png"
+  ]
 }

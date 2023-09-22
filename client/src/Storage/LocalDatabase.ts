@@ -102,10 +102,10 @@ export const DbNationality = [
   "COSTA",
   "Dutch",
   "Egyptian",
-  "Fil-Am 	 ",
-  "Fil-German 	 ",
-  "Fil-Jap 	 ",
-  "Filipino 	",
+  "Fil-Am",
+  "Fil-German",
+  "Fil-Jap",
+  "Filipino",
   "French",
   "German",
   "GREEK",
@@ -133,11 +133,77 @@ export const DbNationality = [
 ];
 
 export const DbBrgyOfficialPositions = [
-  "kagawad",
+  "Kagawad",
   "Secretary",
   "Treasurer",
   "Punong Barangay",
   "Day Care Worker",
   "Utility Worker",
   "Health Worker",
+];
+
+export const DbSerbisyoNadawat = [
+  {
+    value: "scholarship",
+    label: "scholarship",
+  },
+  {
+    value: "livelihood",
+    label: "livelihood",
+  },
+  {
+    value: "4p's",
+    label: "4p's",
+  },
+  {
+    value: "housing",
+    label: "housing",
+  },
+  {
+    value: "financial",
+    label: "financial",
+  },
+  {
+    value: "lingat (burial ug medical)",
+    label: "lingat (burial ug medical)",
+  },
+  {
+    value: "medical nga tabang",
+    label: "medical nga tabang",
+  },
+  {
+    value: "day care service",
+    label: "day care service",
+  },
+  {
+    value: "skill training",
+    label: "skill training",
+  },
+  {
+    value: "employment",
+    label: "employment",
+  },
+];
+
+export const Colors = [
+  "#f44336",
+  "#e91e63",
+  "#9c27b0",
+  "#673ab7",
+  "#3f51b5",
+  "#2196f3",
+  "#03a9f4",
+  "#00bcd4",
+  "#009688",
+  "#4caf50",
+  "#8bc34a",
+  "#cddc39",
+  "#00bcd4",
+  "#ffeb3b",
+  "#ffc107",
+  "#ff9800",
+  "#ff5722",
+  "#795548",
+  "#9e9e9e",
+  "#607d8b",
 ];

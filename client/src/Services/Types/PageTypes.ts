@@ -1,4 +1,5 @@
 import { OptionsObject } from "notistack";
+import { SelectedFamHeadModel } from "../Models/SelectedFamHeadModel";
 
 export type PagePromptTypes = {
   open: boolean;
@@ -55,6 +56,10 @@ export type PageReducerTypes =
   | {
       type: "SET_PAGE_SUCCESS_PROMPT";
       page_success_prompt: PageSuccessPromptTypes;
+    }
+  | {
+      type: "SET_PAGE_SELECTED_HEAD_FAM";
+      selected_head_fam: SelectedFamHeadModel;
     };
 
 export interface PageReducerModel {
@@ -63,4 +68,5 @@ export interface PageReducerModel {
   page_snackbar: PageSnackbarTypes;
   page_links: Array<PageLinkTypes>;
   page_success_prompt?: PageSuccessPromptTypes;
+  selected_head_fam?: SelectedFamHeadModel;
 }

@@ -29,6 +29,16 @@ export const updateAdminApi = async (
   return response;
 };
 
+const changeAdminStatus = async (
+  payload: AdministratorModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "changeAdminStatus",
+    payload
+  );
+  return response;
+};
+
 export const getSingleAdminApi = async (
   admin_pk: string
 ): Promise<IServerResponse> => {
@@ -36,4 +46,8 @@ export const getSingleAdminApi = async (
     admin_pk,
   });
   return response;
+};
+
+export default {
+  changeAdminStatus,
 };

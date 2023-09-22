@@ -1,4 +1,6 @@
 import { NewsCommentModel } from "./NewsCommentModels";
+import { StatusMasterModel } from "./StatusMasterModel";
+import { UserModel } from "./UserModels";
 
 export interface NewsModel {
   news_pk?: number;
@@ -15,8 +17,12 @@ export interface NewsModel {
   upload_files?: Array<any>;
   user_full_name?: string;
   user_pic?: string;
+  pub_date?: string | Date;
+  is_prio?: boolean | 0 | 1;
   comments?: Array<NewsCommentModel>;
   likes?: Array<NewsLikesModel>;
+  user?: UserModel;
+  status?: StatusMasterModel;
 }
 
 export interface NewsFileModel {
