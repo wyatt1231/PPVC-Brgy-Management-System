@@ -171,9 +171,9 @@ const getBrgyOfficialList = async (): Promise<ResponseModel> => {
     const data: Array<BarangayOfficialModel> = await con.Query(
       `
       SELECT * FROM 
-      (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
+      (SELECT r.first_name,r.middle_name,r.last_name,r.suffix,r.pic,r.gender,bo.position,bo.rank,bo.encoded_at,bo.sts_pk,s.sts_backgroundColor,s.sts_color,s.sts_desc FROM barangay_official bo 
       JOIN resident r ON bo.resident_pk = r.resident_pk
-      LEFT JOIN status s ON s.sts_pk = bo.sts_pk) tmp
+      LEFT JOIN STATUS s ON s.sts_pk = bo.sts_pk) tmp ORDER BY bo.rank ASC
       `,
       null
     );
