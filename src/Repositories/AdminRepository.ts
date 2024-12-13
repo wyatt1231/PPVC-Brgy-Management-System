@@ -1,4 +1,5 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
 import { isValidPicture } from "../Hooks/useValidator";
@@ -36,7 +37,7 @@ const addAdmin = async (
     if (sql_insert_user.insertedId > 0) {
       if (isValidPicture(payload.pic)) {
         const upload_result = await UploadImage({
-          base_url: "./src/Storage/Files/Images/",
+          base_url: "./Files/Images/",
           extension: "jpg",
           file_name: sql_insert_user.insertedId,
           file_to_upload: payload.pic,
@@ -108,7 +109,7 @@ const updateAdmin = async (
 
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
-        base_url: "./src/Storage/Files/Images/",
+        base_url: "./Files/Images/",
         extension: "jpg",
         file_name: payload.user_pk,
         file_to_upload: payload.pic,
@@ -162,6 +163,45 @@ const updateAdmin = async (
   }
 };
 
+const changeAdminStatus = async (
+  payload: AdministratorModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_edit_admin = await con.Modify(
+      `UPDATE administrator SET
+         sts_pk=@sts_pk,
+         encoder_pk=@encoder_pk
+         WHERE
+         admin_pk=@admin_pk;`,
+      payload
+    );
+
+    if (sql_edit_admin > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The administrator status has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the administrator's status",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const getAdminDataTable = async (
   payload: PaginationModel
 ): Promise<ResponseModel> => {
@@ -174,12 +214,19 @@ const getAdminDataTable = async (
       SELECT * FROM (SELECT a.*,CONCAT(firstname,' ',lastname) fullname,s.sts_desc  FROM administrator a 
       LEFT JOIN status s ON s.sts_pk = a.sts_pk) tmp
       WHERE 
-      (firstname like concat('%',@search,'%')
-      OR lastname like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%'))
+      firstname like concat('%',@firstname,'%')
+      AND lastname like concat('%',@lastname,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
       AND admin_pk != 1
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
       `,
       payload
     );
@@ -230,7 +277,17 @@ const getSingleAdmin = async (admin_pk: string): Promise<ResponseModel> => {
       }
     );
 
-    data.pic = data.pic = await GetUploadedImage(data.pic);
+    if (!!data?.pic) {
+      data.pic = data.pic = await GetUploadedImage(data.pic);
+    }
+
+    data.status = await con.QuerySingle(
+      `select * from status where sts_pk=@sts_pk`,
+      {
+        sts_pk: data.sts_pk,
+      }
+    );
+
     con.Commit();
     return {
       success: true,
@@ -251,4 +308,5 @@ export default {
   updateAdmin,
   getAdminDataTable,
   getSingleAdmin,
+  changeAdminStatus,
 };

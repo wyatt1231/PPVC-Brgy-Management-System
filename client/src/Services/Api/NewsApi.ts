@@ -1,20 +1,28 @@
 import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
-import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
+import { NewsFileModel, NewsLikesModel, NewsModel } from "../Models/NewsModels";
+import { PaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/news/`;
 
-const getNewsDataTable = async (): Promise<IServerResponse> => {
+const getNewsDataTable = async (
+  payload: PaginationModel
+): Promise<IServerResponse> => {
   const response = await PostFetch(
     API_DEFAULT_ROUTE + "getNewsDataTable",
-    null
+    payload
   );
   return response;
 };
 
 const addNews = async (payload: FormData): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "addNews", payload);
+  return response;
+};
+
+const addNewsFiles = async (payload: FormData): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "addNewsFiles", payload);
   return response;
 };
 
@@ -39,6 +47,13 @@ const unpublishNews = async (news_pk: number): Promise<IServerResponse> => {
 
 const getSingleNews = async (news_pk: number): Promise<IServerResponse> => {
   const response = await PostFetch(API_DEFAULT_ROUTE + "getSingleNews", {
+    news_pk,
+  });
+  return response;
+};
+
+const getNewsFiles = async (news_pk: number): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getNewsFiles", {
     news_pk,
   });
   return response;
@@ -81,6 +96,21 @@ const updateNewsReaction = async (
   return response;
 };
 
+const getNewsLatest = async (): Promise<IServerResponse> => {
+  const response = await PostFetch(API_DEFAULT_ROUTE + "getNewsLatest", {});
+  return response;
+};
+
+const deleteNewsFile = async (
+  payload: NewsFileModel
+): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "deleteNewsFile",
+    payload
+  );
+  return response;
+};
+
 export default {
   getNewsDataTable,
   addNews,
@@ -92,4 +122,8 @@ export default {
   addNewsReaction,
   updateNewsReaction,
   toggleLike,
+  getNewsFiles,
+  getNewsLatest,
+  deleteNewsFile,
+  addNewsFiles,
 };

@@ -7,23 +7,21 @@ import { UserClaims, UserLogin } from "../Models/UserModels";
 
 export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
 
-    const zxc = await con.QuerySingle(
-      `SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'sql6400894';`,
-      null
-    );
-
-    console.log(`zxc`, zxc);
+    // await con.QuerySingle(
+    //   `SELECT table_name FROM information_schema.tables
+    //   WHERE table_schema = 'sql6400894';`,
+    //   null
+    // );
+    console.log(`payload`, payload);
 
     const user: UserClaims | null = await con.QuerySingle(
       `SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`,
       payload
     );
-
-    console.log(`user`, user);
 
     if (user) {
       if (user.allow_login === "n") {
@@ -72,12 +70,58 @@ export const loginUser = async (payload: UserLogin): Promise<ResponseModel> => {
 
 export const currentUser = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
 
     const user_data = await con.QuerySingle(
-      `  SELECT u.user_pk,u.user_type,u.full_name FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
+      `  SELECT u.user_pk,u.user_type,u.full_name,u.new_user FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
+      `,
+      {
+        user_pk,
+      }
+    );
+
+    if (user_data.user_type === "admin") {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM administrator WHERE user_pk=${user_pk} LIMIT 1`,
+        null
+      );
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
+    } else if (user_data.user_type === "resident") {
+      const sql_get_pic = await con.QuerySingle(
+        `SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`,
+        null
+      );
+      user_data.pic = await GetUploadedImage(sql_get_pic?.pic);
+    }
+
+    await con.Commit();
+
+    console.log(`user_data`, user_data.user_type);
+    return {
+      success: true,
+      data: user_data,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+export const userinfo = async (user_pk: number): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const user_data = await con.QuerySingle(
+      ` SELECT u.user_pk,u.user_type,CASE WHEN r.suffix!="" THEN CONCAT(r.last_name,' ',r.first_name,' ',r.middle_name,',',r.suffix) ELSE CONCAT(r.last_name,' ',r.first_name,' ',r.middle_name) END full_name,u.new_user,f.ulo_pamilya,f.fam_pk,r.* FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk LEFT JOIN family f ON f.ulo_pamilya=r.resident_pk
+      WHERE u.user_pk = @user_pk
       `,
       {
         user_pk,

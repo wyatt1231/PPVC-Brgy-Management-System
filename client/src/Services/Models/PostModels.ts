@@ -12,7 +12,7 @@ export interface PostsModel {
   encoded_at?: Date;
   encoder_pk?: number;
   news_files?: Array<PostsFileModel>;
-  upload_files: Array<any>;
+  upload_files?: Array<any>;
   user_full_name?: string;
   user_pic?: string;
   user_pk?: string;

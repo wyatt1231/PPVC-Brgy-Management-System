@@ -2,41 +2,68 @@ import moment from "moment";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import {
-  AgeRangeModel,
-  PopulationOfYearModel,
-  YearlyPopulationModel,
+  DashboardFilterInterface,
+  OverallPopulationModel,
+  YearlyStatsModel,
 } from "../Models/DashboardModels";
 import { ResponseModel } from "../Models/ResponseModels";
 
-const getYearlyPopulationStats = async (): Promise<ResponseModel> => {
+const overallPopulation = async (
+  purok: Array<string>
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
     let current_year = moment().year();
 
-    const yearly_population: Array<YearlyPopulationModel> = [];
+    const years: Array<number> = [];
 
-    for (let i = 0; i < 20; i++) {
-      const current_year_population: YearlyPopulationModel = await con.QuerySingle(
-        `SELECT ${current_year} stat_year, (SELECT COUNT(*) FROM resident WHERE YEAR(resident_date) =@current_year) alive, (SELECT COUNT(*) FROM resident WHERE YEAR(died_date) =@current_year) died
-        `,
+    const alive_stats: Array<YearlyStatsModel> = [];
+    const death_stats: Array<YearlyStatsModel> = [];
+
+    for (let i = 0; i < 10; i++) {
+      const alive = await con.QuerySingle(
+        `
+      SELECT  COUNT(*) total FROM resident WHERE YEAR(resident_date) = '${current_year}' and purok in @purok
+      `,
         {
-          current_year: current_year,
+          purok: purok,
         }
       );
 
+      alive_stats.push({
+        x: current_year,
+        y: alive.total,
+      });
+
+      const death = await con.QuerySingle(
+        `
+      SELECT COUNT(*) as total FROM resident WHERE YEAR(died_date) = '${current_year}' and purok in @purok
+      `,
+        {
+          purok: purok,
+        }
+      );
+
+      death_stats.push({
+        x: current_year,
+        y: death.total,
+      });
+
+      years.push(current_year);
       current_year = current_year - 1;
-
-      console.log(`current_year -> `, current_year);
-
-      yearly_population.push(current_year_population);
     }
 
     con.Commit();
+    const result_data: OverallPopulationModel = {
+      labels: years,
+      death: death_stats,
+      alive: alive_stats,
+    };
     return {
       success: true,
-      data: yearly_population,
+      data: result_data,
     };
   } catch (error) {
     await con.Rollback();
@@ -48,100 +75,24 @@ const getYearlyPopulationStats = async (): Promise<ResponseModel> => {
   }
 };
 
-const getPopulationOfYearStats = async (
-  current_year: number
+const total_population = async (
+  filters: DashboardFilterInterface
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const sql_total_population = await con.QuerySingle(
+    const db_res = await con.QuerySingle(
       `
-        SELECT COUNT(*) as total FROM resident WHERE died_date IS  NULL
-        `,
-      {
-        current_year: current_year,
-      }
+      select count(*) as total from resident where died_date is  null AND YEAR(resident_date) = @year  AND purok in @purok ;
+    `,
+      filters
     );
-
-    const sql_total_deaths = await con.QuerySingle(
-      `
-          SELECT COUNT(*) as total FROM resident WHERE died_date IS NOT NULL
-          `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_male = await con.QuerySingle(
-      `
-        SELECT count(*) as total FROM resident WHERE gender='m' AND died_date IS  NULL AND YEAR(resident_date) =@current_year
-          `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_female = await con.QuerySingle(
-      `
-            SELECT count(*) as total FROM resident WHERE gender='f' AND died_date IS  NULL AND YEAR(resident_date) =@current_year
-              `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_pwd = await con.QuerySingle(
-      `
-          SELECT COUNT(*) total FROM resident WHERE with_disability ='y'  AND YEAR(resident_date) =@current_year  AND died_date IS  NULL 
-                `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_infact = await con.QuerySingle(
-      `
-          SELECT COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date)  <=28  AND YEAR(resident_date) =@current_year  AND died_date IS  NULL
-                `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_senior_citizen = await con.QuerySingle(
-      `
-            SELECT COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date)  >= (60*365)  AND YEAR(resident_date) =@current_year  AND died_date IS  NULL
-                  `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    const sql_get_children = await con.QuerySingle(
-      `
-            SELECT COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date)  < (18*365)  AND YEAR(resident_date) =@current_year  AND died_date IS  NULL
-                  `,
-      {
-        current_year: current_year,
-      }
-    );
-
-    let population_of_year: PopulationOfYearModel = {
-      population: sql_total_population.total,
-      deaths: sql_total_deaths.total,
-      male: sql_get_male.total,
-      female: sql_get_female.total,
-      infant: sql_get_infact.total,
-      pwd: sql_get_pwd.total,
-      senior_citizen: sql_get_senior_citizen.total,
-      children: sql_get_children.total,
-    };
 
     con.Commit();
     return {
       success: true,
-      data: population_of_year,
+      data: db_res.total,
     };
   } catch (error) {
     await con.Rollback();
@@ -153,35 +104,249 @@ const getPopulationOfYearStats = async (
   }
 };
 
-const getAgeGroupStats = async (): Promise<ResponseModel> => {
+const total_death = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const age_range: Array<AgeRangeModel> = await con.Query(
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is not null AND YEAR(resident_date) = @year  and purok in @purok
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_pwd = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      select count(*) as total from resident where died_date is  null  and with_disability = 'y' AND YEAR(resident_date) = @year    and purok in @purok
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const total_sc = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const db_res = await con.QuerySingle(
+      `
+      SELECT count(*) as total FROM (
+        SELECT  FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365) AS age
+        FROM resident WHERE died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
+        ) AS tmp
+        WHERE  age >= 60 
+    `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: db_res.total,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const ageGroupStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const ages: Array<any> = await con.Query(
       `
         SELECT * FROM 
         (
-        SELECT '0-10' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 0 AND DATEDIFF(DATE(NOW()), birth_date) <=10
+        SELECT '0-10' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 0 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=10 AND died_date IS NULL  AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '11-20' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 11 AND DATEDIFF(DATE(NOW()), birth_date) <=20
+        SELECT '11-20' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 11 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=20 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '21-30' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 21 AND DATEDIFF(DATE(NOW()), birth_date) <=30
+        SELECT '21-30' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 21 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=30 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '31-40' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 31 AND DATEDIFF(DATE(NOW()), birth_date) <=40
+        SELECT '31-40' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 31 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=40 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '41-50' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 41 AND DATEDIFF(DATE(NOW()), birth_date) <=50
+        SELECT '41-50' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 41 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=50 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '51-60' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 51 AND DATEDIFF(DATE(NOW()), birth_date) <=60
+        SELECT '51-60' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 51 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=60 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '61-70' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 61 AND DATEDIFF(DATE(NOW()), birth_date) <=70
+        SELECT '61-70' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 61 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=70 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '71-90' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 71 AND DATEDIFF(DATE(NOW()), birth_date) <=80
+        SELECT '71-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 71 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=80 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '81-90' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 91 AND DATEDIFF(DATE(NOW()), birth_date) <=90
+        SELECT '81-90' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 91 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  <=90 AND died_date IS NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         UNION ALL
-        SELECT '100+' AS age_range, COUNT(*) total FROM resident WHERE DATEDIFF(DATE(NOW()), birth_date) >= 100 AND died_date IS NOT NULL
+        SELECT '100+' AS x, COUNT(*) y FROM resident WHERE (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365))  >= 100 AND died_date IS  NULL AND YEAR(resident_date) = @year  AND purok IN @purok
         ) tmp
+          `,
+      filters
+    );
+
+    const labels: Array<number> = [];
+
+    for (const r of ages) {
+      labels.push(r.x);
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: {
+        labels: labels,
+        data_set: ages,
+      },
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const lifeStageStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const life_stage_stats = await con.Query(
+      `
+      SELECT 'infant' AS 'x', COUNT(*) AS 'y' FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) <= 1 AND YEAR(resident_date) = @year  AND purok IN @purok
+      UNION ALL
+      SELECT 'children' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 1 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 18  AND YEAR(resident_date) = @year  AND purok IN @purok
+      UNION ALL
+      SELECT 'adult' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) > 18 AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) < 60  AND YEAR(resident_date) = @year  AND purok IN @purok
+      UNION ALL
+      SELECT 'senior citizen' AS 'x', COUNT(*) AS 'y'  FROM resident WHERE died_date IS NULL AND (FLOOR(DATEDIFF(DATE(NOW()), birth_date)/365)) >= 60  AND YEAR(resident_date) = @year  AND purok IN @purok
+         `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: {
+        labels: ["infant", "children", "adult", "senior citizen"],
+        data_set: life_stage_stats,
+      },
+    };
+  } catch (error) {
+    await con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const genderStats = async (
+  filters: DashboardFilterInterface
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const total_male = await con.QuerySingle(
+      `
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS NULL  AND gender = 'm'   AND YEAR(resident_date) = @year  AND purok in @purok
+          `,
+      filters
+    );
+
+    const total_female = await con.QuerySingle(
+      `
+      SELECT COUNT(*) AS total FROM resident WHERE died_date IS  NULL AND gender = 'f'   AND YEAR(resident_date) = @year  AND purok in @purok
+          `,
+      filters
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: {
+        labels: ["lalaki", "babae"],
+        data_set: [
+          {
+            x: "lalaki",
+            y: total_male.total,
+          },
+          {
+            x: "babae",
+            y: total_female.total,
+          },
+        ],
+      },
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const statsComplaint = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT  s.sts_desc as label,s.sts_color backgroundColor,COUNT(c.sts_pk) total FROM complaint c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
           `,
       null
     );
@@ -189,7 +354,167 @@ const getAgeGroupStats = async (): Promise<ResponseModel> => {
     con.Commit();
     return {
       success: true,
-      data: age_range,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const statsNews = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT  s.sts_desc AS label,s.sts_backgroundColor backgroundColor,COUNT(c.sts_pk) total FROM news c JOIN status s ON c.sts_pk = s.sts_pk GROUP BY c.sts_pk
+          `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsBiktikmaPangabuso = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_biktima_pangabuso AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsKahimtangKomunidad = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_kahimtanang_komunidad AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsMatangBasura = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_basura AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsMatangKasilyas = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_matang_kasilyas AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const StatsPasilidadKuryente = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const stats_complaint: Array<any> = await con.Query(
+      `
+      SELECT COUNT(descrip) AS total ,descrip label FROM family_pasilidad_kuryente AS label GROUP BY descrip
+      `,
+      null
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: stats_complaint,
     };
   } catch (error) {
     await con.Rollback();
@@ -202,7 +527,19 @@ const getAgeGroupStats = async (): Promise<ResponseModel> => {
 };
 
 export default {
-  getYearlyPopulationStats,
-  getPopulationOfYearStats,
-  getAgeGroupStats,
+  total_population,
+  total_death,
+  total_pwd,
+  total_sc,
+  overallPopulation,
+  ageGroupStats,
+  genderStats,
+  lifeStageStats,
+  statsComplaint,
+  statsNews,
+  StatsPasilidadKuryente,
+  StatsBiktikmaPangabuso,
+  StatsKahimtangKomunidad,
+  StatsMatangBasura,
+  StatsMatangKasilyas,
 };

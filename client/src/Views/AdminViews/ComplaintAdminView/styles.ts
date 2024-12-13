@@ -2,10 +2,11 @@ import styled from "styled-components";
 
 export const StyledComplaintItem = styled.div`
   padding: 1em;
+  margin: 0 1em;
   background-color: #fff;
-  border-radius: 7px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* border: 0.001em solid rgba(0, 0, 0, 0.1); */
+  /* border-radius: 7px; */
+  /* box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); */
+  border-bottom: 0.1em solid rgba(0, 0, 0, 0.1);
   display: grid;
   grid-gap: 0.3em;
 
@@ -43,7 +44,7 @@ export const StyledComplaintItem = styled.div`
     }
   }
 
-  .title {
+  .complaint-title {
     font-weight: 600;
   }
 
@@ -51,6 +52,7 @@ export const StyledComplaintItem = styled.div`
     padding: 0.5em;
     background-color: #f5f5f5;
     border-radius: 7px;
+    font-size: 0.8em;
   }
 `;
 

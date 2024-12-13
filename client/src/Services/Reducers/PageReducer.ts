@@ -15,6 +15,10 @@ const defaultState: PageReducerModel = {
     message: null,
   },
   page_links: [],
+  selected_head_fam: {
+    open: false,
+    resident_pk: null,
+  },
 };
 
 const PageReducer = (
@@ -34,6 +38,9 @@ const PageReducer = (
 
     case "SET_PAGE_SUCCESS_PROMPT":
       return { ...state, page_success_prompt: action.page_success_prompt };
+
+    case "SET_PAGE_SELECTED_HEAD_FAM":
+      return { ...state, selected_head_fam: action.selected_head_fam };
 
     default:
       return state;

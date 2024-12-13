@@ -2,13 +2,16 @@ import { PostFetch } from "../../Hooks/UseFetch";
 import IServerResponse from "../Interface/IServerResponse";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
+import { PaginationModel } from "../Models/PaginationModels";
 
 const API_DEFAULT_ROUTE = `api/complaint/`;
 
-const getComplaintTable = async (): Promise<IServerResponse> => {
+const getComplaintTable = async (
+  payload: PaginationModel
+): Promise<IServerResponse> => {
   const response = await PostFetch(
     API_DEFAULT_ROUTE + "getComplaintTable",
-    null
+    payload
   );
   return response;
 };
@@ -19,6 +22,7 @@ const getSingleComplaint = async (
   const response = await PostFetch(API_DEFAULT_ROUTE + "getSingleComplaint", {
     complaint_pk: complaint_pk,
   });
+  console.log(`complaint single`, response);
   return response;
 };
 
@@ -64,6 +68,14 @@ const addComplaintMessage = async (
   return response;
 };
 
+const getComplaintLatest = async (): Promise<IServerResponse> => {
+  const response = await PostFetch(
+    API_DEFAULT_ROUTE + "getComplaintLatest",
+    null
+  );
+  return response;
+};
+
 export default {
   getComplaintTable,
   getSingleComplaint,
@@ -71,4 +83,5 @@ export default {
   getComplaintLogTable,
   getComplaintMessage,
   addComplaintMessage,
+  getComplaintLatest,
 };

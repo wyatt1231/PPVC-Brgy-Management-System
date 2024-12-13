@@ -1,10 +1,18 @@
+import axios from "axios";
+import qs from "qs";
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import {
+  parseInvalidDateToDefault,
+  sqlFilterDate,
+} from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { NewsCommentModel } from "../Models/NewsCommentModels";
 import { NewsFileModel } from "../Models/NewsFileModel";
 import { NewsLikesModel, NewsModel } from "../Models/NewsModels";
 import { NewsReactionModel } from "../Models/NewsReactionModels";
+import { PaginationModel } from "../Models/PaginationModel";
+import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 const getNewsComments = async (news_pk: string): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -139,55 +147,56 @@ const getNewsDataPublished = async (): Promise<ResponseModel> => {
     };
   }
 };
-const getNewsDataTable = async (): Promise<ResponseModel> => {
+const getNewsDataTable = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const data: Array<NewsModel> = await con.Query(
+    const news_table: Array<NewsModel> = await con.QueryPagination(
       `
-      SELECT * FROM 
-      (
-        SELECT n.*, s.sts_desc,s.sts_color,s.sts_backgroundColor
-        ,u.full_name user_full_name,u.pic user_pic FROM news n 
-        LEFT JOIN status s ON n.sts_pk = s.sts_pk 
-        LEFT JOIN vw_users u ON u.user_pk = n.encoder_pk order by n.encoded_at desc) tmp;
+      SELECT * FROM news WHERE
+      title like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.date_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(payload.filters.date_to, "encoded_at")}
       `,
-      null
+      payload
     );
+    const hasMore: boolean = news_table.length > payload.page.limit;
+    if (hasMore) {
+      news_table.splice(news_table.length - 1, 1);
+    }
 
-    for (const file of data) {
-      file.upload_files = await con.Query(
-        `
-      select * from news_file where news_pk=@news_pk
-      `,
+    for (const news of news_table) {
+      news.status = await con.QuerySingle(
+        `select * from status where sts_pk=@sts_pk`,
         {
-          news_pk: file.news_pk,
+          sts_pk: news.sts_pk,
         }
       );
 
-      file.comments = await con.Query(
-        `
-        SELECT nc.*,u.pic,u.full_name FROM news_comment nc LEFT JOIN vw_users u
-        ON nc.user_pk = u.user_pk WHERE nc.news_pk = @news_pk
-        `,
+      news.user = await con.QuerySingle(
+        `select * from vw_users where user_pk=@user_pk`,
         {
-          news_pk: file.news_pk,
+          user_pk: news.encoder_pk,
         }
       );
 
-      for (const com of file.comments) {
-        com.pic = await GetUploadedImage(com.pic);
+      if (!!news?.user?.pic) {
+        news.user.pic = await GetUploadedImage(news?.user?.pic);
       }
 
-      file.likes = await con.Query(
+      news.news_files = await con.Query(
         `
-        SELECT  u.full_name,nl.liked_by FROM news_likes nl JOIN vw_users u
-        ON nl.liked_by = u.user_pk
-        WHERE nl.news_pk = @news_pk;
+        SELECT * FROM news_file where news_pk =@news_pk; 
         `,
         {
-          news_pk: file.news_pk,
+          news_pk: news.news_pk,
         }
       );
     }
@@ -195,7 +204,39 @@ const getNewsDataTable = async (): Promise<ResponseModel> => {
     con.Commit();
     return {
       success: true,
-      data: data,
+      data: {
+        table: news_table,
+        has_more: hasMore,
+      },
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getNewsFiles = async (news_pk: number): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const files_table: Array<NewsFileModel> = await con.Query(
+      `
+      SELECT * FROM news_file where news_pk =@news_pk; 
+      `,
+      {
+        news_pk: news_pk,
+      }
+    );
+
+    con.Commit();
+    return {
+      success: true,
+      data: files_table,
     };
   } catch (error) {
     await con.Rollback();
@@ -217,19 +258,26 @@ const addNews = async (
     await con.BeginTransaction();
 
     payload.encoder_pk = user_pk;
+    const pub_date = payload.pub_date;
+    payload.pub_date = parseInvalidDateToDefault(payload.pub_date, "(NULL)");
+
+    payload.is_prio =
+      payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
 
     const sql_add_news = await con.Insert(
       `INSERT INTO news SET
          title=@title,
          audience=@audience,
          body=@body,
+         pub_date=@pub_date,
+         is_prio=@is_prio,
          encoder_pk=@encoder_pk;`,
       payload
     );
 
     if (sql_add_news.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/News/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -266,6 +314,41 @@ const addNews = async (
         }
       }
 
+      if (payload.is_prio) {
+        let residents: Array<ResidentModel> = [];
+
+        if (payload.audience === "r" || payload.audience === "all") {
+          residents = await con.Query(`SELECT phone FROM resident`, null);
+        } else if (payload.audience === "b") {
+          residents = await con.Query(
+            `SELECT phone FROM resident where resident_pk in (select resident_pk from barangay_official)`,
+            null
+          );
+        }
+
+        for (const r of residents) {
+          if (/^(09|\+639)\d{9}$/.test(r.phone)) {
+            await axios({
+              method: "post",
+              url: `https://api-mapper.clicksend.com/http/v2/send.php`,
+              data: qs.stringify({
+                username: "detail.reynarcilla@gmail.com",
+                key: "1213B160-B60A-E831-A40D-B0E37CA03A8D",
+                to: r.phone,
+                message: `Brgy. 37-D, Davao City. ${
+                  payload.title
+                } | ${parseInvalidDateToDefault(pub_date)}`,
+                //https://dashboard.clicksend.com/#/sms/send-sms/main
+              }),
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic 4B6BBD4D-DBD1-D7FD-7BF1-F58A909008D1`,
+              },
+            });
+          }
+        }
+      }
+
       con.Commit();
       return {
         success: true,
@@ -280,7 +363,71 @@ const addNews = async (
     }
   } catch (error) {
     await con.Rollback();
-    console.error(`error`, error);
+    // console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const addNewsFiles = async (
+  payload: NewsModel,
+  files: Array<File>,
+  user_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    payload.encoder_pk = user_pk;
+
+    for (const file of files) {
+      const file_res = await UploadFile("/Files/Complaints/", file);
+
+      if (!file_res.success) {
+        con.Rollback();
+
+        return file_res;
+      }
+
+      const news_file_payload: NewsFileModel = {
+        file_path: file_res.data.path,
+        file_name: file_res.data.name,
+        mimetype: file_res.data.mimetype,
+        encoder_pk: user_pk,
+        news_pk: payload.news_pk,
+      };
+
+      const sql_add_news_file = await con.Insert(
+        `INSERT INTO news_file SET
+           news_pk=@news_pk,
+           file_path=@file_path,
+           file_name=@file_name,
+           mimetype=@mimetype,
+           encoder_pk=@encoder_pk;`,
+        news_file_payload
+      );
+
+      if (sql_add_news_file.affectedRows < 1) {
+        con.Rollback();
+
+        return {
+          success: false,
+          message:
+            "The process has been terminated when trying to save the file!",
+        };
+      }
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      message: "The news has been published successfully!",
+    };
+  } catch (error) {
+    await con.Rollback();
+    // console.error(`error`, error);
     return {
       success: false,
       message: ErrorMessage(error),
@@ -321,6 +468,43 @@ const republishNews = async (
   } catch (error) {
     await con.Rollback();
     console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const deleteNewsFile = async (
+  news_file: NewsFileModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_delete_file = await con.Modify(
+      `DELETE FROM news_file WHERE news_file_pk = @news_file_pk`,
+      {
+        news_file_pk: news_file.news_file_pk,
+      }
+    );
+
+    if (sql_delete_file > 0) {
+      // await RemoveImage(news_file.file_path);
+      con.Commit();
+      return {
+        success: true,
+        message: "The file has been removed!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while trying to remove the file!",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -378,12 +562,17 @@ const updateNews = async (
     await con.BeginTransaction();
 
     payload.encoder_pk = user_pk;
+    payload.pub_date = parseInvalidDateToDefault(payload.pub_date, "(NULL)");
+    payload.is_prio =
+      payload.is_prio === true || payload.is_prio === "true" ? 1 : 0;
 
     const sql_add_news = await con.Modify(
       `UPDATE news SET
        title=@title,
        body=@body,
        audience=@audience,
+       pub_date=@pub_date,
+       is_prio=@is_prio,
        encoder_pk=@encoder_pk
        where news_pk=@news_pk;`,
       payload
@@ -638,17 +827,91 @@ const getSingleNews = async (news_pk: string): Promise<ResponseModel> => {
   try {
     await con.BeginTransaction();
 
-    const data: NewsModel = await con.QuerySingle(
+    const news: NewsModel = await con.QuerySingle(
       `select * from news where news_pk = @news_pk`,
       {
         news_pk: news_pk,
       }
     );
 
+    news.status = await con.QuerySingle(
+      `select * from status where sts_pk=@sts_pk`,
+      {
+        sts_pk: news.sts_pk,
+      }
+    );
+
+    news.user = await con.QuerySingle(
+      `select * from vw_users where user_pk=@user_pk`,
+      {
+        user_pk: news.encoder_pk,
+      }
+    );
+
+    news.news_files = await con.Query(
+      `
+      SELECT * FROM news_file where news_pk =@news_pk; 
+      `,
+      {
+        news_pk: news.news_pk,
+      }
+    );
+
+    if (news?.user?.pic) {
+      news.user.pic = await GetUploadedImage(news?.user?.pic);
+    }
+
     con.Commit();
     return {
       success: true,
-      data: data,
+      data: news,
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getNewsLatest = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const news_table: Array<NewsModel> = await con.Query(
+      `
+      SELECT * FROM news limit 10
+      `,
+      null
+    );
+
+    for (const news of news_table) {
+      news.status = await con.QuerySingle(
+        `select * from status where sts_pk=@sts_pk`,
+        {
+          sts_pk: news.sts_pk,
+        }
+      );
+
+      news.user = await con.QuerySingle(
+        `select * from vw_users where user_pk=@user_pk`,
+        {
+          user_pk: news.encoder_pk,
+        }
+      );
+
+      if (news?.user?.pic) {
+        news.user.pic = await GetUploadedImage(news?.user?.pic);
+      }
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: news_table,
     };
   } catch (error) {
     await con.Rollback();
@@ -674,4 +937,8 @@ export default {
   getSingleNewsWithPhoto,
   getNewsComments,
   toggleLike,
+  getNewsFiles,
+  getNewsLatest,
+  deleteNewsFile,
+  addNewsFiles,
 };

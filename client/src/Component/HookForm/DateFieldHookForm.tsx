@@ -7,6 +7,7 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
 import "date-fns";
+import moment from "moment";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -19,8 +20,6 @@ interface DateFieldHookFormProps extends Partial<KeyboardDatePickerProps> {
 const DateFieldHookForm: React.FC<DateFieldHookFormProps> = React.memo(
   (props) => {
     const { control, errors } = useFormContext();
-
-    console.log(`errors`, errors);
 
     let error = false;
     let error_message = "";
@@ -35,86 +34,59 @@ const DateFieldHookForm: React.FC<DateFieldHookFormProps> = React.memo(
         control={control}
         name={props.name}
         defaultValue={props.defaultValue}
-        render={({ onChange, onBlur, value }) => (
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <Grid container justify="space-around">
-              {props.type === "datetime" && (
-                <KeyboardDateTimePicker
-                  {...props}
-                  value={value}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  format="yyyy/MM/dd hh:mm a"
-                  fullWidth={true}
-                  autoOk={true}
-                  error={error}
-                  helperText={error_message}
-                />
-              )}
+        render={({ onChange, onBlur, value }) => {
+          return (
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <Grid container justify="space-around">
+                {props.type === "datetime" && (
+                  <KeyboardDateTimePicker
+                    name={props.name}
+                    label={props.label}
+                    fullWidth={props.fullWidth}
+                    disableFuture={props.disableFuture}
+                    disablePast={props.disablePast}
+                    clearable={props.clearable}
+                    InputLabelProps={props.InputLabelProps}
+                    inputVariant={props.inputVariant}
+                    defaultValue={props.defaultValue}
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    format="yyyy/MM/dd hh:mm a"
+                    autoOk={true}
+                    error={error}
+                    helperText={error_message}
+                  />
+                )}
 
-              {props.type === "date" && (
-                <KeyboardDatePicker
-                  {...props}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  disableToolbar
-                  format="MM/dd/yyyy"
-                  fullWidth={true}
-                  autoOk={true}
-                  error={error}
-                  helperText={error_message}
-                />
-              )}
-            </Grid>
-          </MuiPickersUtilsProvider>
-        )}
-        // name={props.name}
-        // defaultValue={props.defaultValue}
-        // onChange={props.onChange}
-        // onBlur={props.onBlur}
-        // variant={props.variant}
-        // label={props.label}
-        // style={props.style}
-        // className={props.className}
-        // color={props.color}
-        // size={props.size}
-        // InputLabelProps={props.InputLabelProps}
-        // placeholder={props.placeholder}
-        // fullWidth={props.fullWidth}
-        // multiline={props.multiline}
-        // rows={props.rows}
-        // rowsMax={props.rowsMax}
-        // error={error}
-        // helperText={error_message}
+                {props.type === "date" && (
+                  <KeyboardDatePicker
+                    name={props.name}
+                    label={props.label}
+                    fullWidth={props.fullWidth}
+                    disableFuture={props.disableFuture}
+                    disablePast={props.disablePast}
+                    clearable={props.clearable}
+                    InputLabelProps={props.InputLabelProps}
+                    inputVariant={props.inputVariant}
+                    // defaultValue={props.defaultValue}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    // value={value ? moment(value).format() : ""}
+                    format="MM/dd/yyyy"
+                    autoOk={props.autoOk}
+                    error={error}
+                    helperText={error_message}
+                    placeholder="MM/DD/YYYY"
+                  />
+                )}
+              </Grid>
+            </MuiPickersUtilsProvider>
+          );
+        }}
       />
     );
-
-    // return (
-    //   <MuiPickersUtilsProvider utils={DateFnsUtils}>
-    //     <Grid container justify="space-around">
-    //       <KeyboardDatePicker
-    //         {...field}
-    //         onChange={handleChange}
-    //         disableToolbar
-    //         label={props.label}
-    //         variant="inline"
-    //         animateYearScrolling={true}
-    //         disableFuture={disableFuture}
-    //         disablePast={disablePast}
-    //         format="MM/dd/yyyy"
-    //         fullWidth={true}
-    //         inputVariant={variant ? variant : "outlined"}
-    //         InputLabelProps={{
-    //           shrink: true,
-    //         }}
-    //         autoOk={true}
-    //         error={!!errorText}
-    //         helperText={errorText}
-    //       />
-    //     </Grid>
-    //   </MuiPickersUtilsProvider>
-    // );
   }
 );
 

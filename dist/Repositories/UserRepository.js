@@ -9,20 +9,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.currentUser = exports.loginUser = void 0;
+exports.userinfo = exports.currentUser = exports.loginUser = void 0;
 const DatabaseConfig_1 = require("../Configurations/DatabaseConfig");
 const useErrorMessage_1 = require("../Hooks/useErrorMessage");
 const useFileUploader_1 = require("../Hooks/useFileUploader");
 const useJwt_1 = require("../Hooks/useJwt");
 const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
-        const zxc = yield con.QuerySingle(`SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'sql6400894';`, null);
-        console.log(`zxc`, zxc);
+        // await con.QuerySingle(
+        //   `SELECT table_name FROM information_schema.tables
+        //   WHERE table_schema = 'sql6400894';`,
+        //   null
+        // );
+        console.log(`payload`, payload);
         const user = yield con.QuerySingle(`SELECT user_pk,user_type,allow_login FROM user u WHERE u.password = AES_ENCRYPT(@password,@email)`, payload);
-        console.log(`user`, user);
         if (user) {
             if (user.allow_login === "n") {
                 return {
@@ -30,7 +32,7 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
                     message: "You are not allowed to login with this account yet.",
                 };
             }
-            const token = yield useJwt_1.CreateToken(user);
+            const token = yield (0, useJwt_1.CreateToken)(user);
             if (token) {
                 yield con.Commit();
                 return {
@@ -63,27 +65,61 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
 exports.loginUser = loginUser;
 const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
-    const con = yield DatabaseConfig_1.DatabaseConnection();
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
     try {
         yield con.BeginTransaction();
-        const user_data = yield con.QuerySingle(`  SELECT u.user_pk,u.user_type,u.full_name FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
+        const user_data = yield con.QuerySingle(`  SELECT u.user_pk,u.user_type,u.full_name,u.new_user FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk
       where u.user_pk = @user_pk
       `, {
             user_pk,
         });
         if (user_data.user_type === "admin") {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM administrator WHERE user_pk=${user_pk} LIMIT 1`, null);
-            user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            user_data.pic = yield (0, useFileUploader_1.GetUploadedImage)(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
         }
         else if (user_data.user_type === "resident") {
             const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`, null);
-            user_data.pic = yield useFileUploader_1.GetUploadedImage(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+            user_data.pic = yield (0, useFileUploader_1.GetUploadedImage)(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+        }
+        yield con.Commit();
+        console.log(`user_data`, user_data.user_type);
+        return {
+            success: true,
+            data: user_data,
+        };
+    }
+    catch (error) {
+        yield con.Rollback();
+        console.error(`error`, error);
+        return {
+            success: false,
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
+        };
+    }
+});
+exports.currentUser = currentUser;
+const userinfo = (user_pk) => __awaiter(void 0, void 0, void 0, function* () {
+    const con = yield (0, DatabaseConfig_1.DatabaseConnection)();
+    try {
+        yield con.BeginTransaction();
+        const user_data = yield con.QuerySingle(` SELECT u.user_pk,u.user_type,CASE WHEN r.suffix!="" THEN CONCAT(r.last_name,' ',r.first_name,' ',r.middle_name,',',r.suffix) ELSE CONCAT(r.last_name,' ',r.first_name,' ',r.middle_name) END full_name,u.new_user,f.ulo_pamilya,f.fam_pk,r.* FROM user u LEFT JOIN resident r ON r.user_pk=u.user_pk LEFT JOIN family f ON f.ulo_pamilya=r.resident_pk
+      WHERE u.user_pk = @user_pk
+      `, {
+            user_pk,
+        });
+        if (user_data.user_type === "admin") {
+            const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM administrator WHERE user_pk=${user_pk} LIMIT 1`, null);
+            user_data.pic = yield (0, useFileUploader_1.GetUploadedImage)(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
+        }
+        else if (user_data.user_type === "resident") {
+            const sql_get_pic = yield con.QuerySingle(`SELECT pic FROM resident WHERE user_pk=${user_pk} LIMIT 1`, null);
+            user_data.pic = yield (0, useFileUploader_1.GetUploadedImage)(sql_get_pic === null || sql_get_pic === void 0 ? void 0 : sql_get_pic.pic);
         }
         yield con.Commit();
         return {
@@ -96,9 +132,9 @@ const currentUser = (user_pk) => __awaiter(void 0, void 0, void 0, function* () 
         console.error(`error`, error);
         return {
             success: false,
-            message: useErrorMessage_1.ErrorMessage(error),
+            message: (0, useErrorMessage_1.ErrorMessage)(error),
         };
     }
 });
-exports.currentUser = currentUser;
+exports.userinfo = userinfo;
 //# sourceMappingURL=UserRepository.js.map

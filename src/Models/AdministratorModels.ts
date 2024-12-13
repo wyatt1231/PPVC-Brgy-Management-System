@@ -1,3 +1,5 @@
+import { StatusMasterModel } from "./StatusMasterModel";
+
 export interface AdministratorModel {
   admin_pk?: number;
   user_pk?: number;
@@ -6,9 +8,10 @@ export interface AdministratorModel {
   phone: string;
   firstname?: string;
   lastname?: string;
-  gender?: "M" | "F";
-  sts_pk?: "";
-  sts_desc?: "";
+  gender?: "m" | "f";
+  sts_pk?: string;
+  sts_desc?: string;
   encoder_pk?: number;
   encoded_at?: Date;
+  status?: StatusMasterModel;
 }

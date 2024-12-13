@@ -16,17 +16,42 @@ const express_1 = require("express");
 const Authorize_1 = __importDefault(require("../Middlewares/Authorize"));
 const BarangayOfficialRepository_1 = __importDefault(require("../Repositories/BarangayOfficialRepository"));
 const BrgyOfficialController = (app) => __awaiter(void 0, void 0, void 0, function* () {
-    const router = express_1.Router();
-    router.post("/getBrgyOfficialDataTable", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialDataTable(payload));
+    const router = (0, express_1.Router)();
+    router.post("/getBrgyOfficialDataTable", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialDataTable(payload));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
-    router.post("/getBrgyOfficialList", Authorize_1.default("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialList());
+    router.post("/getBrgyOfficialList", (0, Authorize_1.default)("admin,resident"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            res.json(yield BarangayOfficialRepository_1.default.getBrgyOfficialList());
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
-    router.post("/addBarangayOfficial", Authorize_1.default("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const payload = req.body;
-        res.json(yield BarangayOfficialRepository_1.default.addBarangayOfficial(payload, req.user_pk));
+    router.post("/addBarangayOfficial", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payload = req.body;
+            res.json(yield BarangayOfficialRepository_1.default.addBarangayOfficial(payload, req.user_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
+    }));
+    router.post("/removeBarangayOfficial", (0, Authorize_1.default)("admin"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        try {
+            const official_pk = (_a = req.body) === null || _a === void 0 ? void 0 : _a.official_pk;
+            res.json(yield BarangayOfficialRepository_1.default.removeBarangayOfficial(official_pk));
+        }
+        catch (error) {
+            res.json(500);
+        }
     }));
     app.use("/api/official/", router);
 });

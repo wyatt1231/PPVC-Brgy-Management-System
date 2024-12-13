@@ -22,7 +22,7 @@ import React, {
   useState,
 } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import * as yup from "yup";
 import FormikInputField from "../../../Component/Formik/FormikInputField";
 import FormikRadio from "../../../Component/Formik/FormikRadio";
@@ -51,9 +51,9 @@ const initFormValues: ResidentModel = {
   suffix: "",
   gender: null,
   birth_date: null,
-  nationality: "",
-  religion: "",
-  civil_status: "",
+  nationality: "Filipino",
+  religion: "CATHOLIC",
+  civil_status: "single",
   dialect: "",
   tribe: "",
   with_disability: "",
@@ -66,6 +66,10 @@ const initFormValues: ResidentModel = {
   house_status: "",
   voting_precinct: "",
   house_ownership: "",
+  died_date: null,
+  resident_date: null,
+  kita: 0.0,
+  educ: "",
 };
 
 const formSchema = yup.object({
@@ -76,28 +80,20 @@ const formSchema = yup.object({
   nationality: yup.string().required().max(150).label("Nationality"),
   religion: yup.string().required().max(150).label("Religion"),
   civil_status: yup.string().required().max(150).label("Civil Status"),
-  dialect: yup.string().required().max(150).label("Dialect"),
-  tribe: yup.string().required().max(150).label("Tribe"),
   with_disability: yup.string().required().max(150).label("With Disability"),
-  phone: yup.string().required().max(150).label("Phone Number"),
-  email: yup
-    .string()
-    .required()
-    .max(150)
-    .label("Gender")
-    .matches(validateEmail),
+
   purok: yup.string().required().max(150).label("Purok"),
-  is_employed: yup.string().required().max(150).label("Is Employed"),
-  employment: yup.string().required().max(150).label("Employment"),
-  house_income: yup.string().max(150).label("House Income"),
-  house_status: yup.string().max(150).label("House Status"),
-  voting_precinct: yup.string().max(150).label("Voting Precinct"),
-  house_ownership: yup.string().max(150).label("House Ownership"),
+  phone: yup.string().max(150).label("Phone Number"),
+  email: yup.string().email().max(150).label("Email Address"),
 });
 
 export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const params = useParams<any>();
+
+  console.log(`params`, params);
 
   const formRef = useRef<FormikProps<ResidentModel> | null>(null);
 
@@ -162,32 +158,43 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
         innerRef={formRef}
       >
         {({ values, errors, touched, setFieldValue }) => (
-          <Form className="">
+          <Form
+            className=""
+            style={{
+              backgroundColor: `#fff`,
+              padding: `1em 4em`,
+            }}
+            noValidate
+          >
             <div className="">
               <div className="box-header">
                 <div className="form-title">
-                  Fill-up the resident information
+                  Pun-a ang mga kinahanglan nga impormasyon sa residente
                 </div>
               </div>
               <div className="box-body">
-                <Grid container spacing={4}>
+                <Grid container spacing={2}>
                   <Grid xs={12} container justify="center" item>
                     <div style={{ padding: "1.5em 0" }}>
                       <PhotoField
                         label=""
-                        height={150}
-                        width={150}
+                        height={180}
+                        width={180}
                         selectedFile={pic}
                         name="pic"
-                        variant="rounded"
+                        variant="circle"
                         handleChange={handleSetPic}
                       />
                     </div>
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12}>
+                    <div className="title">Personal Nga Impormasyon</div>
+                  </Grid>
+
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="First Name"
+                      label="Unang Pangalan"
                       name="first_name"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
@@ -195,9 +202,9 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="Middle Name"
+                      label="Tungatunga nga ngalan"
                       name="middle_name"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
@@ -205,9 +212,9 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="Last Name"
+                      label="Apelyido"
                       name="last_name"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
@@ -215,9 +222,9 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={3} item>
+                  <Grid sm={3} item>
                     <FormikInputField
-                      label="Suffix"
+                      label="Sukwahi"
                       name="suffix"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
@@ -225,27 +232,27 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikRadio
                       name="gender"
-                      label="Gender"
+                      label="Sekso"
                       variant="vertical"
                       data={[
                         {
                           id: "m",
-                          label: "Male",
+                          label: "Lalaki",
                         },
                         {
                           id: "f",
-                          label: "Female",
+                          label: "Babae",
                         },
                       ]}
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
-                      const label = "Birth Date";
+                      const label = "Adlawng Natawhan";
                       const name = "birth_date";
                       const errorText =
                         errors[name] && touched[name] ? errors[name] : "";
@@ -278,7 +285,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "nationality";
                       const errorText =
@@ -289,7 +296,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Nationality"
+                          label="Nasyonalidad"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -309,7 +316,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "religion";
                       const errorText =
@@ -320,7 +327,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Religion"
+                          label="Relihiyon"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -340,7 +347,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     {(() => {
                       const name = "civil_status";
                       const errorText =
@@ -351,7 +358,7 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                       return (
                         <TextField
                           value={values[name] ? values[name] : ""}
-                          label="Civil Status"
+                          label="Hahimtang Sibil"
                           select
                           onChange={handleChange}
                           variant="outlined"
@@ -371,23 +378,51 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     })()}
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Dialect"
-                      name="dialect"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
+                  <Grid xs={12} item>
+                    <FormikRadio
+                      name="purok"
+                      label="Asa na purok nag puyo ang residente?"
+                      variant="horizontal"
+                      data={[
+                        {
+                          id: "1",
+                          label: "Purok 1",
+                        },
+                        {
+                          id: "2",
+                          label: "Purok 2",
+                        },
+                        {
+                          id: "3",
+                          label: "Purok 3",
+                        },
+                        {
+                          id: "4",
+                          label: "Purok 4",
+                        },
+                        {
+                          id: "5",
+                          label: "Purok 5",
+                        },
+                        {
+                          id: "6",
+                          label: "Purok 6",
+                        },
+                        {
+                          id: "7",
+                          label: "Purok 7",
+                        },
+                        {
+                          id: "8",
+                          label: "Purok 8",
+                        },
+                      ]}
                     />
                   </Grid>
 
-                  <Grid item xs={12}>
-                    <Divider />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="Tribe"
+                      label="Tribo"
                       name="tribe"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
@@ -396,103 +431,43 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
+                    <FormikInputField
+                      label="Grado nakab-ot | Nag-eskwela / wala nag eskwela"
+                      name="educ"
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                      type="text"
+                    />
+                  </Grid>
+
+                  <Grid xs={12} item>
                     <FormikRadio
-                      name="with_disability"
-                      label="With Disability?"
-                      variant="vertical"
-                      data={[
-                        {
-                          id: "y",
-                          label: "Yes",
-                        },
-                        {
-                          id: "n",
-                          label: "No",
-                        },
-                      ]}
-                    />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Email Address"
-                      name="email"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                      type="email"
-                    />
-                  </Grid>
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Phone Number"
-                      name="phone"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                      InputProps={{
-                        inputComponent: MaskedPhoneNumber,
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Purok"
-                      name="purok"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                    />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Voting Precinct"
-                      name="voting_precinct"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Divider />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
-                    <FormikRadio
-                      name="is_employed"
-                      label="Is he/she Employed?"
-                      variant="vertical"
-                      data={[
-                        {
-                          id: "y",
-                          label: "Yes",
-                        },
-                        {
-                          id: "n",
-                          label: "No",
-                        },
-                      ]}
-                    />
-                  </Grid>
-
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="Job Employment"
                       name="employment"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
+                      label="Matang sa trabaho, kanunay o panagsa?"
+                      variant="horizontal"
+                      data={[
+                        {
+                          id: "kanunay naay trabaho",
+                          label: "kanunay naay trabaho",
+                        },
+                        {
+                          id: "panagsa",
+                          label: "panagsa ra ang trabaho",
+                        },
+                        {
+                          id: "walay tranaho",
+                          label: "walay trabaho",
+                        },
+                      ]}
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="House Income"
-                      name="house_income"
+                      label="Binulan na kita"
+                      name="kita"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
                       fullWidth
@@ -500,23 +475,124 @@ export const AddResidentAdminView: FC<AddResidentAdminInterface> = memo(() => {
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
-                    <FormikInputField
-                      label="House Status"
-                      name="house_status"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
+                  <Grid xs={12} item>
+                    <FormikRadio
+                      name="with_disability"
+                      label="Matang sa disability"
+                      variant="vertical"
+                      data={[
+                        {
+                          id: "y",
+                          label: "Naa",
+                        },
+                        {
+                          id: "n",
+                          label: "Wala",
+                        },
+                      ]}
                     />
                   </Grid>
 
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12}>
+                    <div className="title">Status sa pagkabuhi</div>
+                  </Grid>
+
+                  <Grid xs={12} item>
+                    {(() => {
+                      const label = "Adlaw sugod pagpuyo sa barangay";
+                      const name = "resident_date";
+                      const errorText =
+                        errors[name] && touched[name] ? errors[name] : "";
+                      const handleChange = (date) => {
+                        setFieldValue(name, moment(date).toDate());
+                      };
+                      return (
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <Grid container justify="space-around">
+                            <KeyboardDatePicker
+                              value={values[name]}
+                              onChange={handleChange}
+                              label={label}
+                              variant="inline"
+                              animateYearScrolling={true}
+                              disableFuture={true}
+                              format="MM/dd/yyyy"
+                              fullWidth={true}
+                              inputVariant="outlined"
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              autoOk={true}
+                              error={!!errorText}
+                              helperText={errorText}
+                            />
+                          </Grid>
+                        </MuiPickersUtilsProvider>
+                      );
+                    })()}
+                  </Grid>
+
+                  <Grid xs={12} item>
+                    {(() => {
+                      const label = "Adlaw pagkamatay (kung patay na)";
+                      const name = "died_date";
+                      const errorText =
+                        errors[name] && touched[name] ? errors[name] : "";
+                      const handleChange = (date) => {
+                        setFieldValue(name, moment(date).toDate());
+                      };
+                      return (
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <Grid container justify="space-around">
+                            <KeyboardDatePicker
+                              value={values[name]}
+                              onChange={handleChange}
+                              label={label}
+                              variant="inline"
+                              animateYearScrolling={true}
+                              disableFuture={true}
+                              format="MM/dd/yyyy"
+                              fullWidth={true}
+                              inputVariant="outlined"
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              autoOk={true}
+                              error={!!errorText}
+                              helperText={errorText}
+                            />
+                          </Grid>
+                        </MuiPickersUtilsProvider>
+                      );
+                    })()}
+                  </Grid>
+
+                  <Grid xs={12}>
+                    <div className="title">Account Nga Impormasyon</div>
+                  </Grid>
+
+                  <Grid xs={12} item>
                     <FormikInputField
-                      label="House Ownership"
-                      name="house_ownership"
+                      label="Email Address (Used as username)"
+                      name="email"
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
                       fullWidth
+                      type="email"
+                      required
+                    />
+                  </Grid>
+                  <Grid xs={12} item>
+                    <FormikInputField
+                      label="Numero sa telepono"
+                      name="phone"
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                      InputProps={{
+                        inputComponent: MaskedPhoneNumber,
+                      }}
+                      required
                     />
                   </Grid>
                 </Grid>

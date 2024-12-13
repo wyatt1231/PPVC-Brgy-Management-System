@@ -1,19 +1,22 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
-import { UploadFile } from "../Hooks/useFileUploader";
-import { GetUploadedImage } from "../Hooks/useFileUploader";
-import { ResponseModel } from "../Models/ResponseModels";
-import { PostCommentModel, PostFilesModel, PostsModel } from "../Models/PostsModel";
+import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
+import { PaginationModel } from "../Models/PaginationModel";
 import { PostReactionModel } from "../Models/PostReactionModel";
 import { PostsCommentModel } from "../Models/PostsCommentModel";
-import { PostsFileModel } from "../Models/PostsFileModel";
-
+import {
+  PostCommentModel,
+  PostFilesModel,
+  PostsModel,
+} from "../Models/PostsModel";
+import { ResponseModel } from "../Models/ResponseModels";
 
 const getPosts = async (): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
-
     const data: Array<PostsModel> = await con.Query(
       `
         SELECT * FROM 
@@ -30,8 +33,9 @@ const getPosts = async (): Promise<ResponseModel> => {
         `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
         null
       );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-      console.error(`error`, file.user_pk);
+      if (!!file?.user_pic) {
+        file.user_pic = await GetUploadedImage(file.user_pic);
+      }
     }
     for (const file of data) {
       file.upload_files = await con.Query(
@@ -51,7 +55,6 @@ const getPosts = async (): Promise<ResponseModel> => {
     };
   } catch (error) {
     await con.Rollback();
-    console.error(`error`, error);
     return {
       success: false,
       message: ErrorMessage(error),
@@ -59,52 +62,77 @@ const getPosts = async (): Promise<ResponseModel> => {
   }
 };
 
-// const getPosts = async (): Promise<ResponseModel> => {
-//   const con = await DatabaseConnection();
-//   try {
-//     const posts: Array<PostsModel> = await con.Query(
-//       `
-//       SELECT * FROM posts`,
-//       null
-//     );
+const getPostsAdmin = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    const posts: Array<PostsModel> = await con.QueryPagination(
+      `
+      select * from (SELECT p.*, u.full_name FROM posts p join vw_users u on u.user_pk = p.encoder_pk) as tmp
+      WHERE
+      (coalesce(full_name,'')  like concat('%',@search,'%')
+      OR coalesce(title,'') like concat('%',@search,'%'))
+      AND sts_pk in @sts_pk
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.date_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(payload.filters.date_to, "encoded_at")}
+      `,
+      payload
+    );
 
-//     for (const post of posts) {
-//       post.user = await con.QuerySingle(
-//         `select * from vw_users where user_pk = @user_pk;`,
-//         {
-//           user_pk: post.encoder_pk,
-//         }
-//       );
+    const hasMore: boolean = posts.length > payload.page.limit;
+    if (hasMore) {
+      posts.splice(posts.length - 1, 1);
+    }
 
-//       post.user.pic = await GetUploadedImage(post.user.pic);
+    for (const post of posts) {
+      post.user = await con.QuerySingle(
+        `select * from vw_users where user_pk = @user_pk;`,
+        {
+          user_pk: post.encoder_pk,
+        }
+      );
 
-//       post.status = await con.QuerySingle(
-//         `select * from status where sts_pk = @sts_pk;`,
-//         {
-//           sts_pk: post.sts_pk,
-//         }
-//       );
+      if (!!post?.user?.pic) {
+        post.user.pic = await GetUploadedImage(post.user.pic);
+      }
 
-//       post.files = await con.Query(
-//         `select * from posts_file where posts_pk=@posts_pk`,
-//         {
-//           posts_pk: post.posts_pk,
-//         }
-//       );
-//     }
+      post.status = await con.QuerySingle(
+        `select * from status where sts_pk = @sts_pk;`,
+        {
+          sts_pk: post.sts_pk,
+        }
+      );
 
-//     return {
-//       success: true,
-//       data: posts,
-//     };
-//   } catch (error) {
-//     console.error(`error`, error);
-//     return {
-//       success: false,
-//       message: ErrorMessage(error),
-//     };
-//   }
-// };
+      post.files = await con.Query(
+        `select * from posts_file where posts_pk=@posts_pk`,
+        {
+          posts_pk: post.posts_pk,
+        }
+      );
+    }
+
+    con.Commit();
+
+    return {
+      success: true,
+      data: {
+        table: posts,
+        has_more: hasMore,
+      },
+    };
+  } catch (error) {
+    console.error(`error`, error);
+    con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
 
 const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
@@ -129,8 +157,10 @@ const getUserPosts = async (user_pk: number): Promise<ResponseModel> => {
         `SELECT pic FROM resident WHERE user_pk=${file?.encoder_pk} LIMIT 1`,
         null
       );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-      console.error(`error`, file.user_pk);
+
+      if (!!file?.user_pic) {
+        file.user_pic = await GetUploadedImage(file.user_pic);
+      }
     }
     for (const file of data) {
       file.upload_files = await con.Query(
@@ -165,8 +195,8 @@ const getPostsReaction = async (): Promise<ResponseModel> => {
 
     const data: Array<PostsModel> = await con.Query(
       `
-        SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
-        `,
+          SELECT CASE WHEN reaction="Like" THEN CASE WHEN COUNT(reaction) IS NULL THEN 0 ELSE COUNT(reaction)END END AS likereaction FROM posts_reaction
+          `,
       null
     );
 
@@ -201,8 +231,9 @@ const getPostsComments = async (posts_pk: string): Promise<ResponseModel> => {
         `SELECT pic FROM resident WHERE user_pk=${file?.user_pk} LIMIT 1`,
         null
       );
-      file.user_pic = await GetUploadedImage(sql_get_pic?.pic);
-      console.error(`error`, file.user_pk);
+      if (!!file?.user_pic) {
+        file.user_pic = await GetUploadedImage(file.user_pic);
+      }
     }
 
     con.Commit();
@@ -242,7 +273,7 @@ const addPosts = async (
 
     if (sql_add_posts.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile("src/Storage/Files/Posts/", file);
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -319,7 +350,6 @@ const addPostComment = async (
     );
 
     if (sql_add_post_comment.insertedId > 0) {
-    
       con.Commit();
       return {
         success: true,
@@ -348,6 +378,7 @@ const addPostReaction = async (
   user_pk: number
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
+
   try {
     await con.BeginTransaction();
 
@@ -375,7 +406,7 @@ const addPostReaction = async (
         return {
           success: false,
           message:
-            "1 Looks like something went wrong, unable to save your reaction!",
+            "Looks like something went wrong, unable to save your reaction!",
         };
       }
     } else {
@@ -419,11 +450,9 @@ const getPostReactionsAdmin = async (
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
-    await con.BeginTransaction();
-
     const data: Array<PostsModel> = await con.Query(
       `
-       SELECT * FROM posts_reaction  WHERE posts_pk=@posts_pk; 
+       SELECT *,resident_pk as user_pk FROM posts_reaction  WHERE posts_pk=@posts_pk; 
         `,
       {
         posts_pk: posts_pk,
@@ -436,7 +465,7 @@ const getPostReactionsAdmin = async (
       data: data,
     };
   } catch (error) {
-    await con.Rollback();
+    con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -454,7 +483,7 @@ const getPostCommentsAdmin = async (
   try {
     const comments: Array<PostCommentModel> = await con.Query(
       `
-       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk;
+       SELECT * FROM posts_comment WHERE posts_pk = @posts_pk order by encoded_at desc;
         `,
       {
         posts_pk: posts_pk,
@@ -468,14 +497,59 @@ const getPostCommentsAdmin = async (
           user_pk: comment.user_pk,
         }
       );
-      comment.user.pic = await GetUploadedImage(comment.user.pic);
+
+      if (!!comment?.user?.pic) {
+        comment.user.pic = await GetUploadedImage(comment.user.pic);
+      }
     }
 
+    con.Commit();
     return {
       success: true,
       data: comments,
     };
   } catch (error) {
+    console.error(`error`, error);
+
+    con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const updatePostStatus = async (
+  payload: PostsModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_update_post = await con.Modify(
+      `UPDATE posts SET
+      sts_pk=@sts_pk
+      WHERE posts_pk=@posts_pk;
+      `,
+      payload
+    );
+
+    if (sql_update_post > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The post status has been changes successfully!",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message:
+          "Looks like something went wrong, unable to save your reaction!",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -494,4 +568,6 @@ export default {
   getPostsComments,
   getPostReactionsAdmin,
   getPostCommentsAdmin,
+  getPostsAdmin,
+  updatePostStatus,
 };

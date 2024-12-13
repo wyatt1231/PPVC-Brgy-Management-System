@@ -1,9 +1,11 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
+import { sqlFilterDate } from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadFile } from "../Hooks/useFileUploader";
 import { ComplaintLogModel } from "../Models/ComplaintLogModels";
 import { ComplaintMessageModel } from "../Models/ComplaintMessageModels";
 import { ComplaintFilesModel, ComplaintModel } from "../Models/ComplaintModels";
+import { PaginationModel } from "../Models/PaginationModel";
 import { ResponseModel } from "../Models/ResponseModels";
 
 const addComplaint = async (
@@ -27,10 +29,7 @@ const addComplaint = async (
 
     if (sql_add_complaint.insertedId > 0) {
       for (const file of files) {
-        const file_res = await UploadFile(
-          "src/Storage/Files/Complaints/",
-          file
-        );
+        const file_res = await UploadFile("/Files/Complaints/", file);
 
         if (!file_res.success) {
           con.Rollback();
@@ -94,8 +93,6 @@ const addComplaintMessage = async (
   try {
     await con.BeginTransaction();
 
-
-
     const sql_add_complaint_msg = await con.Insert(
       `
             INSERT into complaint_message SET
@@ -110,13 +107,13 @@ const addComplaintMessage = async (
       con.Commit();
       return {
         success: true,
-        message: "The complaint has been updated successfully!",
+        message: "The complaint has been added successfully!",
       };
     } else {
       con.Rollback();
       return {
         success: false,
-        message: "No affected rows while updating the complaint",
+        message: "No affected rows while adding the complaint",
       };
     }
   } catch (error) {
@@ -128,6 +125,7 @@ const addComplaintMessage = async (
     };
   }
 };
+
 const updateComplaint = async (
   payload: ComplaintModel
 ): Promise<ResponseModel> => {
@@ -254,12 +252,14 @@ const getComplaintLogTable = async (
       );
     }
 
+    con.Commit();
     return {
       success: true,
       data: log_table,
     };
   } catch (error) {
     console.error(`error`, error);
+    con.Rollback();
     return {
       success: false,
       message: ErrorMessage(error),
@@ -274,45 +274,41 @@ const getSingleComplaint = async (
   try {
     await con.BeginTransaction();
 
-    const data: Array<ComplaintModel> = await con.Query(
-      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk from complaint where complaint_pk = @complaint_pk`,
+    const data: ComplaintModel = await con.QuerySingle(
+      `SELECT * from complaint where complaint_pk = @complaint_pk`,
       {
         complaint_pk: complaint_pk,
       }
     );
-      for(var file of data){
-        file.complaint_file = await con.Query(
-          `
+
+    data.complaint_file = await con.Query(
+      `
             select * from complaint_file where complaint_pk=@complaint_pk
           `,
-          {
-            complaint_pk: complaint_pk,
-          }
-        );
-    
-        file.user = await con.QuerySingle(
-          `Select * from vw_users where user_pk = @user_pk`,
-          {
-            user_pk: file.reported_by,
-          }
-        );
-        file.user.pic = await GetUploadedImage(
-          file.user.pic
-        );
+      {
+        complaint_pk: complaint_pk,
       }
-  
+    );
 
-    file.status = await con.QuerySingle(
+    data.user = await con.QuerySingle(
+      `Select * from vw_users where user_pk = @user_pk`,
+      {
+        user_pk: data.reported_by,
+      }
+    );
+    data.user.pic = await GetUploadedImage(data.user.pic);
+
+    data.status = await con.QuerySingle(
       `Select * from status where sts_pk = @sts_pk;`,
       {
-        sts_pk: file.sts_pk,
+        sts_pk: data.sts_pk,
       }
     );
 
     con.Commit();
     return {
       success: true,
-      data:data,
+      data: data,
     };
   } catch (error) {
     await con.Rollback();
@@ -325,18 +321,33 @@ const getSingleComplaint = async (
 };
 
 const getComplaintTable = async (
-  reported_by: string
+  payload: PaginationModel
 ): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
 
-    const data: Array<ComplaintModel> = await con.Query(
-      `SELECT complaint_pk,reported_by,DATE_FORMAT(reported_at,'%Y-%m-%d %H:%m %p') AS reported_at,title,body,sts_pk FROM complaint where reported_by=@reported_by`,
-      {
-        reported_by: reported_by,
-      }
+    const data: Array<ComplaintModel> = await con.QueryPagination(
+      `SELECT * FROM complaint
+       WHERE
+      title like concat('%',@search,'%')
+      AND sts_pk in @sts_pk
+      AND reported_at >= ${sqlFilterDate(
+        payload.filters.date_from,
+        "reported_at"
+      )}
+      AND reported_at <= ${sqlFilterDate(
+        payload.filters.date_to,
+        "reported_at"
+      )}
+      `,
+      payload
     );
+
+    const hasMore: boolean = data.length > payload.page.limit;
+    if (hasMore) {
+      data.splice(data.length - 1, 1);
+    }
 
     for (const complaint of data) {
       complaint.complaint_file = await con.Query(
@@ -354,13 +365,26 @@ const getComplaintTable = async (
           user_pk: complaint.reported_by,
         }
       );
-      complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+
+      if (!!complaint.user.pic) {
+        complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+      }
+
+      complaint.status = await con.QuerySingle(
+        `Select * from status where sts_pk = @sts_pk`,
+        {
+          sts_pk: complaint.sts_pk,
+        }
+      );
     }
 
     con.Commit();
     return {
       success: true,
-      data: data,
+      data: {
+        table: data,
+        has_more: hasMore,
+      },
     };
   } catch (error) {
     await con.Rollback();
@@ -371,7 +395,10 @@ const getComplaintTable = async (
     };
   }
 };
-const getComplaintList = async (reported_by: string): Promise<ResponseModel> => {
+
+const getComplaintList = async (
+  reported_by: string
+): Promise<ResponseModel> => {
   const con = await DatabaseConnection();
   try {
     await con.BeginTransaction();
@@ -406,7 +433,7 @@ const getComplaintList = async (reported_by: string): Promise<ResponseModel> => 
       message: ErrorMessage(error),
     };
   }
-}
+};
 
 const getComplaintMessage = async (
   complaint_pk: number
@@ -430,11 +457,58 @@ const getComplaintMessage = async (
       message.user.pic = await GetUploadedImage(message.user.pic);
     }
 
+    con.Commit();
+
     return {
       success: true,
       data: table_messages,
     };
   } catch (error) {
+    console.error(`error`, error);
+    con.Rollback();
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
+const getComplaintLatest = async (): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const data: Array<ComplaintModel> = await con.Query(
+      `
+      SELECT * FROM complaint WHERE sts_pk NOT IN('C','X','D') LIMIT 10 
+      `,
+      null
+    );
+
+    for (const complaint of data) {
+      complaint.user = await con.QuerySingle(
+        `Select * from vw_users where user_pk = @user_pk`,
+        {
+          user_pk: complaint.reported_by,
+        }
+      );
+      complaint.user.pic = await GetUploadedImage(complaint.user.pic);
+
+      complaint.status = await con.QuerySingle(
+        `Select * from status where sts_pk = @sts_pk`,
+        {
+          sts_pk: complaint.sts_pk,
+        }
+      );
+    }
+
+    con.Commit();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    await con.Rollback();
     console.error(`error`, error);
     return {
       success: false,
@@ -453,4 +527,5 @@ export default {
   getSingleComplaint,
   getComplaintTable,
   getComplaintLogTable,
+  getComplaintLatest,
 };

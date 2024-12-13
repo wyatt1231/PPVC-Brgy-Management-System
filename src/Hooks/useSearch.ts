@@ -1,6 +1,6 @@
 import mysql from "mysql2";
 export const GenerateSearch = (search: string, column: string): string => {
-  const searchArray = search.trim().split(" ");
+  const searchArray = search?.toString()?.trim().split(" ");
 
   let sql = ``;
 

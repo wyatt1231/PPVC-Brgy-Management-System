@@ -184,7 +184,7 @@ export const StyledMobileSidebar = styled(Drawer)`
         color: ${(p) => p.theme.sidebar.color} !important;
 
         .nav-item-label {
-          font-size: 0.87em !important;
+          /* font-size: 0.87em !important; */
           text-transform: capitalize;
           font-family: Nunito !important;
         }

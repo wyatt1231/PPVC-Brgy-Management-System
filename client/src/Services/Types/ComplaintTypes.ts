@@ -12,6 +12,10 @@ export type ComplaintReducerTypes =
       fetch_complaints_table: boolean;
     }
   | {
+      type: "has_more_complaints_table";
+      has_more_complaints_table: boolean;
+    }
+  | {
       type: "single_complaint";
       single_complaint: ComplaintModel;
     }
@@ -27,6 +31,7 @@ export type ComplaintReducerTypes =
       type: "fetch_selected_complaint_log";
       fetch_selected_complaint_log: boolean;
     }
+  //
   | {
       type: "complaint_messages";
       complaint_messages: Array<ComplaintMessageModel>;
@@ -34,11 +39,21 @@ export type ComplaintReducerTypes =
   | {
       type: "fetch_complaint_messages";
       fetch_complaint_messages: boolean;
+    }
+  //
+  | {
+      type: "latest_complaint";
+      latest_complaint: Array<ComplaintModel>;
+    }
+  | {
+      type: "fetch_latest_complaint";
+      fetch_latest_complaint: boolean;
     };
 
 export interface ComplaintReducerModel {
   complaints_table?: Array<ComplaintModel>;
   fetch_complaints_table?: boolean;
+  has_more_complaints_table?: boolean;
   single_complaint?: ComplaintModel;
   fetch_single_complaint?: boolean;
 
@@ -47,4 +62,7 @@ export interface ComplaintReducerModel {
 
   complaint_messages?: Array<ComplaintMessageModel>;
   fetch_complaint_messages?: boolean;
+  //
+  latest_complaint?: Array<ComplaintModel>;
+  fetch_latest_complaint?: boolean;
 }

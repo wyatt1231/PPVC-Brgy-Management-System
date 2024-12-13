@@ -1,5 +1,9 @@
 import { DatabaseConnection } from "../Configurations/DatabaseConfig";
-import { parseInvalidDateToDefault } from "../Hooks/useDateParser";
+import {
+  parseInvalidDateToDefault,
+  sqlFilterDate,
+  sqlFilterNumber,
+} from "../Hooks/useDateParser";
 import { ErrorMessage } from "../Hooks/useErrorMessage";
 import { GetUploadedImage, UploadImage } from "../Hooks/useFileUploader";
 import { GenerateSearch } from "../Hooks/useSearch";
@@ -8,6 +12,8 @@ import { PaginationModel } from "../Models/PaginationModel";
 import { ResidentModel } from "../Models/ResidentModels";
 import { ResponseModel } from "../Models/ResponseModels";
 import { UserModel } from "../Models/UserModels";
+import ResidentReport from "../PdfTemplates/ResidentReport";
+const puppeteer = require("puppeteer");
 
 const addResident = async (
   payload: ResidentModel,
@@ -38,7 +44,7 @@ const addResident = async (
     if (sql_insert_user.insertedId > 0) {
       if (isValidPicture(payload.pic)) {
         const upload_result = await UploadImage({
-          base_url: "./src/Storage/Files/Images/",
+          base_url: "./Files/Images/",
           extension: "jpg",
           file_name: sql_insert_user.insertedId,
           file_to_upload: payload.pic,
@@ -56,6 +62,8 @@ const addResident = async (
         user_pk: sql_insert_user.insertedId,
         encoder_pk: user_pk,
         birth_date: parseInvalidDateToDefault(payload.birth_date),
+        died_date: parseInvalidDateToDefault(payload.died_date),
+        resident_date: parseInvalidDateToDefault(payload.resident_date),
       };
 
       const sql_add_resident = await con.Insert(
@@ -82,7 +90,11 @@ const addResident = async (
          house_income=@house_income,     
          house_status=@house_status,     
          voting_precinct=@voting_precinct,  
-         house_ownership=@house_ownership,  
+         house_ownership=@house_ownership,
+         kita=@kita,
+         educ=@educ,  
+         resident_date=@resident_date,  
+         died_date=@died_date,  
          sts_pk='A',
          encoder_pk=@encoder_pk;`,
         resident_payload
@@ -126,9 +138,27 @@ const updateResident = async (
   try {
     await con.BeginTransaction();
 
+    if (user_pk !== 1) {
+      const user_payload: UserModel = {
+        full_name: `${payload.last_name}, ${payload.first_name}`,
+        email: payload.email,
+        encoder_pk: payload.user_pk,
+      };
+
+      const update_user = await con.Insert(
+        `UPDATE user SET
+        email=@email,
+        password=AES_ENCRYPT(@email,@email),
+        full_name=@full_name
+        where user_pk=@encoder_pk;
+        `,
+        user_payload
+      );
+    }
+
     if (isValidPicture(payload.pic)) {
       const upload_result = await UploadImage({
-        base_url: "./src/Storage/Files/Images/",
+        base_url: "./Files/Images/",
         extension: "jpg",
         file_name: payload.user_pk,
         file_to_upload: payload.pic,
@@ -144,34 +174,40 @@ const updateResident = async (
     const resident_payload: ResidentModel = {
       ...payload,
       encoder_pk: user_pk,
+      birth_date: parseInvalidDateToDefault(payload.birth_date),
+      died_date: parseInvalidDateToDefault(payload.died_date),
+      resident_date: parseInvalidDateToDefault(payload.resident_date),
     };
 
     const sql_edit_resident = await con.Modify(
       `UPDATE resident SET
+        user_pk=@user_pk,
+        pic=@pic,              
         first_name=@first_name,       
         middle_name=@middle_name,      
         last_name=@last_name,        
-        prefix=@prefix,           
+        suffix=@suffix,           
         gender=@gender,           
         birth_date=@birth_date,       
         nationality=@nationality,      
         religion=@religion,         
         civil_status=@civil_status,  
-        dialect=@dialect,          
-        tribe=@tribe,  
-        with_disability=@with_disability,  
-
         purok=@purok,   
         phone=@phone,    
         email=@email,  
-        voting_precinct=@voting_precinct,  
-
+        dialect=@dialect,          
+        tribe=@tribe,            
+        with_disability=@with_disability,  
         is_employed=@is_employed,      
         employment=@employment,       
         house_income=@house_income,     
         house_status=@house_status,     
-        house_ownership=@house_ownership,  
-        encoder_pk=@encoder_pk
+        voting_precinct=@voting_precinct,  
+        house_ownership=@house_ownership,
+        kita=@kita,
+        educ=@educ,  
+        resident_date=@resident_date,  
+        died_date=@died_date
         WHERE resident_pk=@resident_pk;`,
       resident_payload
     );
@@ -199,6 +235,45 @@ const updateResident = async (
   }
 };
 
+const toggleResidentStatus = async (
+  resident_pk: number
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const sql_edit_resident = await con.Modify(
+      `UPDATE resident SET
+        sts_pk=if(sts_pk = 'A' , 'X', 'A') 
+        WHERE resident_pk=@resident_pk;`,
+      {
+        resident_pk: resident_pk,
+      }
+    );
+
+    if (sql_edit_resident > 0) {
+      con.Commit();
+      return {
+        success: true,
+        message: "The resident status has been updated successfully",
+      };
+    } else {
+      con.Rollback();
+      return {
+        success: false,
+        message: "No affected rows while updating the resident",
+      };
+    }
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const getDataTableResident = async (
   payload: PaginationModel
 ): Promise<ResponseModel> => {
@@ -208,18 +283,27 @@ const getDataTableResident = async (
 
     const data: Array<ResidentModel> = await con.QueryPagination(
       `
-      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc,s.sts_color,s.sts_backgroundColor  FROM resident r 
+      SELECT * FROM (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
       LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
       WHERE 
-      first_name like concat('%',@search,'%')
-      OR last_name like concat('%',@search,'%')
-      OR fullname like concat('%',@search,'%')
-      OR civil_status like concat('%',@search,'%')
-      OR religion like concat('%',@search,'%')
-      OR nationality like concat('%',@search,'%')
-      OR phone like concat('%',@search,'%')
-      OR email like concat('%',@search,'%')
-      OR sts_desc like concat('%',@search,'%')
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
+      AND last_name LIKE concat('%',@last_name,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
       `,
       payload
     );
@@ -258,6 +342,92 @@ const getDataTableResident = async (
   }
 };
 
+const getDataTableResidentPdf = async (
+  payload: PaginationModel
+): Promise<ResponseModel> => {
+  const con = await DatabaseConnection();
+  try {
+    await con.BeginTransaction();
+
+    const brand_info: any = await con.QuerySingle(
+      `
+        SELECT logo FROM brand_logo LIMIT 1
+      `,
+      {}
+    );
+
+    var base64data = brand_info?.logo.toString("base64");
+
+    const resident_data: Array<ResidentModel> = await con.Query(
+      `
+      SELECT * FROM
+      (SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT COUNT(*) FROM family WHERE ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) AS ulo_pamilya,s.sts_desc,s.sts_color,s.sts_backgroundColor,
+      YEAR(NOW()) - YEAR(r.birth_date) - (DATE_FORMAT( NOW(), '%m%d') < DATE_FORMAT(r.birth_date, '%m%d')) AS age
+      FROM resident r 
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk) tmp
+      WHERE 
+      concat(first_name,' ',last_name)  LIKE concat('%',@quick_search,'%')
+      AND first_name LIKE concat('%',@first_name,'%')
+      AND last_name LIKE concat('%',@last_name,'%')
+      AND gender IN @gender
+      AND sts_pk IN @sts_pk
+      AND purok IN @purok
+      AND age >= ${sqlFilterNumber(payload.filters.min_age, "age")}
+      AND age >= ${sqlFilterNumber(payload.filters.max_age, "age")}
+      AND encoded_at >= ${sqlFilterDate(
+        payload.filters.encoded_from,
+        "encoded_at"
+      )}
+      AND encoded_at <= ${sqlFilterDate(
+        payload.filters.encoded_to,
+        "encoded_at"
+      )}
+      ORDER BY ${payload.sort.column} ${payload.sort.direction}
+      `,
+      payload.filters
+    );
+
+    const browser = await puppeteer.launch({
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
+      headless: true,
+      ignoreDefaultArgs: ["--disable-extensions"],
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(`${ResidentReport.Content(resident_data, payload)}`);
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      displayHeaderFooter: true,
+      headerTemplate: ResidentReport.Header(base64data),
+      footerTemplate: ResidentReport.Footer(),
+      margin: {
+        top: "160px",
+        bottom: "40px",
+      },
+    });
+
+    await browser.close();
+    con.Commit();
+    return {
+      success: true,
+      data: `data:image/png;base64, ` + pdfBuffer.toString("base64"),
+    };
+  } catch (error) {
+    await con.Rollback();
+    console.error(`error`, error);
+    return {
+      success: false,
+      message: ErrorMessage(error),
+    };
+  }
+};
+
 const getSingleResident = async (
   resident_pk: string
 ): Promise<ResponseModel> => {
@@ -265,11 +435,22 @@ const getSingleResident = async (
   try {
     await con.BeginTransaction();
 
-    const data = await con.QuerySingle(
-      `SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,s.sts_desc  FROM resident a 
-      LEFT JOIN status s ON s.sts_pk = a.sts_pk where r.resident_pk =@resident_pk`,
+    const data: ResidentModel = await con.QuerySingle(
+      `SELECT r.*,CONCAT(r.first_name,' ',r.last_name) fullname,IF((SELECT count(*) from family where ulo_pamilya=r.resident_pk) > 0 , 'oo','dili' ) as ulo_pamilya,s.sts_desc
+      ,(SELECT position FROM barangay_official WHERE official_pk=r.resident_pk) brgy_official_pos
+      FROM resident r 
+      LEFT JOIN status s ON s.sts_pk = r.sts_pk where r.resident_pk =@resident_pk`,
       {
         resident_pk: resident_pk,
+      }
+    );
+
+    data.pic = await GetUploadedImage(data.pic);
+
+    data.status = await con.QuerySingle(
+      `select * from status where sts_pk = @sts_pk;`,
+      {
+        sts_pk: data.sts_pk,
       }
     );
 
@@ -323,4 +504,6 @@ export default {
   getDataTableResident,
   getSingleResident,
   searchResident,
+  toggleResidentStatus,
+  getDataTableResidentPdf,
 };
